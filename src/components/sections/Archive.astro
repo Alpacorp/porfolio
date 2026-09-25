@@ -1,0 +1,49 @@
+---
+import ArchiveTable from '../ArchiveTable.astro';
+import type { Project } from '../../lib/projects';
+
+interface Props {
+  projects: Project[];
+}
+
+const { projects } = Astro.props;
+const HOME_LIMIT = 12;
+---
+
+<section id="archivo" class="section" aria-labelledby="archivo-titulo">
+  <div class="head">
+    <h2 id="archivo-titulo" class="eyebrow">05 — Archivo</h2>
+    <a class="mono all" href="/archivo/">Ver los {projects.length} proyectos →</a>
+  </div>
+  <p class="muted intro">
+    Todo lo que he construido, en una sola lista. Los proyectos marcados con{' '}
+    <span class="badge-case">CASO</span> tienen su historia completa; el resto enlaza al sitio en vivo.
+  </p>
+  <ArchiveTable projects={projects.slice(0, HOME_LIMIT)} total={projects.length} />
+</section>
+
+<style>
+  .section {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .all {
+    font-size: 13px;
+  }
+
+  .intro {
+    font-size: 17px;
+    line-height: 1.55;
+    max-width: 640px;
+  }
+</style>

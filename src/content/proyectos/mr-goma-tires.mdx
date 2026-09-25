@@ -1,0 +1,44 @@
+---
+title: Vender llantas usadas como si fueran premium
+client: Mr. Goma Tires
+year: 2024
+yearEnd: hoy
+sector: Automotriz
+kind: freelance
+group: goma
+stack: [Next.js, React, TypeScript, Tailwind, Three.js, SQL Server, Stripe, Claude API, n8n, Vercel]
+url: https://www.mrgomatires.com/
+summary: E-commerce para 7 sedes en Florida con búsqueda por medida, catálogo facetado, labrado en 3D, checkout con Stripe y un panel de vendedores con un chat de IA que filtra el inventario en lenguaje natural.
+featured: true
+order: 2
+metric:
+  value: 'CLS → 0'
+  label: desde 0,914, y LCP móvil de 4,5 s a 3,2 s en la ficha de producto
+---
+
+## El negocio
+
+Mr. Goma Tires vende llantas usadas y nuevas, y ofrece servicios automotrices en **7 sedes de Miami y Orlando**. No compite por catálogo ni por precio, sino por la experiencia: la misión del proyecto era que **comprar una llanta usada en línea fuera tan claro como comprar un producto premium nuevo**.
+
+## Qué construí
+
+Lideré y construí la plataforma de punta a punta, en inglés y para compradores de EE. UU.
+
+- **Tienda:** búsqueda por medida desde el home, catálogo con filtros por facetas y conteos, páginas por marca y medida, y una ficha con galería, lupa y **visualización 3D del labrado**, con la profundidad en 1/32" y el % de vida restante.
+- **Compra:** carrito y checkout con **Stripe**, pedidos por WhatsApp como alternativa y un cotizador por pasos conectado a **n8n**.
+- **Panel de vendedores:** inventario con tabla y filtros por sede, más un **chat de IA (Claude, con tool use)**. El vendedor escribe lo que busca en lenguaje natural y el modelo aplica los filtros de la tabla.
+- **SEO y analítica:** feed para Google Merchant Center, datos estructurados, guías con FAQ, páginas por sede y por servicio, y analítica con consentimiento.
+
+## Decisiones que importaron
+
+- **Desarrollo guiado por especificaciones** con Claude Code: más de 35 features documentadas, cada una con su especificación, plan, tareas y resultados medidos.
+- **Decir que no con datos.** Una auditoría SEO recomendaba consolidar URLs "duplicadas". El análisis mostró que esas unidades tenían diferencias reales de precio (una mediana del 22 %), así que las mantuvimos separadas.
+- **Rendimiento con presupuesto:** un límite de peso de JavaScript vigilado en CI y cientos de pruebas automatizadas.
+- **Seguridad en producción:** detectamos y mitigamos un ataque de bots de 150–200 mil visitas falsas diarias.
+
+## Resultados
+
+- **CLS de 0,914 a 0** en móvil y de 0,525 a 0 en escritorio, en la ficha de producto.
+- **LCP móvil de 4,5 s a 3,2 s** en la misma ficha.
+- La lupa de la galería pasó de tardar 1,7 s a estar lista **antes del hover**, con imágenes de 283 KB a 90 KB.
+- **−29 % en el costo diario de infraestructura** tras mitigar el tráfico automatizado.

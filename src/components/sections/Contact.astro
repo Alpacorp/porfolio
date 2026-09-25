@@ -1,0 +1,52 @@
+---
+import { profile } from '../../data/profile';
+---
+
+<section id="contacto" class="contact" aria-labelledby="contacto-titulo">
+  <h2 id="contacto-titulo" class="eyebrow contact__eyebrow">06 — Contacto</h2>
+  <p class="contact__title">¿Construimos algo que mueva los números?</p>
+  <p class="contact__text">Posiciones en fintech y producto, o proyectos freelance a través de alpacorp.</p>
+  <div class="contact__actions">
+    <a class="btn btn--dark" href={`mailto:${profile.email}`}>Escríbeme</a>
+    <a class="btn btn--outline" href="/cv/">Ver CV / descargar PDF</a>
+  </div>
+</section>
+
+<style>
+  .contact {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding: clamp(28px, 5vw, 52px);
+    border-radius: 16px;
+    background: var(--yellow);
+    color: var(--on-yellow);
+  }
+
+  .contact__eyebrow {
+    color: var(--on-yellow);
+  }
+
+  .contact__title {
+    font-size: clamp(32px, 5vw, 46px);
+    line-height: 1.05;
+    font-weight: 700;
+    letter-spacing: -0.035em;
+  }
+
+  .contact__text {
+    font-size: 17px;
+    line-height: 1.5;
+    max-width: 560px;
+  }
+
+  .contact__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .contact :focus-visible {
+    outline-color: #151515;
+  }
+</style>

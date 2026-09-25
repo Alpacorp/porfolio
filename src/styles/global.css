@@ -1,0 +1,318 @@
+@import '@fontsource-variable/geist';
+@import '@fontsource-variable/geist-mono';
+
+/* ------------------------------------------------------------------
+   Tokens · concepto «Papel y resaltador»
+   Claro = papel · Oscuro = tinta · Amarillo = resaltador · Magenta = interacción
+------------------------------------------------------------------- */
+:root {
+  --paper: #f6f4ee;
+  --surface: #ffffff;
+  --ink: #151515;
+  --muted: #57544e;
+  --line: #dcd7cb;
+  --hl: #ffdd00;
+  --mag: #c4006b;
+
+  --yellow: #ffdd00;
+  --on-yellow: #151515;
+
+  --font-sans: 'Geist Variable', system-ui, sans-serif;
+  --font-mono: 'Geist Mono Variable', ui-monospace, monospace;
+
+  --radius: 12px;
+  --gutter: clamp(20px, 5vw, 56px);
+
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --paper: #0f0f0e;
+    --surface: #181816;
+    --ink: #edeae2;
+    --muted: #a09c92;
+    --line: #2e2d29;
+    --hl: rgba(255, 221, 0, 0.34);
+    --mag: #ff5cb4;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme='dark'] {
+  --paper: #0f0f0e;
+  --surface: #181816;
+  --ink: #edeae2;
+  --muted: #a09c92;
+  --line: #2e2d29;
+  --hl: rgba(255, 221, 0, 0.34);
+  --mag: #ff5cb4;
+  color-scheme: dark;
+}
+
+/* ------------------------------------------------------------------ Base */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 32px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+a {
+  color: var(--ink);
+  text-decoration-color: var(--yellow);
+  text-decoration-thickness: 3px;
+  text-underline-offset: 4px;
+}
+
+a:hover {
+  color: var(--mag);
+  text-decoration-color: var(--mag);
+}
+
+:focus-visible {
+  outline: 2px solid var(--mag);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+::selection {
+  background: var(--yellow);
+  color: var(--on-yellow);
+}
+
+/* ------------------------------------------------------------------ Utilidades */
+.mono {
+  font-family: var(--font-mono);
+}
+
+.muted {
+  color: var(--muted);
+}
+
+/* El resaltador: banda amarilla en la mitad inferior del texto */
+.hl {
+  background: linear-gradient(
+    180deg,
+    transparent 56%,
+    var(--hl) 56%,
+    var(--hl) 94%,
+    transparent 94%
+  );
+  padding: 0 3px;
+  margin: 0 -3px;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  left: 16px;
+  top: -48px;
+  z-index: 100;
+  padding: 10px 16px;
+  background: var(--yellow);
+  color: var(--on-yellow);
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.skip-link:focus {
+  top: 16px;
+}
+
+/* Chips / botones de filtro */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 18px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color 0.15s, background-color 0.15s, color 0.15s;
+}
+
+.chip:hover {
+  border-color: var(--mag);
+}
+
+.chip[aria-pressed='true'] {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+
+.tag {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.badge-case {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--yellow);
+  color: var(--on-yellow);
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  transition: border-color 0.15s;
+}
+
+a.card,
+.card--interactive {
+  text-decoration: none;
+  color: var(--ink);
+}
+
+a.card:hover,
+.card--interactive:hover {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 22px;
+  border-radius: 8px;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 15px;
+  text-decoration: none;
+  cursor: pointer;
+  border: 1.5px solid transparent;
+}
+
+.btn--dark {
+  background: #151515;
+  color: var(--yellow);
+}
+
+.btn--dark:hover {
+  color: #ffffff;
+}
+
+.btn--outline {
+  border-color: currentColor;
+  background: transparent;
+  color: inherit;
+}
+
+.btn--outline:hover {
+  color: inherit;
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.icon-btn:hover {
+  border-color: var(--mag);
+  color: var(--ink);
+}
+
+/* ------------------------------------------------------------------ Impresión */
+@media print {
+  :root,
+  :root[data-theme='dark'] {
+    --paper: #ffffff;
+    --surface: #ffffff;
+    --ink: #000000;
+    --muted: #444444;
+    --line: #cccccc;
+    --hl: #fff3a0;
+  }
+  .no-print {
+    display: none !important;
+  }
+  a {
+    text-decoration: none;
+  }
+}

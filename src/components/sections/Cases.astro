@@ -1,0 +1,124 @@
+---
+import { formatYears, type Project } from '../../lib/projects';
+
+interface Props {
+  cases: Project[];
+}
+
+const { cases } = Astro.props;
+---
+
+<section id="casos" class="section" aria-labelledby="casos-titulo">
+  <h2 id="casos-titulo" class="eyebrow">03 — Casos de estudio</h2>
+  <ul class="cases">
+    {
+      cases.map((c) => (
+        <li>
+          <a class="card case" href={`/casos/${c.id}/`}>
+            <div class="case__main">
+              <p class="mono muted case__meta">
+                {[c.data.client, c.data.sector, formatYears(c.data)].join(' · ').toUpperCase()}
+              </p>
+              <h3 class="case__title">{c.data.title}</h3>
+              <p class="muted case__summary">{c.data.summary}</p>
+              <p class="mono muted case__stack">{c.data.stack.slice(0, 5).join(' · ')}</p>
+            </div>
+            {c.data.metric && (
+              <div class="case__metric">
+                <span class="case__value">
+                  <span class="hl">{c.data.metric.value}</span>
+                </span>
+                <span class="mono muted case__label">{c.data.metric.label}</span>
+              </div>
+            )}
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</section>
+
+<style>
+  .section {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+
+  .cases {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .case {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 210px;
+    gap: 32px;
+    padding: clamp(20px, 3vw, 30px);
+  }
+
+  .case__main {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .case__meta,
+  .case__stack {
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .case__title {
+    font-size: clamp(21px, 2.4vw, 25px);
+    line-height: 1.2;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  .case:hover .case__title {
+    color: var(--mag);
+  }
+
+  .case__summary {
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  .case__metric {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 8px;
+    padding-left: 24px;
+    border-left: 1px solid var(--line);
+  }
+
+  .case__value {
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+  }
+
+  .case__label {
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  @media (max-width: 720px) {
+    .case {
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+    .case__metric {
+      padding: 16px 0 0;
+      border-left: 0;
+      border-top: 1px solid var(--line);
+    }
+  }
+</style>

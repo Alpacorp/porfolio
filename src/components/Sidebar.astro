@@ -1,0 +1,253 @@
+---
+import Icon from './Icon.astro';
+import ThemeToggle from './ThemeToggle.astro';
+import { nav, profile } from '../data/profile';
+
+interface Props {
+  /** En la home los enlaces son anclas; en otras páginas apuntan a la home. */
+  home?: boolean;
+}
+
+const { home = false } = Astro.props;
+const base = home ? '' : '/';
+const NameTag = home ? 'h1' : 'p';
+---
+
+<aside class="sidebar">
+  <div class="sidebar__top">
+    <a class="logo" href="/" aria-label={`${profile.site}, inicio`}>
+      <span class="logo__mark" aria-hidden="true">a</span>
+      <span class="mono">alpacorp</span>
+    </a>
+    <ThemeToggle />
+  </div>
+
+  <div class="intro">
+    <NameTag class="intro__name">Alejandro<br />Palacios</NameTag>
+    <p class="intro__role mono">{profile.role} · {profile.focus} · Bogotá</p>
+    <p class="intro__tagline">
+      Construyo producto digital con <span class="hl">ojo de negocio</span>: plataformas en Mercado
+      Pago, banca digital y, como freelance, más de 30 proyectos para clientes en Colombia, México y
+      EE. UU.
+    </p>
+  </div>
+
+  <p class="status mono"><span class="status__dot" aria-hidden="true"></span>{profile.availability}</p>
+
+  <nav class="nav no-print" aria-label="Secciones">
+    {
+      nav.map((item) => (
+        <a class="nav__link mono" href={`${base}#${item.id}`} data-nav={item.id}>
+          <span class="nav__bar" aria-hidden="true" />
+          {item.label}
+        </a>
+      ))
+    }
+  </nav>
+
+  <button class="palette-btn mono no-print" type="button" data-open-palette>
+    <Icon name="search" size={16} />
+    Buscar o navegar
+    <kbd>⌘K</kbd>
+  </button>
+
+  <div class="social no-print">
+    <a class="icon-btn" href={profile.links.linkedin} aria-label="LinkedIn" rel="me"><Icon name="linkedin" /></a>
+    <a class="icon-btn" href={profile.links.github} aria-label="GitHub" rel="me"><Icon name="github" /></a>
+    <a class="icon-btn" href={`mailto:${profile.email}`} aria-label="Correo"><Icon name="mail" /></a>
+  </div>
+</aside>
+
+<style>
+  .sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+
+  @media (min-width: 1024px) {
+    .sidebar {
+      position: sticky;
+      top: 56px;
+      align-self: flex-start;
+      width: 340px;
+      flex-shrink: 0;
+      max-height: calc(100vh - 80px);
+      overflow-y: auto;
+      scrollbar-width: none;
+    }
+  }
+
+  .sidebar__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    font-size: 15px;
+    min-height: 44px;
+  }
+
+  .logo__mark {
+    width: 36px;
+    height: 36px;
+    border-radius: 6px;
+    background: var(--yellow);
+    color: var(--on-yellow);
+    display: grid;
+    place-items: center;
+    font-weight: 800;
+    font-size: 20px;
+  }
+
+  .intro {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .intro__name {
+    font-size: clamp(40px, 6vw, 50px);
+    line-height: 1.02;
+    font-weight: 700;
+    letter-spacing: -0.035em;
+  }
+
+  .intro__role {
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--muted);
+  }
+
+  .intro__tagline {
+    margin-top: 6px;
+    font-size: 18px;
+    line-height: 1.5;
+  }
+
+  .status {
+    display: inline-flex;
+    align-self: flex-start;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 14px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .status__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--yellow);
+    box-shadow: 0 0 0 3px rgba(255, 221, 0, 0.25);
+  }
+
+  .nav {
+    display: none;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  @media (min-width: 1024px) {
+    .nav {
+      display: flex;
+    }
+  }
+
+  .nav__link {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-height: 34px;
+    font-size: 13px;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--muted);
+  }
+
+  .nav__bar {
+    display: block;
+    width: 28px;
+    height: 1px;
+    background: currentColor;
+    transition: width 0.2s, background-color 0.2s;
+  }
+
+  .nav__link:hover,
+  .nav__link[aria-current='true'] {
+    color: var(--ink);
+  }
+
+  .nav__link:hover .nav__bar,
+  .nav__link[aria-current='true'] .nav__bar {
+    width: 56px;
+  }
+
+  .nav__link:hover .nav__bar {
+    background: var(--mag);
+  }
+
+  .palette-btn {
+    align-self: flex-start;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 44px;
+    padding: 0 16px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    color: var(--muted);
+    font-size: 13px;
+    cursor: pointer;
+  }
+
+  .palette-btn:hover {
+    border-color: var(--mag);
+  }
+
+  kbd {
+    font-family: var(--font-mono);
+    padding: 2px 6px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    color: var(--ink);
+  }
+
+  .social {
+    display: flex;
+    gap: 8px;
+  }
+</style>
+
+<script>
+  // Marca en la navegación la sección visible.
+  const links = new Map(
+    [...document.querySelectorAll<HTMLAnchorElement>('[data-nav]')].map((a) => [a.dataset.nav!, a]),
+  );
+  const sections = [...links.keys()]
+    .map((id) => document.getElementById(id))
+    .filter((el): el is HTMLElement => el !== null);
+
+  if (sections.length) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          for (const a of links.values()) a.removeAttribute('aria-current');
+          links.get(entry.target.id)?.setAttribute('aria-current', 'true');
+        }
+      },
+      { rootMargin: '-35% 0px -60% 0px' },
+    );
+    sections.forEach((s) => observer.observe(s));
+  }
+</script>

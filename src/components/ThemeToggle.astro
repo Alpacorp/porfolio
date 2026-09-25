@@ -1,0 +1,39 @@
+---
+import Icon from './Icon.astro';
+---
+
+<button class="icon-btn theme-toggle" type="button" data-theme-toggle aria-label="Cambiar tema">
+  <span class="theme-toggle__sun"><Icon name="sun" /></span>
+  <span class="theme-toggle__moon"><Icon name="moon" /></span>
+</button>
+
+<style>
+  .theme-toggle__sun {
+    display: none;
+  }
+  .theme-toggle__moon {
+    display: inline-flex;
+  }
+  @media (prefers-color-scheme: dark) {
+    :global(:root:not([data-theme='light'])) .theme-toggle__sun {
+      display: inline-flex;
+    }
+    :global(:root:not([data-theme='light'])) .theme-toggle__moon {
+      display: none;
+    }
+  }
+  :global(:root[data-theme='dark']) .theme-toggle__sun {
+    display: inline-flex;
+  }
+  :global(:root[data-theme='dark']) .theme-toggle__moon {
+    display: none;
+  }
+</style>
+
+<script>
+  import { toggleTheme } from '../lib/theme';
+
+  for (const btn of document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]')) {
+    btn.addEventListener('click', toggleTheme);
+  }
+</script>

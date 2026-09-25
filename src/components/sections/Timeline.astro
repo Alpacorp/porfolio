@@ -1,0 +1,407 @@
+---
+import { freelanceGroups, freelanceSince, milestones, timelineRange } from '../../data/career';
+import { groupItems, type Project } from '../../lib/projects';
+
+interface Props {
+  projects: Project[];
+}
+
+const { projects } = Astro.props;
+const span = timelineRange.to - timelineRange.from;
+const pos = (year: number) => `${(((year - timelineRange.from) / span) * 100).toFixed(2)}%`;
+const initial = `y-${milestones.at(-1)!.year}`;
+
+const panels = [
+  ...milestones.map((m) => ({
+    id: `y-${m.year}`,
+    heading: String(m.year),
+    role: m.role,
+    org: m.org,
+    text: m.text,
+    items: [] as { name: string; url?: string; note: string }[],
+  })),
+  ...freelanceGroups.map((g) => ({
+    id: `g-${g.id}`,
+    heading: g.period,
+    role: g.role,
+    org: g.org,
+    text: g.text,
+    items: groupItems(projects, g.id),
+  })),
+];
+---
+
+<section id="trayectoria" class="section" aria-labelledby="trayectoria-titulo" data-timeline>
+  <h2 id="trayectoria-titulo" class="eyebrow">02 — Trayectoria</h2>
+  <p class="hint mono muted">Haz clic en un año o en un bloque freelance.</p>
+
+  <div class="lanes">
+    <p class="lane-label mono muted">Empleo</p>
+    <div class="axis" role="group" aria-label="Hitos de empleo">
+      <div class="axis__ticks" aria-hidden="true"></div>
+      {
+        milestones.map((m) => {
+          const id = `y-${m.year}`;
+          return (
+            <button
+              class="year"
+              type="button"
+              style={`left: ${pos(m.year)}`}
+              aria-pressed={id === initial ? "true" : "false"}
+              aria-controls="timeline-panel"
+              aria-label={`${m.year}: ${m.role}, ${m.org}`}
+              data-target={id}
+            >
+              <span class="year__label mono">{m.year}</span>
+              <span class="year__line" aria-hidden="true" />
+            </button>
+          );
+        })
+      }
+    </div>
+
+    <p class="lane-label mono muted">Freelance · alpacorp (en paralelo)</p>
+    <div class="axis axis--free" aria-hidden="true">
+      <div class="free-bar mono" style={`left: ${pos(freelanceSince)}`}>{freelanceSince} → hoy</div>
+    </div>
+    <div class="groups" role="group" aria-label="Proyectos freelance">
+      {
+        freelanceGroups.map((g) => (
+          <button
+            class="group"
+            type="button"
+            aria-pressed="false"
+            aria-controls="timeline-panel"
+            data-target={`g-${g.id}`}
+          >
+            <span class="group__label">{g.label}</span>
+            <span class="group__sub mono">{g.sub}</span>
+          </button>
+        ))
+      }
+    </div>
+  </div>
+
+  <div id="timeline-panel" class="card panel" aria-live="polite">
+    {
+      panels.map((p) => (
+        <div class="panel__item" data-panel={p.id} hidden={p.id !== initial}>
+          <p class="panel__heading">
+            <span class="hl">{p.heading}</span>
+          </p>
+          <div class="panel__body">
+            <h3 class="panel__role">{p.role}</h3>
+            <p class="mono muted panel__org">{p.org}</p>
+            <p class="muted panel__text">{p.text}</p>
+            {p.items.length > 0 && (
+              <ul class="panel__list">
+                {p.items.map((it) => (
+                  <li>
+                    {it.url ? (
+                      <a href={it.url} rel="noopener" target="_blank">
+                        {it.name} <span aria-hidden="true">↗</span>
+                        <span class="sr-only">(abre en otra pestaña)</span>
+                      </a>
+                    ) : (
+                      <span class="panel__name">{it.name}</span>
+                    )}
+                    <span class="mono muted panel__note">{it.note}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
+      ))
+    }
+  </div>
+</section>
+
+<style>
+  .section {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .hint {
+    font-size: 12px;
+    margin-top: -8px;
+  }
+
+  .lanes {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .lane-label {
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .axis {
+    position: relative;
+    height: 96px;
+    margin: 0 24px;
+  }
+
+  .axis__ticks {
+    position: absolute;
+    left: -24px;
+    right: -24px;
+    top: 30px;
+    height: 12px;
+    border-bottom: 1px solid var(--line);
+    background: repeating-linear-gradient(90deg, var(--line) 0 1px, transparent 1px 12px);
+  }
+
+  .year {
+    position: absolute;
+    top: 0;
+    transform: translateX(-50%);
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+  }
+
+  .year__label {
+    font-size: 13px;
+  }
+
+  .year__line {
+    display: block;
+    width: 2px;
+    height: 18px;
+    background: currentColor;
+    transition: height 0.2s;
+  }
+
+  .year:hover {
+    color: var(--mag);
+  }
+
+  .year[aria-pressed='true'] {
+    color: var(--ink);
+    font-weight: 700;
+  }
+
+  .year[aria-pressed='true'] .year__line {
+    height: 40px;
+    background: var(--yellow);
+  }
+
+  .axis--free {
+    height: 26px;
+  }
+
+  .axis--free::before {
+    content: '';
+    position: absolute;
+    left: -24px;
+    right: -24px;
+    top: 12px;
+    height: 1px;
+    background: var(--line);
+  }
+
+  .free-bar {
+    position: absolute;
+    right: -24px;
+    top: 3px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    border-radius: 999px;
+    background: var(--yellow);
+    color: var(--on-yellow);
+    font-size: 11px;
+    font-weight: 500;
+  }
+
+  .groups {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+    padding-top: 6px;
+  }
+
+  .group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    min-height: 64px;
+    padding: 12px 16px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: transparent;
+    color: var(--ink);
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 0.15s, background-color 0.15s;
+  }
+
+  .group:hover {
+    border-color: var(--mag);
+  }
+
+  .group[aria-pressed='true'] {
+    background: var(--yellow);
+    border-color: var(--yellow);
+    color: var(--on-yellow);
+  }
+
+  .group__label {
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .group__sub {
+    font-size: 11px;
+    opacity: 0.8;
+  }
+
+  .panel {
+    padding: clamp(20px, 3vw, 30px);
+    min-height: 150px;
+  }
+
+  .panel__item {
+    display: flex;
+    gap: 32px;
+  }
+
+  .panel__item[hidden] {
+    display: none;
+  }
+
+  .panel__heading {
+    width: 140px;
+    flex-shrink: 0;
+    font-size: 34px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+  }
+
+  .panel__body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .panel__role {
+    font-size: 22px;
+    font-weight: 600;
+  }
+
+  .panel__org {
+    font-size: 13px;
+  }
+
+  .panel__text {
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  .panel__list {
+    list-style: none;
+    margin: 8px 0 0;
+    padding: 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .panel__list li {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 16px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 15px;
+  }
+
+  .panel__list a,
+  .panel__name {
+    font-weight: 500;
+  }
+
+  .panel__note {
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  /* En pantallas estrechas los años se encimarían: el eje pasa a ser una fila de botones. */
+  @media (max-width: 640px) {
+    .axis:not(.axis--free) {
+      height: auto;
+      margin: 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .axis__ticks,
+    .year__line {
+      display: none;
+    }
+    .year {
+      position: static;
+      transform: none;
+      justify-content: center;
+      gap: 0;
+      padding: 0 14px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+    }
+    .year[aria-pressed='true'] {
+      background: var(--yellow);
+      border-color: var(--yellow);
+      color: var(--on-yellow);
+    }
+    .axis--free {
+      margin: 0 12px;
+    }
+    .axis--free::before {
+      left: -12px;
+      right: -12px;
+    }
+    .free-bar {
+      right: -12px;
+    }
+    .panel__item {
+      flex-direction: column;
+      gap: 12px;
+    }
+    .panel__list li {
+      grid-template-columns: 1fr;
+      gap: 4px;
+    }
+  }
+</style>
+
+<script>
+  for (const root of document.querySelectorAll<HTMLElement>('[data-timeline]')) {
+    const triggers = [...root.querySelectorAll<HTMLButtonElement>('[data-target]')];
+    const panels = [...root.querySelectorAll<HTMLElement>('[data-panel]')];
+
+    for (const trigger of triggers) {
+      trigger.addEventListener('click', () => {
+        const target = trigger.dataset.target;
+        triggers.forEach((t) => t.setAttribute('aria-pressed', String(t === trigger)));
+        panels.forEach((p) => (p.hidden = p.dataset.panel !== target));
+      });
+    }
+  }
+</script>

@@ -1,0 +1,260 @@
+---
+import Icon from './Icon.astro';
+import { nav, profile } from '../data/profile';
+import { getCases } from '../lib/projects';
+
+const cases = await getCases();
+
+type Item = { group: string; label: string; href?: string; action?: string; hint?: string };
+
+const items: Item[] = [
+  ...nav.map((n) => ({ group: 'Secciones', label: n.label, href: `/#${n.id}` })),
+  ...cases.map((c) => ({ group: 'Casos de estudio', label: c.data.title, href: `/casos/${c.id}/`, hint: c.data.client })),
+  { group: 'Páginas', label: 'Archivo completo de proyectos', href: '/archivo/' },
+  { group: 'Páginas', label: 'CV imprimible', href: '/cv/' },
+  { group: 'Acciones', label: 'Cambiar tema claro / oscuro', action: 'theme' },
+  { group: 'Acciones', label: 'Copiar correo', action: 'copy-email', hint: profile.email },
+  { group: 'Acciones', label: 'Escribir un correo', href: `mailto:${profile.email}` },
+  { group: 'Acciones', label: 'Abrir LinkedIn', href: profile.links.linkedin },
+];
+---
+
+<dialog class="palette" data-palette data-email={profile.email} aria-label="Buscar o navegar">
+  <div class="palette__search">
+    <Icon name="search" size={18} />
+    <input
+      type="text"
+      placeholder="Busca una sección, un caso o una acción…"
+      aria-label="Buscar"
+      role="combobox"
+      aria-expanded="true"
+      aria-controls="palette-list"
+      autocomplete="off"
+      spellcheck="false"
+      data-palette-input
+    />
+    <kbd class="mono">esc</kbd>
+  </div>
+  <ul class="palette__list" id="palette-list" role="listbox" data-palette-list>
+    {
+      items.map((it, i) => (
+        <li
+          role="option"
+          id={`palette-opt-${i}`}
+          aria-selected="false"
+          data-label={`${it.label} ${it.hint ?? ''} ${it.group}`.toLowerCase()}
+          data-href={it.href}
+          data-action={it.action}
+        >
+          <span class="palette__group mono">{it.group}</span>
+          <span class="palette__label">{it.label}</span>
+          {it.hint && <span class="palette__hint mono">{it.hint}</span>}
+        </li>
+      ))
+    }
+  </ul>
+  <p class="palette__empty mono" data-palette-empty hidden>Sin resultados.</p>
+  <p class="palette__status sr-only" aria-live="polite" data-palette-status></p>
+</dialog>
+
+<style>
+  .palette {
+    width: min(640px, calc(100vw - 32px));
+    max-height: min(520px, calc(100vh - 96px));
+    margin: 12vh auto auto;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: var(--surface);
+    color: var(--ink);
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+    flex-direction: column;
+  }
+
+  .palette[open] {
+    display: flex;
+  }
+
+  .palette::backdrop {
+    background: rgba(15, 15, 14, 0.45);
+    backdrop-filter: blur(2px);
+  }
+
+  .palette__search {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 18px;
+    border-bottom: 1px solid var(--line);
+    color: var(--muted);
+  }
+
+  .palette__search input {
+    flex: 1;
+    min-height: 56px;
+    border: 0;
+    background: transparent;
+    color: var(--ink);
+    font: inherit;
+    font-size: 16px;
+    outline: none;
+  }
+
+  kbd {
+    font-size: 11px;
+    padding: 2px 6px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+  }
+
+  .palette__list {
+    list-style: none;
+    margin: 0;
+    padding: 8px;
+    overflow-y: auto;
+  }
+
+  .palette__list li {
+    display: grid;
+    grid-template-columns: 120px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+    min-height: 44px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+
+  .palette__list li[hidden] {
+    display: none;
+  }
+
+  .palette__list li[aria-selected='true'] {
+    background: var(--paper);
+    box-shadow: inset 3px 0 0 var(--mag);
+  }
+
+  .palette__group,
+  .palette__hint {
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .palette__label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .palette__empty {
+    padding: 24px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  @media (max-width: 560px) {
+    .palette__list li {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 2px;
+    }
+    .palette__hint {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  import { toggleTheme } from '../lib/theme';
+
+  const dialog = document.querySelector<HTMLDialogElement>('[data-palette]')!;
+  const input = dialog.querySelector<HTMLInputElement>('[data-palette-input]')!;
+  const options = [...dialog.querySelectorAll<HTMLLIElement>('[role="option"]')];
+  const empty = dialog.querySelector<HTMLElement>('[data-palette-empty]')!;
+  const status = dialog.querySelector<HTMLElement>('[data-palette-status]')!;
+  const email = dialog.dataset.email ?? '';
+  let active = 0;
+
+  const normalize = (s: string) => s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
+  const visible = () => options.filter((o) => !o.hidden);
+
+  function highlight(index: number) {
+    const list = visible();
+    if (!list.length) return;
+    active = (index + list.length) % list.length;
+    options.forEach((o) => o.setAttribute('aria-selected', 'false'));
+    const current = list[active];
+    current.setAttribute('aria-selected', 'true');
+    input.setAttribute('aria-activedescendant', current.id);
+    current.scrollIntoView({ block: 'nearest' });
+  }
+
+  function filter() {
+    const q = normalize(input.value.trim());
+    for (const o of options) o.hidden = q !== '' && !normalize(o.dataset.label ?? '').includes(q);
+    const count = visible().length;
+    empty.hidden = count > 0;
+    status.textContent = `${count} resultados`;
+    highlight(0);
+  }
+
+  function open() {
+    input.value = '';
+    filter();
+    dialog.showModal();
+    input.focus();
+  }
+
+  async function run(option: HTMLLIElement) {
+    const { href, action } = option.dataset;
+    if (href) {
+      dialog.close();
+      location.href = href;
+      return;
+    }
+    if (action === 'theme') toggleTheme();
+    if (action === 'copy-email') {
+      try {
+        await navigator.clipboard.writeText(email);
+        status.textContent = 'Correo copiado';
+      } catch {
+        status.textContent = email;
+      }
+    }
+    dialog.close();
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      dialog.open ? dialog.close() : open();
+    }
+  });
+
+  for (const btn of document.querySelectorAll('[data-open-palette]')) btn.addEventListener('click', open);
+
+  input.addEventListener('input', filter);
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      highlight(active + 1);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      highlight(active - 1);
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      const current = visible()[active];
+      if (current) run(current);
+    }
+  });
+
+  for (const o of options) {
+    o.addEventListener('click', () => run(o));
+    o.addEventListener('mousemove', () => highlight(visible().indexOf(o)));
+  }
+
+  // Cerrar al hacer clic fuera del cuadro.
+  dialog.addEventListener('click', (e) => {
+    if (e.target === dialog) dialog.close();
+  });
+</script>

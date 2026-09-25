@@ -1,0 +1,106 @@
+---
+import { languages, stats } from '../../data/profile';
+---
+
+<section id="sobre" class="section" aria-labelledby="sobre-titulo">
+  <h2 id="sobre-titulo" class="eyebrow">01 — Sobre mí</h2>
+  <p class="lead">
+    Hablo tres idiomas en un equipo: <span class="hl">negocio</span>, <span class="hl">marketing</span>{' '}
+    y <span class="hl">código</span>. Por eso mis interfaces no solo se ven bien: mueven los indicadores
+    que importan.
+  </p>
+
+  <div class="languages">
+    {
+      languages.map((l) => (
+        <div class="card language">
+          <span class="mono muted language__period">{l.period}</span>
+          <h3 class="language__title">{l.title}</h3>
+          <p class="muted language__text">{l.text}</p>
+        </div>
+      ))
+    }
+  </div>
+
+  <dl class="stats">
+    {
+      stats.map((s) => (
+        <div class="stat">
+          <dt class="mono muted">{s.label}</dt>
+          <dd>{s.value}</dd>
+        </div>
+      ))
+    }
+  </dl>
+</section>
+
+<style>
+  .section {
+    display: flex;
+    flex-direction: column;
+    gap: 36px;
+  }
+
+  .lead {
+    font-size: clamp(24px, 3vw, 32px);
+    line-height: 1.28;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+  }
+
+  .languages {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 14px;
+  }
+
+  .language {
+    padding: 26px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .language__period {
+    font-size: 12px;
+  }
+
+  .language__title {
+    font-size: 21px;
+    font-weight: 600;
+  }
+
+  .language__text {
+    font-size: 15px;
+    line-height: 1.55;
+  }
+
+  .stats {
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 16px;
+    border-top: 1px solid var(--line);
+  }
+
+  .stat {
+    display: flex;
+    flex-direction: column-reverse;
+    justify-content: flex-end;
+    gap: 6px;
+    padding-top: 20px;
+  }
+
+  .stat dt {
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .stat dd {
+    margin: 0;
+    font-size: clamp(30px, 8vw, 42px);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+  }
+</style>
