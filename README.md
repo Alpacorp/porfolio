@@ -8,6 +8,7 @@ Portafolio de Alejandro Palacios. Astro 7, MDX y CSS propio, sin frameworks de U
 | ----------------- | ------------------------------------------ |
 | `npm install`     | Instala dependencias                       |
 | `npm run dev`     | Servidor local en `localhost:4321`         |
+| `npm run dev:fresh` | Dev server with a clean content cache — use it after switching branches or pulling if content looks stale |
 | `npm run check`   | Revisa tipos y el esquema del contenido    |
 | `npm run build`   | Genera el sitio estático en `dist/`        |
 | `npm run preview` | Sirve `dist/` para revisarlo antes de subir |
