@@ -19,12 +19,21 @@ const NameTag = home ? 'h1' : 'p';
       <span class="logo__mark" aria-hidden="true">a</span>
       <span class="mono">alpacorp</span>
     </a>
-    <ThemeToggle />
+    <div class="sidebar__tools no-print">
+      <button class="search-btn mono" type="button" data-open-palette aria-label="Buscar o navegar (⌘K)">
+        <Icon name="search" size={16} />
+        <kbd>⌘K</kbd>
+      </button>
+      <ThemeToggle />
+    </div>
   </div>
 
   <div class="intro">
     <NameTag class="intro__name">Alejandro<br />Palacios</NameTag>
-    <p class="intro__role mono">{profile.role} · {profile.focus} · Bogotá</p>
+    <p class="intro__role mono">
+      <span class="intro__now">{profile.role} en {profile.current}</span>
+      {profile.focus} · Bogotá
+    </p>
     <p class="intro__tagline">
       Construyo producto digital con <span class="hl">ojo de negocio</span>: plataformas en Mercado
       Pago, banca digital y, como freelance, más de 30 proyectos para clientes en Colombia, México y
@@ -39,21 +48,15 @@ const NameTag = home ? 'h1' : 'p';
       nav.map((item) => (
         <a class="nav__link mono" href={`${base}#${item.id}`} data-nav={item.id}>
           <span class="nav__bar" aria-hidden="true" />
-          {item.label}
+          <span class="nav__label">{item.label}</span>
         </a>
       ))
     }
   </nav>
 
-  <button class="palette-btn mono no-print" type="button" data-open-palette>
-    <Icon name="search" size={16} />
-    Buscar o navegar
-    <kbd>⌘K</kbd>
-  </button>
-
   <div class="social no-print">
-    <a class="icon-btn" href={profile.links.linkedin} aria-label="LinkedIn" rel="me"><Icon name="linkedin" /></a>
-    <a class="icon-btn" href={profile.links.github} aria-label="GitHub" rel="me"><Icon name="github" /></a>
+    <a class="icon-btn" href={profile.links.linkedin} aria-label="LinkedIn (abre en otra pestaña)" rel="me noopener" target="_blank"><Icon name="linkedin" /></a>
+    <a class="icon-btn" href={profile.links.github} aria-label="GitHub (abre en otra pestaña)" rel="me noopener" target="_blank"><Icon name="github" /></a>
     <a class="icon-btn" href={`mailto:${profile.email}`} aria-label="Correo"><Icon name="mail" /></a>
   </div>
 </aside>
@@ -62,7 +65,7 @@ const NameTag = home ? 'h1' : 'p';
   .sidebar {
     display: flex;
     flex-direction: column;
-    gap: 28px;
+    gap: 24px;
   }
 
   @media (min-width: 1024px) {
@@ -119,9 +122,16 @@ const NameTag = home ? 'h1' : 'p';
   }
 
   .intro__role {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
     font-size: 13px;
     line-height: 1.6;
     color: var(--muted);
+  }
+
+  .intro__now {
+    color: var(--ink);
   }
 
   .intro__tagline {
@@ -166,7 +176,7 @@ const NameTag = home ? 'h1' : 'p';
     display: flex;
     align-items: center;
     gap: 14px;
-    min-height: 34px;
+    min-height: 31px;
     font-size: 13px;
     text-transform: uppercase;
     text-decoration: none;
@@ -178,40 +188,71 @@ const NameTag = home ? 'h1' : 'p';
     width: 28px;
     height: 1px;
     background: currentColor;
-    transition: width 0.2s, background-color 0.2s;
+    transition: width 0.2s, height 0.2s, background-color 0.2s;
   }
 
-  .nav__link:hover,
-  .nav__link[aria-current='true'] {
+  .nav__label {
+    padding: 0 3px;
+    margin: 0 -3px;
+    transition: background-size 0.2s;
+    background: linear-gradient(var(--hl), var(--hl)) left 88% / 0 42% no-repeat;
+  }
+
+  /* Hover: magenta, el color de interacción del sitio */
+  .nav__link:hover {
     color: var(--ink);
   }
 
-  .nav__link:hover .nav__bar,
-  .nav__link[aria-current='true'] .nav__bar {
-    width: 56px;
-  }
-
   .nav__link:hover .nav__bar {
+    width: 56px;
     background: var(--mag);
   }
 
-  .palette-btn {
-    align-self: flex-start;
+  /* Sección en pantalla: el amarillo del resaltador, en la raya y bajo el texto */
+  .nav__link[aria-current='true'] {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  .nav__link[aria-current='true'] .nav__bar {
+    width: 56px;
+    height: 3px;
+    background: var(--yellow);
+  }
+
+  .nav__link[aria-current='true'] .nav__label {
+    background-size: 100% 42%;
+  }
+
+  .sidebar__tools {
+    display: flex;
+    gap: 8px;
+  }
+
+  .search-btn {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
     min-height: 44px;
-    padding: 0 16px;
-    background: var(--surface);
+    padding: 0 12px;
+    background: transparent;
     border: 1px solid var(--line);
     border-radius: 8px;
     color: var(--muted);
-    font-size: 13px;
+    font-size: 12px;
     cursor: pointer;
   }
 
-  .palette-btn:hover {
+  .search-btn:hover {
     border-color: var(--mag);
+    color: var(--ink);
+  }
+
+  /* En pantallas táctiles el atajo de teclado no aplica: basta la lupa */
+  @media (hover: none) {
+    .search-btn kbd {
+      display: none;
+    }
   }
 
   kbd {
@@ -225,6 +266,28 @@ const NameTag = home ? 'h1' : 'p';
   .social {
     display: flex;
     gap: 8px;
+  }
+
+  /* Portátiles con poca altura: todo debe caber sin desplazar la barra lateral */
+  @media (min-width: 1024px) and (max-height: 900px) {
+    .sidebar {
+      top: 28px;
+      max-height: calc(100vh - 40px);
+      gap: 18px;
+    }
+    .intro {
+      gap: 10px;
+    }
+    .intro__name {
+      font-size: 42px;
+    }
+    .intro__tagline {
+      font-size: 16px;
+      margin-top: 2px;
+    }
+    .nav__link {
+      min-height: 28px;
+    }
   }
 </style>
 

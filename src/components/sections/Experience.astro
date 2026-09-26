@@ -1,4 +1,5 @@
 ---
+import Logo from '../Logo.astro';
 import { experience, experienceFilters } from '../../data/career';
 ---
 
@@ -18,8 +19,14 @@ import { experience, experienceFilters } from '../../data/career';
   <ol class="jobs">
     {
       experience.map((job) => (
-        <li class="job" data-tags={job.filters.join('|')}>
-          <p class="mono muted job__dates">{job.dates}</p>
+        <li class="job logo-host" data-tags={job.filters.join('|')}>
+          <div class="job__side">
+            <span class="job__logo"><Logo id={job.logo} /></span>
+            <p class="mono muted job__dates">
+              {job.dates}
+              {job.current && <span class="now">Actual</span>}
+            </p>
+          </div>
           <div class="job__body">
             <h3 class="job__title">
               {job.role} <span class="muted">· {job.org}</span>
@@ -74,7 +81,35 @@ import { experience, experienceFilters } from '../../data/career';
   .job__dates {
     font-size: 13px;
     line-height: 1.5;
-    padding-top: 4px;
+  }
+
+  .job__side {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  /* Hueco de alto fijo: las fechas quedan a la misma altura en todas las filas */
+  .job__logo {
+    height: 34px;
+    display: flex;
+    align-items: center;
+  }
+
+  .job__dates {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .now {
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: var(--yellow);
+    color: var(--on-yellow);
+    font-size: 11px;
+    font-weight: 500;
   }
 
   .job__body {
@@ -115,6 +150,16 @@ import { experience, experienceFilters } from '../../data/career';
     .job {
       grid-template-columns: 1fr;
       gap: 8px;
+    }
+    .job__dates {
+      flex-direction: row;
+      align-items: center;
+    }
+    .job__side {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
     }
   }
 </style>

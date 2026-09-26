@@ -1,37 +1,39 @@
+import type { LogoId } from './logos';
+
 /** Hitos del carril «Empleo» de la línea de tiempo. */
 export const milestones = [
   {
     year: 2011,
+    logo: 'servientrega' as LogoId,
     role: 'Analista de Facturación e In Company',
     org: 'Servientrega',
     text: 'Facturación de clientes corporativos, bases de datos de cobro e indicadores de flujo de caja a nivel nacional. Aquí aprendí cómo se mueve el dinero en una empresa.',
   },
   {
     year: 2015,
+    logo: 'servientrega' as LogoId,
     role: 'Webmaster y Trafficker Digital',
     org: 'Servientrega',
     text: 'Migré dos veces el sitio principal hasta su versión actual, hoy muy bien posicionado, y administré más de 12 portales del grupo. SEO, analítica y pauta en Google, Meta, LinkedIn y Twitter.',
   },
   {
-    year: 2017,
-    role: 'Formación en sistemas',
-    org: 'SENA · UNAD',
-    text: 'Tecnología en Análisis y Desarrollo de Sistemas (SENA) y luego Ingeniería de Sistemas (UNAD), mientras seguía trabajando.',
-  },
-  {
     year: 2021,
+    logo: 'jikkosoft' as LogoId,
     role: 'Frontend Developer',
     org: 'Jikkosoft · Cali',
     text: 'Plataforma para gestionar las obligaciones tributarias de empresas de Cali: impuestos, cuentas por pagar y cobranzas. React, Material UI, Redux, SOLID y pruebas unitarias.',
   },
   {
     year: 2022,
+    logo: 'bcs' as LogoId,
     role: 'Frontend Developer',
     org: 'Banco Caja Social',
     text: 'Creamos CDT Digital de punta a punta: más de 2.000 millones COP recaudados en dos años y mejor producto del banco tres años seguidos.',
   },
   {
     year: 2024,
+    current: true,
+    logo: 'mercadolibre' as LogoId,
     role: 'Software Engineer',
     org: 'Mercado Libre / Mercado Pago · OpsIT',
     text: 'Todo el frontend de la plataforma de devoluciones y el de las plataformas de cashbacks, integradas con múltiples servicios internos. Último año enfocado en IA aplicada al desarrollo.',
@@ -85,6 +87,8 @@ export const freelanceGroups = [
 export const experience = [
   {
     dates: '2019 — hoy',
+    logo: 'alpacorp' as LogoId,
+    current: true,
     role: 'Desarrollador full stack freelance',
     org: 'alpacorp',
     text: 'E-commerce y panel con IA para Mr. Goma Tires (EE. UU.); sitios y campañas para clientes de BBDO México y la web de la agencia; sitios, tiendas y SEO para 9 empresas en Colombia; novenas digitales de marca blanca para 8 empresas.',
@@ -93,6 +97,8 @@ export const experience = [
   },
   {
     dates: 'oct 2024 — hoy',
+    logo: 'mercadolibre' as LogoId,
+    current: true,
     role: 'Software Engineer',
     org: 'Mercado Libre / Mercado Pago',
     text: 'Frontend completo de la plataforma de devoluciones (refunds) y de las plataformas de cashbacks en OpsIT, integradas con múltiples servicios internos. IA aplicada al desarrollo: asistentes internos, n8n y Python.',
@@ -101,6 +107,7 @@ export const experience = [
   },
   {
     dates: 'jun 2022 — oct 2024',
+    logo: 'bcs' as LogoId,
     role: 'Frontend Developer',
     org: 'Banco Caja Social',
     text: 'Creamos CDT Digital de punta a punta: todo el frontend y las integraciones con el backend. Más de 2.000 millones COP recaudados en dos años y mejor producto del banco tres años seguidos.',
@@ -109,6 +116,7 @@ export const experience = [
   },
   {
     dates: 'jul 2021 — jul 2022',
+    logo: 'jikkosoft' as LogoId,
     role: 'Frontend Developer',
     org: 'Jikkosoft',
     text: 'Plataforma de obligaciones tributarias para empresas de Cali: impuestos, cuentas por pagar y cobranzas.',
@@ -117,6 +125,7 @@ export const experience = [
   },
   {
     dates: 'oct 2015 — jun 2021',
+    logo: 'servientrega' as LogoId,
     role: 'Webmaster y Trafficker Digital',
     org: 'Servientrega',
     text: 'Dos migraciones del sitio principal hasta su versión actual, muy bien posicionada; más de 12 portales del grupo, SEO, analítica y pauta digital.',
@@ -125,6 +134,7 @@ export const experience = [
   },
   {
     dates: 'jul 2011 — sep 2015',
+    logo: 'servientrega' as LogoId,
     role: 'Analista de Facturación e In Company',
     org: 'Servientrega',
     text: 'Facturación corporativa, indicadores de gestión y flujo de caja a nivel nacional.',
@@ -143,10 +153,38 @@ export const experienceFilters = [
   'Negocio',
 ];
 
+/** Fechas de UNAD y SENA según el CV más reciente; Acámica e INCAP según LinkedIn. */
 export const education = [
-  { title: 'Ingeniería de Sistemas', org: 'UNAD', dates: '2019 — 2024' },
-  { title: 'Tecnología en Análisis y Desarrollo de Sistemas', org: 'SENA', dates: '2017 — 2019' },
+  {
+    title: 'Ingeniería de Sistemas',
+    org: 'Universidad Nacional Abierta y a Distancia (UNAD)',
+    dates: '2019 — 2024',
+    kind: 'Profesional',
+  },
+  {
+    title: 'Desarrollador Web Full Stack',
+    org: 'Acámica',
+    dates: '2019 — 2020',
+    kind: 'Bootcamp',
+  },
+  {
+    title: 'Tecnología en Análisis y Desarrollo de Sistemas de Información',
+    org: 'SENA',
+    dates: '2017 — 2019',
+    kind: 'Tecnólogo',
+  },
+  {
+    title: 'Técnico en Exportaciones, Importaciones y Cambios Internacionales',
+    org: 'Instituto Colombiano de Aprendizaje (INCAP)',
+    dates: '2010 — 2012',
+    kind: 'Técnico',
+  },
 ];
+
+export const educationLinks = {
+  education: 'https://www.linkedin.com/in/alejandro-palacios88/details/education/',
+  certifications: 'https://www.linkedin.com/in/alejandro-palacios88/details/certifications/',
+};
 
 export const skills = [
   { area: 'Frontend', items: 'React, Next.js, Astro, JavaScript, TypeScript, HTML, CSS, Tailwind, Material UI, Redux, Vite' },

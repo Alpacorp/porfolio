@@ -3,6 +3,7 @@ export const profile = {
   fullName: 'Alejandro Palacios Arévalo',
   role: 'Software Engineer',
   focus: 'Frontend, Backend, Automatización e IA',
+  current: 'Mercado Libre / Mercado Pago',
   location: 'Bogotá, Colombia',
   email: 'alejandro.palacios88@gmail.com',
   site: 'alpacorp.net',
@@ -48,6 +49,7 @@ export const nav = [
   { id: 'trayectoria', label: 'Trayectoria' },
   { id: 'casos', label: 'Casos' },
   { id: 'experiencia', label: 'Experiencia' },
+  { id: 'formacion', label: 'Formación' },
   { id: 'archivo', label: 'Archivo' },
   { id: 'contacto', label: 'Contacto' },
 ];
