@@ -46,5 +46,14 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <a class="skip-link" href="#contenido">Saltar al contenido</a>
     <slot />
     <CommandPalette />
+
+    <!-- Red de seguridad: todo enlace a otro sitio se abre en pestaña nueva, también los del contenido MDX -->
+    <script>
+      for (const a of document.querySelectorAll<HTMLAnchorElement>('a[href^="http"]')) {
+        if (a.host === location.host || a.target) continue;
+        a.target = '_blank';
+        a.relList.add('noopener');
+      }
+    </script>
   </body>
 </html>

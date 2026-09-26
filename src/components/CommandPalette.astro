@@ -209,7 +209,10 @@ const items: Item[] = [
     const { href, action } = option.dataset;
     if (href) {
       dialog.close();
-      location.href = href;
+      // Otros sitios en pestaña nueva; secciones y páginas propias, en la misma.
+      const external = /^https?:/.test(href) && new URL(href).host !== location.host;
+      if (external) window.open(href, '_blank', 'noopener');
+      else location.href = href;
       return;
     }
     if (action === 'theme') toggleTheme();
