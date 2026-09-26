@@ -5,6 +5,7 @@ year: null
 sector: "Educación"
 kind: freelance
 group: empresas
+logo: glearning
 stack: ["WordPress", "WooCommerce"]
 url: https://www.glearning.co/
 status: live

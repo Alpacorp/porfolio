@@ -6,6 +6,7 @@ year: null
 sector: "Alimentos"
 kind: freelance
 group: bbdo
+logo: sanrafael
 stack: ["WordPress", "Divi"]
 url: https://sanrafaeldeli.com/
 status: live

@@ -5,6 +5,7 @@ year: null
 sector: "ONG"
 kind: freelance
 group: empresas
+logo: procesion
 stack: ["Astro"]
 url: https://www.procesioninfantiltunja.com/
 status: live

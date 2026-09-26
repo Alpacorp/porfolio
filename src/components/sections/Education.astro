@@ -1,0 +1,115 @@
+---
+import Icon from '../Icon.astro';
+import { education, educationLinks } from '../../data/career';
+---
+
+<section id="formacion" class="section" aria-labelledby="formacion-titulo">
+  <h2 id="formacion-titulo" class="eyebrow">05 — Formación</h2>
+
+  <ol class="list">
+    {
+      education.map((e) => (
+        <li class="item">
+          <p class="mono muted dates">{e.dates}</p>
+          <div class="body">
+            <h3 class="title">{e.title}</h3>
+            <p class="muted org">{e.org}</p>
+          </div>
+          <span class="tag kind">{e.kind}</span>
+        </li>
+      ))
+    }
+  </ol>
+
+  <div class="links">
+    <a class="link mono" href={educationLinks.education} rel="noopener" target="_blank">
+      Formación completa en LinkedIn <Icon name="arrow-up-right" size={14} />
+      <span class="sr-only">(abre en otra pestaña)</span>
+    </a>
+    <a class="link mono" href={educationLinks.certifications} rel="noopener" target="_blank">
+      Certificados y cursos <Icon name="arrow-up-right" size={14} />
+      <span class="sr-only">(abre en otra pestaña)</span>
+    </a>
+  </div>
+</section>
+
+<style>
+  .section {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+
+  .list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .item {
+    display: grid;
+    grid-template-columns: 150px minmax(0, 1fr) auto;
+    gap: 32px;
+    align-items: baseline;
+    padding: 22px 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .item:last-child {
+    border-bottom: 1px solid var(--line);
+  }
+
+  .dates {
+    font-size: 13px;
+  }
+
+  .body {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .title {
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.35;
+  }
+
+  .org {
+    font-size: 15px;
+  }
+
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 18px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    font-size: 13px;
+    text-decoration: none;
+    color: var(--ink);
+  }
+
+  .link:hover {
+    border-color: var(--mag);
+    color: var(--ink);
+  }
+
+  @media (max-width: 640px) {
+    .item {
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 6px 16px;
+    }
+    .dates {
+      grid-column: 1 / -1;
+    }
+  }
+</style>

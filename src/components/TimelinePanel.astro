@@ -1,0 +1,149 @@
+---
+import Logo from './Logo.astro';
+import type { LogoId } from '../data/logos';
+
+interface Props {
+  id: string;
+  heading: string;
+  role: string;
+  org: string;
+  text: string;
+  items?: { name: string; url?: string; note: string; logo?: LogoId }[];
+  hidden?: boolean;
+  current?: boolean;
+  logo?: LogoId;
+}
+
+const { id, heading, role, org, text, items = [], hidden = false, current = false, logo } = Astro.props;
+---
+
+<div class="item logo-host" data-panel={id} hidden={hidden}>
+  <p class="heading"><span class="hl">{heading}</span></p>
+  <div class="body">
+    {logo && <Logo id={logo} class="panel-logo" />}
+    <h3 class="role">
+      {role}
+      {current && <span class="now mono">Actual</span>}
+    </h3>
+    <p class="mono muted org">{org}</p>
+    <p class="muted text">{text}</p>
+    {
+      items.length > 0 && (
+        <ul class="list">
+          {items.map((it) => (
+            <li class="logo-host">
+              <span class="slot">{it.logo && <Logo id={it.logo} scale={0.8} />}</span>
+              {it.url ? (
+                <a href={it.url} rel="noopener" target="_blank">
+                  {it.name} <span aria-hidden="true">↗</span>
+                  <span class="sr-only">(abre en otra pestaña)</span>
+                </a>
+              ) : (
+                <span class="name">{it.name}</span>
+              )}
+              <span class="mono muted note">{it.note}</span>
+            </li>
+          ))}
+        </ul>
+      )
+    }
+  </div>
+</div>
+
+<style>
+  .item {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .item[hidden] {
+    display: none;
+  }
+
+  .heading {
+    font-size: clamp(28px, 3.4vw, 34px);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+  }
+
+  .body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .body :global(.panel-logo) {
+    margin-bottom: 4px;
+  }
+
+  .role {
+    font-size: 22px;
+    font-weight: 600;
+  }
+
+  .now {
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 8px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: var(--yellow);
+    color: var(--on-yellow);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+
+  .org {
+    font-size: 13px;
+  }
+
+  .text {
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  .list {
+    list-style: none;
+    margin: 8px 0 0;
+    padding: 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .list li {
+    display: grid;
+    grid-template-columns: 110px minmax(0, 1fr) minmax(0, 1fr);
+    align-items: center;
+    gap: 16px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 15px;
+  }
+
+  .list a,
+  .name {
+    font-weight: 500;
+  }
+
+  .note {
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  @media (max-width: 640px) {
+    .role {
+      font-size: 19px;
+    }
+    .list li {
+      grid-template-columns: 1fr;
+      gap: 4px;
+    }
+    .slot:empty {
+      display: none;
+    }
+  }
+</style>

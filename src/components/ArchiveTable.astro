@@ -1,4 +1,5 @@
 ---
+import Logo from './Logo.astro';
 import { formatYears, projectHref, statusLabel, type Project } from '../lib/projects';
 
 interface Props {
@@ -53,6 +54,7 @@ const filters = ['Todo', 'Casos', 'Empleo', 'Freelance'];
     <thead class="mono">
       <tr>
         <th scope="col">Año</th>
+        <th scope="col" class="col-logo"><span class="sr-only">Cliente</span></th>
         <th scope="col">Proyecto</th>
         <th scope="col" class="col-sector">Sector</th>
         <th scope="col" class="col-stack">Stack</th>
@@ -69,6 +71,7 @@ const filters = ['Todo', 'Casos', 'Empleo', 'Freelance'];
             .toLowerCase();
           return (
             <tr
+              class="logo-host"
               data-row
               data-kind={p.data.kind === 'empleo' ? 'Empleo' : 'Freelance'}
               data-case={String(p.data.featured)}
@@ -76,6 +79,7 @@ const filters = ['Todo', 'Casos', 'Empleo', 'Freelance'];
               data-search={search}
             >
               <td class="mono muted col-year">{formatYears(p.data)}</td>
+              <td class="col-logo">{p.data.logo && <Logo id={p.data.logo} scale={0.7} />}</td>
               <td>
                 {link ? (
                   <a class="row-link" href={link.href} {...(link.external ? { rel: 'noopener', target: '_blank' } : {})}>
@@ -195,13 +199,19 @@ const filters = ['Todo', 'Casos', 'Empleo', 'Freelance'];
     white-space: nowrap;
   }
 
+  .col-logo {
+    width: 100px;
+    vertical-align: top;
+    padding-top: 12px;
+  }
+
   .col-sector {
-    width: 150px;
+    width: 120px;
     font-size: 14px;
   }
 
   .col-stack {
-    width: 190px;
+    width: 160px;
     font-size: 12px;
     line-height: 1.5;
   }
@@ -244,7 +254,8 @@ const filters = ['Todo', 'Casos', 'Empleo', 'Freelance'];
 
   @media (max-width: 720px) {
     .col-sector,
-    .col-stack {
+    .col-stack,
+    .col-logo {
       display: none;
     }
     .col-year {

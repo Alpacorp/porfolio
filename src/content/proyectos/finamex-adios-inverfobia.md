@@ -6,6 +6,7 @@ year: null
 sector: "Finanzas"
 kind: freelance
 group: bbdo
+logo: finamex
 stack: ["React", "Vite", "HubSpot", "GTM"]
 url: https://inverfobia-v2.vercel.app/
 status: live

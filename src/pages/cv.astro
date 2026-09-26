@@ -1,7 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import Icon from '../components/Icon.astro';
-import { education, experience, skills } from '../data/career';
+import { education, educationLinks, experience, skills } from '../data/career';
 import { profile } from '../data/profile';
 import { getCases } from '../lib/projects';
 
@@ -17,12 +17,13 @@ const cases = await getCases();
 
     <header class="header">
       <h1 class="name">{profile.fullName}</h1>
-      <p class="role">{profile.role} · {profile.focus}</p>
+      <p class="role">{profile.role} en {profile.current}</p>
+      <p class="focus muted">{profile.focus}</p>
       <ul class="mono muted contact">
         <li>{profile.location}</li>
         <li><a href={`mailto:${profile.email}`}>{profile.email}</a></li>
-        <li><a href={profile.links.linkedin}>linkedin.com/in/alejandro-palacios88</a></li>
-        <li><a href={profile.links.github}>github.com/Alpacorp</a></li>
+        <li><a href={profile.links.linkedin} rel="noopener" target="_blank">linkedin.com/in/alejandro-palacios88</a></li>
+        <li><a href={profile.links.github} rel="noopener" target="_blank">github.com/Alpacorp</a></li>
         <li><a href="/">{profile.site}</a></li>
       </ul>
     </header>
@@ -30,7 +31,8 @@ const cases = await getCases();
     <section>
       <h2 class="eyebrow">Perfil</h2>
       <p>
-        Desarrollador de software con más de 9 años construyendo productos digitales para banca, fintech,
+        Software Engineer en Mercado Libre / Mercado Pago y desarrollador freelance desde 2019. Más de 9 años
+        construyendo productos digitales para banca, fintech,
         e-commerce, logística y agencias. React, TypeScript, Next.js, Node.js y Go, integración de APIs, pruebas,
         automatización e IA aplicada al desarrollo. Hablo tres idiomas en un equipo: <span class="hl">negocio, marketing y código</span>.
       </p>
@@ -56,7 +58,7 @@ const cases = await getCases();
       </ol>
     </section>
 
-    <section>
+    <section class="projects">
       <h2 class="eyebrow">Proyectos destacados</h2>
       <ul class="list">
         {
@@ -68,17 +70,15 @@ const cases = await getCases();
                 </h3>
                 <span class="mono muted">{c.data.client}</span>
               </div>
-              <p>
-                {c.data.summary}
-                {c.data.metric && (
-                  <>
-                    {' '}
-                    <strong>
-                      {c.data.metric.value} {c.data.metric.label}.
-                    </strong>
-                  </>
-                )}
-              </p>
+              <p>{c.data.summary}</p>
+              {c.data.metric && (
+                <p class="result">
+                  <span class="mono muted">Resultado</span>
+                  <strong>
+                    {c.data.metric.value} {c.data.metric.label}
+                  </strong>
+                </p>
+              )}
             </li>
           ))
         }
@@ -87,8 +87,8 @@ const cases = await getCases();
 
     <section class="two-col">
       <div>
-        <h2 class="eyebrow">Educación</h2>
-        <ul class="list">
+        <h2 class="eyebrow">Formación</h2>
+        <ul class="list list--tight">
           {
             education.map((e) => (
               <li class="item">
@@ -100,6 +100,11 @@ const cases = await getCases();
             ))
           }
         </ul>
+        <p class="small links">
+          <a href={educationLinks.education} rel="noopener" target="_blank">Formación completa</a> y{' '}
+          <a href={educationLinks.certifications} rel="noopener" target="_blank">certificados</a> en{' '}
+          <span class="mono">linkedin.com/in/alejandro-palacios88</span>
+        </p>
       </div>
       <div>
         <h2 class="eyebrow">Habilidades</h2>
@@ -166,6 +171,32 @@ const cases = await getCases();
 
   .role {
     font-size: 17px;
+    font-weight: 500;
+  }
+
+  .focus {
+    font-size: 14px;
+    margin-top: -4px;
+  }
+
+  .result {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 10px;
+  }
+
+  .result .mono {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .list--tight {
+    gap: 12px;
+  }
+
+  .links a {
     font-weight: 500;
   }
 
@@ -257,12 +288,46 @@ const cases = await getCases();
     font-size: 14px;
   }
 
+  .skills > div {
+    break-inside: avoid;
+  }
+
   @media print {
     .cv {
       padding: 0;
       max-width: none;
-      font-size: 10.5pt;
-      gap: 18pt;
+      font-size: 10pt;
+      line-height: 1.45;
+      gap: 14pt;
+    }
+    section {
+      gap: 8pt;
+    }
+    .list {
+      gap: 10pt;
+    }
+    .header {
+      padding-bottom: 12pt;
+    }
+    .name {
+      font-size: 26pt;
+    }
+    .item h3 {
+      font-size: 11pt;
+    }
+    .skills dt,
+    .skills dd {
+      font-size: 9.5pt;
+    }
+    .skills {
+      gap: 6pt;
+    }
+    .two-col {
+      gap: 20pt;
+    }
+    /* Los proyectos arrancan en la página 2 para que su título no quede huérfano */
+    .projects {
+      break-before: page;
     }
     @page {
       margin: 16mm 14mm;

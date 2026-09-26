@@ -1,6 +1,7 @@
 ---
 import { freelanceGroups, freelanceSince, milestones, timelineRange } from '../../data/career';
 import { groupItems, type Project } from '../../lib/projects';
+import TimelinePanel from '../TimelinePanel.astro';
 
 interface Props {
   projects: Project[];
@@ -10,35 +11,22 @@ const { projects } = Astro.props;
 const span = timelineRange.to - timelineRange.from;
 const pos = (year: number) => `${(((year - timelineRange.from) / span) * 100).toFixed(2)}%`;
 const initial = `y-${milestones.at(-1)!.year}`;
-
-const panels = [
-  ...milestones.map((m) => ({
-    id: `y-${m.year}`,
-    heading: String(m.year),
-    role: m.role,
-    org: m.org,
-    text: m.text,
-    items: [] as { name: string; url?: string; note: string }[],
-  })),
-  ...freelanceGroups.map((g) => ({
-    id: `g-${g.id}`,
-    heading: g.period,
-    role: g.role,
-    org: g.org,
-    text: g.text,
-    items: groupItems(projects, g.id),
-  })),
-];
+const current = milestones.find((m) => m.current);
 ---
 
 <section id="trayectoria" class="section" aria-labelledby="trayectoria-titulo" data-timeline>
   <h2 id="trayectoria-titulo" class="eyebrow">02 — Trayectoria</h2>
-  <p class="hint mono muted">Haz clic en un año o en un bloque freelance.</p>
 
-  <div class="lanes">
-    <p class="lane-label mono muted">Empleo</p>
+  <!-- Carril 1: empleo. Los años controlan el panel que va justo debajo. -->
+  <div class="lane" data-lane>
+    <p class="lane-label mono muted">Empleo <span class="lane-hint">· toca un año</span></p>
     <div class="axis" role="group" aria-label="Hitos de empleo">
       <div class="axis__ticks" aria-hidden="true"></div>
+      {current && (
+        <div class="now-bar" style={`left: ${pos(current.year)}`} aria-hidden="true">
+          <span class="now-bar__label mono">hoy</span>
+        </div>
+      )}
       {
         milestones.map((m) => {
           const id = `y-${m.year}`;
@@ -47,8 +35,8 @@ const panels = [
               class="year"
               type="button"
               style={`left: ${pos(m.year)}`}
-              aria-pressed={id === initial ? "true" : "false"}
-              aria-controls="timeline-panel"
+              aria-pressed={id === initial ? 'true' : 'false'}
+              aria-controls="panel-empleo"
               aria-label={`${m.year}: ${m.role}, ${m.org}`}
               data-target={id}
             >
@@ -59,61 +47,67 @@ const panels = [
         })
       }
     </div>
-
-    <p class="lane-label mono muted">Freelance · alpacorp (en paralelo)</p>
-    <div class="axis axis--free" aria-hidden="true">
-      <div class="free-bar mono" style={`left: ${pos(freelanceSince)}`}>{freelanceSince} → hoy</div>
-    </div>
-    <div class="groups" role="group" aria-label="Proyectos freelance">
+    <div id="panel-empleo" class="card panel" data-panel-box>
       {
-        freelanceGroups.map((g) => (
-          <button
-            class="group"
-            type="button"
-            aria-pressed="false"
-            aria-controls="timeline-panel"
-            data-target={`g-${g.id}`}
-          >
-            <span class="group__label">{g.label}</span>
-            <span class="group__sub mono">{g.sub}</span>
-          </button>
+        milestones.map((m) => (
+          <TimelinePanel
+            id={`y-${m.year}`}
+            heading={m.current ? `${m.year} → hoy` : String(m.year)}
+            current={m.current}
+            logo={m.logo}
+            role={m.role}
+            org={m.org}
+            text={m.text}
+            hidden={`y-${m.year}` !== initial}
+          />
         ))
       }
     </div>
   </div>
 
-  <div id="timeline-panel" class="card panel" aria-live="polite">
-    {
-      panels.map((p) => (
-        <div class="panel__item" data-panel={p.id} hidden={p.id !== initial}>
-          <p class="panel__heading">
-            <span class="hl">{p.heading}</span>
-          </p>
-          <div class="panel__body">
-            <h3 class="panel__role">{p.role}</h3>
-            <p class="mono muted panel__org">{p.org}</p>
-            <p class="muted panel__text">{p.text}</p>
-            {p.items.length > 0 && (
-              <ul class="panel__list">
-                {p.items.map((it) => (
-                  <li>
-                    {it.url ? (
-                      <a href={it.url} rel="noopener" target="_blank">
-                        {it.name} <span aria-hidden="true">↗</span>
-                        <span class="sr-only">(abre en otra pestaña)</span>
-                      </a>
-                    ) : (
-                      <span class="panel__name">{it.name}</span>
-                    )}
-                    <span class="mono muted panel__note">{it.note}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        </div>
-      ))
-    }
+  <!-- Carril 2: freelance. Empieza cerrado; cada bloque abre o cierra su lista de proyectos. -->
+  <div class="lane" data-lane data-collapsible>
+    <p class="lane-label mono muted">
+      Freelance · alpacorp, en paralelo <span class="lane-hint">· toca un bloque para ver sus proyectos</span>
+    </p>
+    <div class="axis axis--free" aria-hidden="true">
+      <div class="free-bar mono" style={`left: ${pos(freelanceSince)}`}>{freelanceSince} → hoy</div>
+    </div>
+    <div class="groups" role="group" aria-label="Bloques freelance">
+      {
+        freelanceGroups.map((g) => (
+          <button
+            class="group"
+            type="button"
+            aria-expanded="false"
+            aria-controls="panel-freelance"
+            data-target={`g-${g.id}`}
+          >
+            <span class="group__label">{g.label}</span>
+            <span class="group__sub mono">{g.sub}</span>
+            <span class="group__cta mono" aria-hidden="true">
+              <span class="group__open">Ver proyectos ↓</span>
+              <span class="group__close">Cerrar ↑</span>
+            </span>
+          </button>
+        ))
+      }
+    </div>
+    <div id="panel-freelance" class="card panel" data-panel-box hidden>
+      {
+        freelanceGroups.map((g) => (
+          <TimelinePanel
+            id={`g-${g.id}`}
+            heading={g.label}
+            role={g.role}
+            org={g.org}
+            text={g.text}
+            items={groupItems(projects, g.id)}
+            hidden
+          />
+        ))
+      }
+    </div>
   </div>
 </section>
 
@@ -121,24 +115,24 @@ const panels = [
   .section {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 40px;
   }
 
-  .hint {
-    font-size: 12px;
-    margin-top: -8px;
-  }
-
-  .lanes {
+  .lane {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
   }
 
   .lane-label {
     font-size: 11px;
     letter-spacing: 0.06em;
     text-transform: uppercase;
+  }
+
+  .lane-hint {
+    text-transform: none;
+    letter-spacing: 0;
   }
 
   .axis {
@@ -155,6 +149,25 @@ const panels = [
     height: 12px;
     border-bottom: 1px solid var(--line);
     background: repeating-linear-gradient(90deg, var(--line) 0 1px, transparent 1px 12px);
+  }
+
+  /* Franja desde el empleo actual hasta el final del eje: «sigo aquí». */
+  .now-bar {
+    position: absolute;
+    right: -24px;
+    top: 38px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--yellow);
+  }
+
+  .now-bar__label {
+    position: absolute;
+    right: 0;
+    top: 10px;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--ink);
   }
 
   .year {
@@ -233,7 +246,6 @@ const panels = [
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     gap: 10px;
-    padding-top: 6px;
   }
 
   .group {
@@ -245,7 +257,7 @@ const panels = [
     padding: 12px 16px;
     border: 1px solid var(--line);
     border-radius: 10px;
-    background: transparent;
+    background: var(--surface);
     color: var(--ink);
     text-align: left;
     cursor: pointer;
@@ -256,7 +268,7 @@ const panels = [
     border-color: var(--mag);
   }
 
-  .group[aria-pressed='true'] {
+  .group[aria-expanded='true'] {
     background: var(--yellow);
     border-color: var(--yellow);
     color: var(--on-yellow);
@@ -267,80 +279,41 @@ const panels = [
     font-weight: 600;
   }
 
-  .group__sub {
+  .group__sub,
+  .group__cta {
     font-size: 11px;
     opacity: 0.8;
   }
 
-  .panel {
-    padding: clamp(20px, 3vw, 30px);
-    min-height: 150px;
+  .group__cta {
+    margin-top: auto;
+    padding-top: 6px;
+    text-decoration: underline;
+    text-decoration-color: var(--yellow);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 3px;
   }
 
-  .panel__item {
-    display: flex;
-    gap: 32px;
+  .group[aria-expanded='true'] .group__cta {
+    text-decoration-color: currentColor;
   }
 
-  .panel__item[hidden] {
+  .group__close,
+  .group[aria-expanded='true'] .group__open {
     display: none;
   }
 
-  .panel__heading {
-    width: 140px;
-    flex-shrink: 0;
-    font-size: 34px;
-    font-weight: 700;
-    letter-spacing: -0.03em;
-    line-height: 1.1;
+  .group[aria-expanded='true'] .group__close {
+    display: inline;
   }
 
-  .panel__body {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    min-width: 0;
-    flex: 1;
+  .panel {
+    padding: clamp(20px, 3vw, 30px);
+    scroll-margin: 24px;
   }
 
-  .panel__role {
-    font-size: 22px;
-    font-weight: 600;
-  }
-
-  .panel__org {
-    font-size: 13px;
-  }
-
-  .panel__text {
-    font-size: 16px;
-    line-height: 1.6;
-  }
-
-  .panel__list {
-    list-style: none;
-    margin: 8px 0 0;
-    padding: 0;
-    border-top: 1px solid var(--line);
-  }
-
-  .panel__list li {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: 16px;
-    padding: 12px 0;
-    border-bottom: 1px solid var(--line);
-    font-size: 15px;
-  }
-
-  .panel__list a,
-  .panel__name {
-    font-weight: 500;
-  }
-
-  .panel__note {
-    font-size: 12px;
-    line-height: 1.5;
+  .panel[hidden] {
+    display: none;
   }
 
   /* En pantallas estrechas los años se encimarían: el eje pasa a ser una fila de botones. */
@@ -353,7 +326,8 @@ const panels = [
       gap: 8px;
     }
     .axis__ticks,
-    .year__line {
+    .year__line,
+    .now-bar {
       display: none;
     }
     .year {
@@ -380,27 +354,43 @@ const panels = [
     .free-bar {
       right: -12px;
     }
-    .panel__item {
-      flex-direction: column;
-      gap: 12px;
-    }
-    .panel__list li {
-      grid-template-columns: 1fr;
-      gap: 4px;
+    .groups {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
 </style>
 
 <script>
-  for (const root of document.querySelectorAll<HTMLElement>('[data-timeline]')) {
-    const triggers = [...root.querySelectorAll<HTMLButtonElement>('[data-target]')];
-    const panels = [...root.querySelectorAll<HTMLElement>('[data-panel]')];
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
+
+  /** Si el panel quedó fuera de la pantalla (típico en móvil), lo trae a la vista. */
+  function reveal(box: HTMLElement) {
+    const r = box.getBoundingClientRect();
+    if (r.top < 0 || r.top > innerHeight * 0.6) {
+      box.scrollIntoView({ block: 'start', behavior: reduceMotion.matches ? 'auto' : 'smooth' });
+    }
+  }
+
+  for (const lane of document.querySelectorAll<HTMLElement>('[data-timeline] [data-lane]')) {
+    const triggers = [...lane.querySelectorAll<HTMLButtonElement>('[data-target]')];
+    const box = lane.querySelector<HTMLElement>('[data-panel-box]')!;
+    const panels = [...box.querySelectorAll<HTMLElement>('[data-panel]')];
+    const collapsible = lane.hasAttribute('data-collapsible');
+    // Los años son un selector (aria-pressed); los bloques freelance, un acordeón (aria-expanded).
+    const state = collapsible ? 'aria-expanded' : 'aria-pressed';
 
     for (const trigger of triggers) {
       trigger.addEventListener('click', () => {
-        const target = trigger.dataset.target;
-        triggers.forEach((t) => t.setAttribute('aria-pressed', String(t === trigger)));
+        const closing = collapsible && trigger.getAttribute(state) === 'true';
+        const target = closing ? null : trigger.dataset.target;
+
+        for (const t of triggers) {
+          t.setAttribute(state, String(t === trigger && !closing));
+        }
         panels.forEach((p) => (p.hidden = p.dataset.panel !== target));
+        box.hidden = target === null;
+
+        if (target) reveal(box);
       });
     }
   }

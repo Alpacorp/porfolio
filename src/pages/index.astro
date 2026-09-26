@@ -4,6 +4,7 @@ import About from '../components/sections/About.astro';
 import Timeline from '../components/sections/Timeline.astro';
 import Cases from '../components/sections/Cases.astro';
 import Experience from '../components/sections/Experience.astro';
+import Education from '../components/sections/Education.astro';
 import Archive from '../components/sections/Archive.astro';
 import Contact from '../components/sections/Contact.astro';
 import { getCases, getProjects } from '../lib/projects';
@@ -16,6 +17,7 @@ const [projects, cases] = await Promise.all([getProjects(), getCases()]);
   <Timeline projects={projects} />
   <Cases cases={cases} />
   <Experience />
+  <Education />
   <Archive projects={projects} />
   <Contact />
 </Shell>

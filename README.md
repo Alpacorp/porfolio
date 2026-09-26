@@ -51,6 +51,10 @@ Aparece solo en el archivo y, si tiene `group`, en su bloque de la línea de tie
 
 **Convertirlo en caso de estudio:** renómbralo a `.mdx`, añade `featured: true`, `order` y `metric: { value, label }`, y escribe la historia en el cuerpo (`## El reto`, `## Qué hice`, `## Resultado`). Se crea sola su página en `/casos/<id>/`.
 
+## Logos
+
+Cada logo son dos archivos en `src/assets/logos/`: `<id>.webp` (el original a color, que aparece al pasar el cursor en tema claro) y `<id>.mono.webp` (la máscara monocroma que se ve en reposo). Se registran en `src/data/logos.ts` con su alto y, si el original es blanco, `hoverColor: false`. Un proyecto lo usa con `logo: <id>` en su frontmatter.
+
 ## Diseño
 
 - **Claro = papel, oscuro = tinta.** El tema sigue al sistema y se puede cambiar con el botón o con ⌘K.

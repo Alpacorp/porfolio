@@ -47,8 +47,20 @@ const { title, description, home = false } = Astro.props;
     min-width: 0;
     display: flex;
     flex-direction: column;
-    gap: clamp(80px, 10vw, 112px);
+    gap: clamp(64px, 8vw, 88px);
     outline: none;
+  }
+
+  /* Separador entre secciones: línea en color de texto con una pestaña amarilla al inicio.
+     El bloque de contacto (amarillo) ya separa por sí mismo. */
+  .main > :global(section:not(:first-child):not(.contact))::before {
+    content: '';
+    display: block;
+    height: 5px;
+    margin-bottom: 12px;
+    background:
+      linear-gradient(var(--yellow), var(--yellow)) left top / 56px 5px no-repeat,
+      linear-gradient(var(--ink), var(--ink)) left bottom / 100% 1px no-repeat;
   }
 
   .footer {

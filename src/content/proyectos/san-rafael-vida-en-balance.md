@@ -6,6 +6,7 @@ year: null
 sector: "Alimentos"
 kind: freelance
 group: bbdo
+logo: sanrafael
 stack: ["React", "Vite", "React Router"]
 url: https://vidaenbalance.com/
 status: live

@@ -5,6 +5,7 @@ year: 2015
 yearEnd: 2021
 sector: "Logística"
 kind: empleo
+logo: servientrega
 stack: ["WordPress", "IBM WebSphere", "Joomla", "Google Analytics"]
 url: https://www.servientrega.com/
 status: live

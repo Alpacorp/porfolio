@@ -5,6 +5,7 @@ year: null
 sector: "Moda"
 kind: freelance
 group: empresas
+logo: hilada
 stack: ["WordPress", "WooCommerce", "Elementor"]
 url: https://hilada.co/
 status: live
