@@ -5,6 +5,7 @@ year: null
 sector: "Fintech"
 kind: freelance
 group: empresas
+logo: onoff
 stack: ["WordPress", "Elementor"]
 url: https://onoff.com.co/
 status: live

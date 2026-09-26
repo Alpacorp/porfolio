@@ -1,4 +1,5 @@
 ---
+import Logo from '../Logo.astro';
 import { formatYears, type Project } from '../../lib/projects';
 
 interface Props {
@@ -14,8 +15,9 @@ const { cases } = Astro.props;
     {
       cases.map((c) => (
         <li>
-          <a class="card case" href={`/casos/${c.id}/`}>
+          <a class="card case logo-host" href={`/casos/${c.id}/`}>
             <div class="case__main">
+              {c.data.logo && <Logo id={c.data.logo} scale={0.9} class="case__logo" />}
               <p class="mono muted case__meta">
                 {[c.data.client, c.data.sector, formatYears(c.data)].join(' · ').toUpperCase()}
               </p>
@@ -65,6 +67,11 @@ const { cases } = Astro.props;
     display: flex;
     flex-direction: column;
     gap: 12px;
+  }
+
+  .case__main :global(.case__logo) {
+    align-self: flex-start;
+    margin-bottom: 4px;
   }
 
   .case__meta,

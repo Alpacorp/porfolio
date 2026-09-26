@@ -47,10 +47,11 @@ export function groupItems(projects: Project[], group: string) {
     .filter((p) => p.data.group === group)
     .flatMap((p) =>
       p.data.links?.length
-        ? p.data.links.map((l) => ({ name: l.name, url: l.url, note: l.note ?? '' }))
+        ? p.data.links.map((l) => ({ name: l.name, url: l.url, note: l.note ?? '', logo: l.logo }))
         : [
             {
               name: p.data.client,
+              logo: p.data.logo,
               url: p.data.status === 'live' ? p.data.url : undefined,
               note: [
                 p.data.title,

@@ -5,6 +5,7 @@ year: 2026
 sector: "Publicidad"
 kind: freelance
 group: bbdo
+logo: bbdo
 stack: ["Astro", "GSAP", "View Transitions"]
 url: https://bbdo-mx-web.vercel.app/
 status: live

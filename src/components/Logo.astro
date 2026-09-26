@@ -1,0 +1,111 @@
+---
+/**
+ * Logo de empresa o cliente (decorativo: el nombre siempre aparece también como texto).
+ *
+ * - En reposo: monocromo en el color del texto, pintado con una máscara
+ *   (<id>.mono.webp), así funciona igual en claro y en oscuro.
+ * - Al pasar el cursor por el elemento contenedor con clase `logo-host`: el
+ *   original a color (<id>.webp), solo en tema claro. Reglas en global.css.
+ *
+ * Registro, tamaños y fuentes: src/data/logos.ts.
+ */
+import { logos, type LogoId } from '../data/logos';
+
+interface Props {
+  id: LogoId;
+  /** Multiplica el alto configurado (p. ej. 0.8 en listas compactas). */
+  scale?: number;
+  class?: string;
+}
+
+// Importar la imagen da su URL y sus dimensiones: así el espacio se reserva antes de cargarla.
+const files = import.meta.glob<ImageMetadata>('../assets/logos/*.webp', { eager: true, import: 'default' });
+const file = (name: string) => files[`../assets/logos/${name}.webp`];
+
+const { id, scale = 1, class: className } = Astro.props;
+const config: { height: number; hoverColor?: boolean } = logos[id];
+const height = Math.round(config.height * scale);
+const color = id === 'alpacorp' ? undefined : file(id);
+const mono = id === 'alpacorp' ? undefined : file(`${id}.mono`);
+
+if (id !== 'alpacorp' && (!color || !mono)) {
+  throw new Error(`Faltan los archivos del logo «${id}» en src/assets/logos/`);
+}
+const width = color ? Math.round((height * color.width) / color.height) : 0;
+---
+
+{
+  id === 'alpacorp' ? (
+    <span class:list={['logo', 'logo--alpacorp', className]} style={`--h: ${height}px`} aria-hidden="true">
+      <span class="logo__a">a</span>
+      <span class="logo__word">alpacorp</span>
+    </span>
+  ) : (
+    <span
+      class:list={['logo', className, { 'logo--color': config.hoverColor !== false }]}
+      style={`--h: ${height}px; width: ${width}px; --mono: url('${mono!.src}')`}
+      aria-hidden="true"
+    >
+      <img class="logo__color" src={color!.src} width={width} height={height} alt="" loading="lazy" decoding="async" />
+      <span class="logo__mono" />
+    </span>
+  )
+}
+
+<style>
+  .logo {
+    position: relative;
+    display: inline-block;
+    height: var(--h);
+    line-height: 0;
+    flex-shrink: 0;
+    vertical-align: middle;
+    /* Dentro de grid/flex no debe estirarse ni centrarse: el ancho lo da la proporción del logo */
+    justify-self: start;
+    align-self: flex-start;
+  }
+
+  /* El original fija el tamaño (alto fijo, ancho según su proporción); invisible en reposo */
+  .logo__color {
+    height: 100%;
+    width: auto;
+    max-width: none;
+    display: block;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .logo__mono {
+    position: absolute;
+    inset: 0;
+    background: currentColor;
+    -webkit-mask: var(--mono) no-repeat left center / contain;
+    mask: var(--mono) no-repeat left center / contain;
+    transition: opacity 0.2s;
+  }
+
+  .logo--alpacorp {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    line-height: 1;
+  }
+
+  .logo__a {
+    display: grid;
+    place-items: center;
+    height: 100%;
+    aspect-ratio: 1;
+    border-radius: 5px;
+    /* Es la marca propia: mismo cuadro amarillo que el encabezado del sitio */
+    background: var(--yellow);
+    color: var(--on-yellow);
+    font-weight: 800;
+    font-size: 15px;
+  }
+
+  .logo__word {
+    font-family: var(--font-mono);
+    font-size: 15px;
+  }
+</style>

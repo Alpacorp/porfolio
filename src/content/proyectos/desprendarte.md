@@ -5,6 +5,7 @@ year: null
 sector: "Moda"
 kind: freelance
 group: empresas
+logo: desprendarte
 stack: ["WordPress", "WooCommerce", "Elementor"]
 url: https://desprendarte.com/
 status: live

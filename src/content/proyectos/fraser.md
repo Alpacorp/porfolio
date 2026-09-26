@@ -5,6 +5,7 @@ year: null
 sector: "Química industrial"
 kind: freelance
 group: empresas
+logo: fraser
 stack: ["WordPress", "WPBakery"]
 url: https://fraser.com.co/
 status: live

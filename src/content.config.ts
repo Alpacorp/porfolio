@@ -1,6 +1,7 @@
 import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
+import { logoIds } from './data/logos';
 
 /**
  * Un archivo por proyecto. Los que tienen `featured: true` son casos de estudio
@@ -21,6 +22,8 @@ const proyectos = defineCollection({
     /** Bloque freelance de la línea de tiempo al que pertenece. */
     group: z.enum(['goma', 'bbdo', 'empresas', 'novenas']).optional(),
     stack: z.array(z.string()).default([]),
+    /** Logo del cliente (ver src/data/logos.ts). */
+    logo: z.enum(logoIds).optional(),
     url: z.url().optional(),
     /** live = en línea · internal = herramienta interna · replaced = ya reemplazado · offline = ya no existe */
     status: z.enum(['live', 'internal', 'replaced', 'offline']).default('live'),
@@ -31,7 +34,7 @@ const proyectos = defineCollection({
     metric: z.object({ value: z.string(), label: z.string() }).optional(),
     /** Enlaces relacionados (p. ej. las 8 novenas de marca blanca). */
     links: z
-      .array(z.object({ name: z.string(), url: z.url(), note: z.string().optional() }))
+      .array(z.object({ name: z.string(), url: z.url(), note: z.string().optional(), logo: z.enum(logoIds).optional() }))
       .optional(),
   }),
 });

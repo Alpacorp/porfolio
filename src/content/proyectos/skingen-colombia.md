@@ -5,6 +5,7 @@ year: null
 sector: "Dermocosmética"
 kind: freelance
 group: empresas
+logo: skingen
 stack: ["Next.js", "React"]
 url: https://www.skingencolombia.com/
 status: live

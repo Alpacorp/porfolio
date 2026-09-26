@@ -6,6 +6,7 @@ yearEnd: 2026
 sector: "Servicios"
 kind: freelance
 group: empresas
+logo: toctoc
 stack: ["WordPress"]
 url: https://elitefms.com.co/
 status: live

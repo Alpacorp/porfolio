@@ -298,6 +298,36 @@ a.card:hover,
   color: var(--ink);
 }
 
+/* ------------------------------------------------------------------ Logos
+   Monocromos en gris; al pasar el cursor por su contenedor (.logo-host) toman el
+   color del texto y, en tema claro, se revela el original a color. */
+.logo-host .logo {
+  color: var(--muted);
+  transition: color 0.2s;
+}
+
+.logo-host:is(:hover, :focus-within) .logo {
+  color: var(--ink);
+}
+
+@media (hover: hover) {
+  :root[data-theme='light'] .logo-host:is(:hover, :focus-within) .logo--color .logo__color {
+    opacity: 1;
+  }
+  :root[data-theme='light'] .logo-host:is(:hover, :focus-within) .logo--color .logo__mono {
+    opacity: 0;
+  }
+}
+
+@media (hover: hover) and (prefers-color-scheme: light) {
+  :root:not([data-theme='dark']) .logo-host:is(:hover, :focus-within) .logo--color .logo__color {
+    opacity: 1;
+  }
+  :root:not([data-theme='dark']) .logo-host:is(:hover, :focus-within) .logo--color .logo__mono {
+    opacity: 0;
+  }
+}
+
 /* ------------------------------------------------------------------ Impresión */
 @media print {
   :root,

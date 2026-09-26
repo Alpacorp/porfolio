@@ -6,6 +6,7 @@ year: null
 sector: "Automotriz"
 kind: freelance
 group: bbdo
+logo: bmw
 stack: ["CMS", "HTML email"]
 url: https://www.bmw.com.mx/es/index.html
 status: live

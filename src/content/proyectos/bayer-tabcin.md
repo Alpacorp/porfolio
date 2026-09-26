@@ -6,6 +6,7 @@ year: null
 sector: "Farmacéutico"
 kind: freelance
 group: bbdo
+logo: bayer
 stack: ["Drupal"]
 url: https://www.tabcin.com.mx/
 status: live
