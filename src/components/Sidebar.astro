@@ -29,7 +29,7 @@ const NameTag = home ? 'h1' : 'p';
   </div>
 
   <div class="intro">
-    <NameTag class="intro__name">Alejandro<br />Palacios</NameTag>
+    <NameTag class="intro__name">Alejandro<br /><span class="intro__surname">Palacios Arévalo</span></NameTag>
     <p class="intro__role mono">
       <span class="intro__now">{profile.role} en {profile.current}</span>
       {profile.focus} · Bogotá
@@ -115,10 +115,15 @@ const NameTag = home ? 'h1' : 'p';
   }
 
   .intro__name {
-    font-size: clamp(40px, 6vw, 50px);
-    line-height: 1.02;
+    font-size: clamp(32px, 9vw, 40px);
+    line-height: 1.04;
     font-weight: 700;
     letter-spacing: -0.035em;
+  }
+
+  /* Both surnames stay on one line */
+  .intro__surname {
+    white-space: nowrap;
   }
 
   .intro__role {
@@ -279,7 +284,7 @@ const NameTag = home ? 'h1' : 'p';
       gap: 10px;
     }
     .intro__name {
-      font-size: 42px;
+      font-size: 36px;
     }
     .intro__tagline {
       font-size: 16px;

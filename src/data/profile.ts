@@ -1,5 +1,5 @@
 export const profile = {
-  name: 'Alejandro Palacios',
+  name: 'Alejandro Palacios Arévalo',
   fullName: 'Alejandro Palacios Arévalo',
   role: 'Software Engineer',
   focus: 'Frontend, Backend, Automatización e IA',

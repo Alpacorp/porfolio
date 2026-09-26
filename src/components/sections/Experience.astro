@@ -19,7 +19,7 @@ import { experience, experienceFilters } from '../../data/career';
   <ol class="jobs">
     {
       experience.map((job) => (
-        <li class="job logo-host" data-tags={job.filters.join('|')}>
+        <li class="job logo-host" id={job.id} data-tags={job.filters.join('|')}>
           <div class="job__side">
             <span class="job__logo"><Logo id={job.logo} /></span>
             <p class="mono muted job__dates">
@@ -72,6 +72,24 @@ import { experience, experienceFilters } from '../../data/career';
     gap: 32px;
     padding: 26px 0;
     border-top: 1px solid var(--line);
+  }
+
+  .job {
+    scroll-margin-top: 32px;
+  }
+
+  /* Arriving from a timeline link: flash the entry with the highlighter */
+  .job:target {
+    animation: target-flash 1.6s ease-out;
+  }
+
+  @keyframes target-flash {
+    from {
+      background: var(--hl);
+    }
+    to {
+      background: transparent;
+    }
   }
 
   .job[hidden] {

@@ -12,9 +12,11 @@ interface Props {
   hidden?: boolean;
   current?: boolean;
   logo?: LogoId;
+  /** Where to keep reading: a case study, an experience entry or the archive. */
+  more?: { href: string; label: string; internal?: boolean };
 }
 
-const { id, heading, role, org, text, items = [], hidden = false, current = false, logo } = Astro.props;
+const { id, heading, role, org, text, items = [], hidden = false, current = false, logo, more } = Astro.props;
 ---
 
 <div class="item logo-host" data-panel={id} hidden={hidden}>
@@ -45,6 +47,13 @@ const { id, heading, role, org, text, items = [], hidden = false, current = fals
             </li>
           ))}
         </ul>
+      )
+    }
+    {
+      more && (
+        <a class="more mono" href={more.href}>
+          {more.label} <span aria-hidden="true">{more.internal ? '↓' : '→'}</span>
+        </a>
       )
     }
   </div>
@@ -127,6 +136,16 @@ const { id, heading, role, org, text, items = [], hidden = false, current = fals
   .list a,
   .name {
     font-weight: 500;
+  }
+
+  .more {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    margin-top: 6px;
+    font-size: 13px;
   }
 
   .note {

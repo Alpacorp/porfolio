@@ -4,6 +4,7 @@ import type { LogoId } from './logos';
 export const milestones = [
   {
     year: 2011,
+    more: { href: '#exp-servientrega-billing', label: 'Ver en Experiencia', internal: true },
     logo: 'servientrega' as LogoId,
     role: 'Analista de Facturación e In Company',
     org: 'Servientrega',
@@ -11,6 +12,7 @@ export const milestones = [
   },
   {
     year: 2015,
+    more: { href: '#exp-servientrega-web', label: 'Ver en Experiencia', internal: true },
     logo: 'servientrega' as LogoId,
     role: 'Webmaster y Trafficker Digital',
     org: 'Servientrega',
@@ -18,6 +20,7 @@ export const milestones = [
   },
   {
     year: 2021,
+    more: { href: '#exp-jikkosoft', label: 'Ver en Experiencia', internal: true },
     logo: 'jikkosoft' as LogoId,
     role: 'Frontend Developer',
     org: 'Jikkosoft · Cali',
@@ -25,6 +28,7 @@ export const milestones = [
   },
   {
     year: 2022,
+    more: { href: '/casos/cdt-digital/', label: 'Leer el caso: CDT Digital' },
     logo: 'bcs' as LogoId,
     role: 'Frontend Developer',
     org: 'Banco Caja Social',
@@ -32,6 +36,7 @@ export const milestones = [
   },
   {
     year: 2024,
+    more: { href: '/casos/opsit-devoluciones-cashbacks/', label: 'Leer el caso: Devoluciones y cashbacks' },
     current: true,
     logo: 'mercadolibre' as LogoId,
     role: 'Software Engineer',
@@ -47,6 +52,7 @@ export const freelanceSince = 2019;
 export const freelanceGroups = [
   {
     id: 'goma',
+    more: { href: '/casos/mr-goma-tires/', label: 'Leer el caso: Mr. Goma Tires' },
     label: 'Mr. Goma Tires',
     sub: 'EE. UU. · e-commerce + IA',
     period: '2024 →',
@@ -56,6 +62,7 @@ export const freelanceGroups = [
   },
   {
     id: 'bbdo',
+    more: { href: '/casos/bbdo-mexico/', label: 'Leer el caso: BBDO México' },
     label: 'BBDO México',
     sub: 'Agencia · 6 marcas',
     period: 'Agencia',
@@ -65,6 +72,7 @@ export const freelanceGroups = [
   },
   {
     id: 'empresas',
+    more: { href: '/archivo/?tipo=Freelance', label: 'Ver todos en el archivo' },
     label: 'Sitios para empresas',
     sub: 'Colombia · 9 empresas',
     period: '2019 →',
@@ -74,6 +82,7 @@ export const freelanceGroups = [
   },
   {
     id: 'novenas',
+    more: { href: '/casos/novenas-digitales/', label: 'Leer el caso: Novenas digitales' },
     label: 'Novenas digitales',
     sub: 'Marca blanca · 8 marcas',
     period: 'Producto',
@@ -86,6 +95,7 @@ export const freelanceGroups = [
 /** Experiencia (sección con filtros). */
 export const experience = [
   {
+    id: 'exp-freelance',
     dates: '2019 — hoy',
     logo: 'alpacorp' as LogoId,
     current: true,
@@ -96,6 +106,7 @@ export const experience = [
     filters: ['Freelance', 'Frontend', 'Backend + IA'],
   },
   {
+    id: 'exp-mercadolibre',
     dates: 'oct 2024 — hoy',
     logo: 'mercadolibre' as LogoId,
     current: true,
@@ -106,6 +117,7 @@ export const experience = [
     filters: ['Fintech', 'Frontend', 'Backend + IA'],
   },
   {
+    id: 'exp-bcs',
     dates: 'jun 2022 — oct 2024',
     logo: 'bcs' as LogoId,
     role: 'Frontend Developer',
@@ -115,6 +127,7 @@ export const experience = [
     filters: ['Fintech', 'Frontend'],
   },
   {
+    id: 'exp-jikkosoft',
     dates: 'jul 2021 — jul 2022',
     logo: 'jikkosoft' as LogoId,
     role: 'Frontend Developer',
@@ -124,6 +137,7 @@ export const experience = [
     filters: ['Fintech', 'Frontend'],
   },
   {
+    id: 'exp-servientrega-web',
     dates: 'oct 2015 — jun 2021',
     logo: 'servientrega' as LogoId,
     role: 'Webmaster y Trafficker Digital',
@@ -133,6 +147,7 @@ export const experience = [
     filters: ['Marketing', 'Frontend'],
   },
   {
+    id: 'exp-servientrega-billing',
     dates: 'jul 2011 — sep 2015',
     logo: 'servientrega' as LogoId,
     role: 'Analista de Facturación e In Company',

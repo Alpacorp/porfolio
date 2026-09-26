@@ -302,6 +302,10 @@ const filters = ['Todo', 'Casos', 'Empleo', 'Freelance'];
     search?.addEventListener('input', apply);
     sector?.addEventListener('change', apply);
 
+    // Deep link from elsewhere (e.g. the timeline): /archivo/?tipo=Freelance preselects that filter.
+    const preset = new URLSearchParams(location.search).get('tipo');
+    chips.find((c) => c.dataset.kind === preset)?.click();
+
     // Clic en cualquier parte de la fila sigue su enlace.
     for (const row of rows) {
       const link = row.querySelector<HTMLAnchorElement>('.row-link');
