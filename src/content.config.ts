@@ -1,4 +1,4 @@
-import { defineCollection } from 'astro:content';
+import { defineCollection, reference } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
 import { logoIds } from './data/logos';
@@ -39,4 +39,46 @@ const proyectos = defineCollection({
   }),
 });
 
-export const collections = { proyectos };
+/**
+ * One file per employer. Each company has a page at /experiencia/<id> that tells
+ * the full story by phases; the home page only shows its summary and highlights.
+ */
+const empresas = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/empresas' }),
+  schema: z.object({
+    company: z.string(),
+    /** Latest role; a career inside the company can be written as «A → B». */
+    role: z.string(),
+    logo: z.enum(logoIds),
+    /** Display dates, e.g. «oct 2024» and «hoy». */
+    start: z.string(),
+    end: z.string(),
+    /** Used for ordering. */
+    startYear: z.number().int(),
+    current: z.boolean().default(false),
+    location: z.string(),
+    summary: z.string(),
+    /** The 2–3 achievements shown on the home page. */
+    highlights: z.array(z.string()).min(1).max(3),
+    stack: z.array(z.string()).default([]),
+    /** Home page experience filters this company belongs to. */
+    filters: z.array(z.string()).default([]),
+    phases: z
+      .array(
+        z.object({
+          /** Anchor on the company page, e.g. /experiencia/servientrega/#webmaster */
+          id: z.string(),
+          period: z.string(),
+          title: z.string(),
+          role: z.string().optional(),
+          text: z.string(),
+          achievements: z.array(z.string()).default([]),
+          stack: z.array(z.string()).default([]),
+          projects: z.array(reference('proyectos')).default([]),
+        }),
+      )
+      .min(1),
+  }),
+});
+
+export const collections = { proyectos, empresas };

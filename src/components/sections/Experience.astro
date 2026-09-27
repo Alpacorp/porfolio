@@ -1,6 +1,10 @@
 ---
 import Logo from '../Logo.astro';
-import { experience, experienceFilters } from '../../data/career';
+import { experienceFilters } from '../../data/career';
+import { getExperienceItems } from '../../lib/experience';
+
+// One row per company (plus freelance). The full story lives on each company page.
+const items = await getExperienceItems();
 ---
 
 <section id="experiencia" class="section" aria-labelledby="experiencia-titulo" data-filterable>
@@ -18,8 +22,8 @@ import { experience, experienceFilters } from '../../data/career';
 
   <ol class="jobs">
     {
-      experience.map((job) => (
-        <li class="job logo-host" id={job.id} data-tags={job.filters.join('|')}>
+      items.map((job) => (
+        <li class="job logo-host" id={`exp-${job.id}`} data-tags={job.filters.join('|')}>
           <div class="job__side">
             <span class="job__logo"><Logo id={job.logo} /></span>
             <p class="mono muted job__dates">
@@ -29,14 +33,23 @@ import { experience, experienceFilters } from '../../data/career';
           </div>
           <div class="job__body">
             <h3 class="job__title">
-              {job.role} <span class="muted">· {job.org}</span>
+              {job.role} <span class="muted">· {job.company}</span>
             </h3>
-            <p class="muted job__text">{job.text}</p>
+            <p class="muted job__text">{job.summary}</p>
+            <ul class="job__highlights">
+              {job.highlights.map((h) => (
+                <li>{h}</li>
+              ))}
+            </ul>
             <ul class="job__tags" aria-label="Tecnologías">
-              {job.tags.map((t) => (
+              {job.stack.slice(0, 6).map((t) => (
                 <li class="tag">{t}</li>
               ))}
             </ul>
+            <a class="job__more mono" href={job.href}>
+              {job.hrefLabel}{' '}
+              <span aria-hidden="true">→</span>
+            </a>
           </div>
         </li>
       ))
@@ -148,6 +161,42 @@ import { experience, experienceFilters } from '../../data/career';
   .job__text {
     font-size: 15px;
     line-height: 1.6;
+  }
+
+  .job__highlights {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  /* Highlighter tick: the brand yellow marks each achievement */
+  .job__highlights li {
+    position: relative;
+    padding-left: 18px;
+  }
+
+  .job__highlights li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.62em;
+    width: 8px;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--yellow);
+  }
+
+  .job__more {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-size: 13px;
   }
 
   .job__tags {
