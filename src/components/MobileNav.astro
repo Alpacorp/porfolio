@@ -1,0 +1,103 @@
+---
+import { nav } from '../data/profile';
+
+interface Props {
+  /** On the home page links are anchors; elsewhere they point back to the home page. */
+  home?: boolean;
+}
+
+const { home = false } = Astro.props;
+const base = home ? '' : '/';
+---
+
+<!-- Sticky section bar for small screens, where the sidebar menu is hidden -->
+<nav class="mnav no-print" aria-label="Secciones">
+  <ul class="mnav__list" data-mnav>
+    {
+      nav.map((item) => (
+        <li>
+          <a class="mnav__link mono" href={item.page ?? `${base}#${item.id}`}
+          data-nav={item.page ? undefined : item.id}
+          aria-current={item.page && Astro.url.pathname.startsWith(item.page) ? 'page' : undefined}
+        >
+            {item.label}
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</nav>
+
+<style>
+  .mnav {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    margin: 0 calc(var(--gutter) * -1);
+    padding: 8px var(--gutter);
+    background: color-mix(in srgb, var(--paper) 92%, transparent);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--line);
+  }
+
+  @media (min-width: 1024px) {
+    .mnav {
+      display: none;
+    }
+  }
+
+  .mnav__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    scroll-behavior: smooth;
+  }
+
+  .mnav__list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .mnav__link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    padding: 0 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    text-decoration: none;
+    color: var(--muted);
+  }
+
+  .mnav__link[aria-current] {
+    background: var(--yellow);
+    color: var(--on-yellow);
+    font-weight: 600;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mnav__list {
+      scroll-behavior: auto;
+    }
+  }
+</style>
+
+<script>
+  // Keep the active section visible in the horizontal bar without scrolling the page.
+  const list = document.querySelector<HTMLElement>('[data-mnav]');
+  document.addEventListener('nav:active', (e) => {
+    const link = (e as CustomEvent<HTMLAnchorElement>).detail;
+    if (!list || !list.contains(link)) return;
+    // Center the active link: its position inside the list, not inside the sticky bar.
+    const listBox = list.getBoundingClientRect();
+    const linkBox = link.getBoundingClientRect();
+    const target = list.scrollLeft + (linkBox.left - listBox.left) - (listBox.width - linkBox.width) / 2;
+    list.scrollTo({ left: Math.max(0, target) });
+  });
+</script>

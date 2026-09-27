@@ -55,6 +55,7 @@ const current = milestones.find((m) => m.current);
             heading={m.current ? `${m.year} → hoy` : String(m.year)}
             current={m.current}
             logo={m.logo}
+            more={m.more}
             role={m.role}
             org={m.org}
             text={m.text}
@@ -103,6 +104,7 @@ const current = milestones.find((m) => m.current);
             org={g.org}
             text={g.text}
             items={groupItems(projects, g.id)}
+            more={g.more}
             hidden
           />
         ))
@@ -307,9 +309,34 @@ const current = milestones.find((m) => m.current);
     display: inline;
   }
 
+  /* Yellow border: the panel belongs to the year (or block) highlighted in yellow above */
   .panel {
+    position: relative;
     padding: clamp(20px, 3vw, 30px);
     scroll-margin: 24px;
+    border: 1.5px solid var(--yellow);
+  }
+
+  /* Pointer on the top border, aimed at the selected year or block (x set from the script) */
+  .panel[data-pointer]::before {
+    content: '';
+    position: absolute;
+    top: -9px;
+    left: var(--pointer-x, 50%);
+    width: 16px;
+    height: 16px;
+    background: var(--surface);
+    border-top: 1.5px solid var(--yellow);
+    border-left: 1.5px solid var(--yellow);
+    border-top-left-radius: 3px;
+    transform: translateX(-50%) rotate(45deg);
+    transition: left 0.25s ease;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .panel[data-pointer]::before {
+      transition: none;
+    }
   }
 
   .panel[hidden] {
@@ -371,6 +398,19 @@ const current = milestones.find((m) => m.current);
     }
   }
 
+  /** Aim the panel's pointer at the centre of the trigger that opened it. */
+  function point(box: HTMLElement, trigger: HTMLElement) {
+    const b = box.getBoundingClientRect();
+    const t = trigger.getBoundingClientRect();
+    const x = Math.min(Math.max(t.left + t.width / 2 - b.left, 24), b.width - 24);
+    box.style.setProperty('--pointer-x', `${x}px`);
+    box.dataset.pointer = '';
+  }
+
+  const pointers: (() => void)[] = [];
+  // Fonts can shift the years slightly once loaded, so re-aim after load and on resize.
+  for (const ev of ['load', 'resize']) addEventListener(ev, () => pointers.forEach((update) => update()));
+
   for (const lane of document.querySelectorAll<HTMLElement>('[data-timeline] [data-lane]')) {
     const triggers = [...lane.querySelectorAll<HTMLButtonElement>('[data-target]')];
     const box = lane.querySelector<HTMLElement>('[data-panel-box]')!;
@@ -378,6 +418,13 @@ const current = milestones.find((m) => m.current);
     const collapsible = lane.hasAttribute('data-collapsible');
     // Los años son un selector (aria-pressed); los bloques freelance, un acordeón (aria-expanded).
     const state = collapsible ? 'aria-expanded' : 'aria-pressed';
+
+    const update = () => {
+      const active = triggers.find((t) => t.getAttribute(state) === 'true');
+      if (active && !box.hidden) point(box, active);
+    };
+    pointers.push(update);
+    update();
 
     for (const trigger of triggers) {
       trigger.addEventListener('click', () => {
@@ -390,7 +437,10 @@ const current = milestones.find((m) => m.current);
         panels.forEach((p) => (p.hidden = p.dataset.panel !== target));
         box.hidden = target === null;
 
-        if (target) reveal(box);
+        if (target) {
+          point(box, trigger);
+          reveal(box);
+        }
       });
     }
   }

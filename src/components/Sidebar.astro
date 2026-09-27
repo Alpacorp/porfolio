@@ -1,6 +1,7 @@
 ---
 import Icon from './Icon.astro';
 import ThemeToggle from './ThemeToggle.astro';
+import avatar from '../assets/profile/avatar.webp';
 import { nav, profile } from '../data/profile';
 
 interface Props {
@@ -16,7 +17,7 @@ const NameTag = home ? 'h1' : 'p';
 <aside class="sidebar">
   <div class="sidebar__top">
     <a class="logo" href="/" aria-label={`${profile.site}, inicio`}>
-      <span class="logo__mark" aria-hidden="true">a</span>
+      <span class="logo__mark" aria-hidden="true">A</span>
       <span class="mono">alpacorp</span>
     </a>
     <div class="sidebar__tools no-print">
@@ -29,7 +30,17 @@ const NameTag = home ? 'h1' : 'p';
   </div>
 
   <div class="intro">
-    <NameTag class="intro__name">Alejandro<br />Palacios</NameTag>
+    <div class="intro__id">
+      <img
+        class="intro__photo"
+        src={avatar.src}
+        width="72"
+        height="72"
+        alt={`Foto de ${profile.name}`}
+        decoding="async"
+      />
+      <NameTag class="intro__name">Alejandro<br /><span class="intro__surname">Palacios Arévalo</span></NameTag>
+    </div>
     <p class="intro__role mono">
       <span class="intro__now">{profile.role} en {profile.current}</span>
       {profile.focus} · Bogotá
@@ -46,7 +57,10 @@ const NameTag = home ? 'h1' : 'p';
   <nav class="nav no-print" aria-label="Secciones">
     {
       nav.map((item) => (
-        <a class="nav__link mono" href={`${base}#${item.id}`} data-nav={item.id}>
+        <a class="nav__link mono" href={item.page ?? `${base}#${item.id}`}
+          data-nav={item.page ? undefined : item.id}
+          aria-current={item.page && Astro.url.pathname.startsWith(item.page) ? 'page' : undefined}
+        >
           <span class="nav__bar" aria-hidden="true" />
           <span class="nav__label">{item.label}</span>
         </a>
@@ -114,11 +128,37 @@ const NameTag = home ? 'h1' : 'p';
     gap: 14px;
   }
 
+  /* Photo beside the name: same height as its two lines, so the sidebar doesn't grow */
+  .intro__id {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .intro__photo {
+    flex-shrink: 0;
+    width: 72px;
+    height: 72px;
+    border-radius: 14px;
+    object-fit: cover;
+    border: 1.5px solid var(--line);
+    transition: border-color 0.2s;
+  }
+
+  .intro__id:hover .intro__photo {
+    border-color: var(--yellow);
+  }
+
   .intro__name {
-    font-size: clamp(40px, 6vw, 50px);
-    line-height: 1.02;
+    font-size: clamp(28px, 8vw, 34px);
+    line-height: 1.04;
     font-weight: 700;
     letter-spacing: -0.035em;
+  }
+
+  /* Both surnames stay on one line */
+  .intro__surname {
+    white-space: nowrap;
   }
 
   .intro__role {
@@ -209,18 +249,18 @@ const NameTag = home ? 'h1' : 'p';
   }
 
   /* Sección en pantalla: el amarillo del resaltador, en la raya y bajo el texto */
-  .nav__link[aria-current='true'] {
+  .nav__link[aria-current] {
     color: var(--ink);
     font-weight: 600;
   }
 
-  .nav__link[aria-current='true'] .nav__bar {
+  .nav__link[aria-current] .nav__bar {
     width: 56px;
     height: 3px;
     background: var(--yellow);
   }
 
-  .nav__link[aria-current='true'] .nav__label {
+  .nav__link[aria-current] .nav__label {
     background-size: 100% 42%;
   }
 
@@ -279,7 +319,7 @@ const NameTag = home ? 'h1' : 'p';
       gap: 10px;
     }
     .intro__name {
-      font-size: 42px;
+      font-size: 32px;
     }
     .intro__tagline {
       font-size: 16px;
@@ -292,10 +332,11 @@ const NameTag = home ? 'h1' : 'p';
 </style>
 
 <script>
-  // Marca en la navegación la sección visible.
-  const links = new Map(
-    [...document.querySelectorAll<HTMLAnchorElement>('[data-nav]')].map((a) => [a.dataset.nav!, a]),
-  );
+  // Highlight the section on screen in every menu that links to it (sidebar and mobile bar).
+  const links = new Map<string, HTMLAnchorElement[]>();
+  for (const a of document.querySelectorAll<HTMLAnchorElement>('[data-nav]')) {
+    links.set(a.dataset.nav!, [...(links.get(a.dataset.nav!) ?? []), a]);
+  }
   const sections = [...links.keys()]
     .map((id) => document.getElementById(id))
     .filter((el): el is HTMLElement => el !== null);
@@ -305,8 +346,11 @@ const NameTag = home ? 'h1' : 'p';
       (entries) => {
         for (const entry of entries) {
           if (!entry.isIntersecting) continue;
-          for (const a of links.values()) a.removeAttribute('aria-current');
-          links.get(entry.target.id)?.setAttribute('aria-current', 'true');
+          for (const group of links.values()) group.forEach((a) => a.removeAttribute('aria-current'));
+          for (const a of links.get(entry.target.id) ?? []) {
+            a.setAttribute('aria-current', 'true');
+            document.dispatchEvent(new CustomEvent('nav:active', { detail: a }));
+          }
         }
       },
       { rootMargin: '-35% 0px -60% 0px' },

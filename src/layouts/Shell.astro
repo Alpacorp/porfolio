@@ -1,6 +1,7 @@
 ---
 import Base from './Base.astro';
 import Sidebar from '../components/Sidebar.astro';
+import MobileNav from '../components/MobileNav.astro';
 import { profile } from '../data/profile';
 
 interface Props {
@@ -15,6 +16,7 @@ const { title, description, home = false } = Astro.props;
 <Base title={title} description={description}>
   <div class="shell">
     <Sidebar home={home} />
+    <MobileNav home={home} />
     <main id="contenido" class="main" tabindex="-1">
       <slot />
       <footer class="footer mono">

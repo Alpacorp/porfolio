@@ -1,0 +1,34 @@
+---
+title: Interfaces que se escriben en JSON
+client: Mercado Libre / Mercado Pago
+year: 2024
+yearEnd: 2025
+sector: Fintech
+kind: empleo
+logo: mercadolibre
+stack: [React, TypeScript, JSON]
+status: internal
+summary: Unas 15 mejoras importantes a una librería interna que construye interfaces a partir de archivos JSON, incluido un pseudo-lenguaje para dar formato a los datos desde la propia configuración.
+featured: true
+order: 5
+metric:
+  value: '~15'
+  label: mejoras importantes a la librería interna de interfaces
+---
+
+## El contexto
+
+Las plataformas internas de Mercado Libre usan una librería que permite crear interfaces gráficas a partir de archivos JSON: en lugar de programar cada pantalla, se describe qué componentes lleva y la librería los dibuja. Durante mi primer año en OpsIT, mientras aprendía las tecnologías propias de la compañía y sus sistemas de diseño, trabajé en esa librería.
+
+## Qué aporté
+
+- **Componentes nuevos** con un alto grado de personalización.
+- **Un pseudo-lenguaje dentro del JSON** para decidir cómo se muestran los datos sin escribir código aparte:
+  - mayúsculas y otras transformaciones de texto,
+  - formatos de fecha y de moneda,
+  - sanitización de textos,
+  - renderizado condicional según los datos de contexto que maneja la librería.
+
+## Por qué importa
+
+Cada mejora a una librería así llega a todas las pantallas construidas con ella, y hace que construir la siguiente interfaz sea más rápido. Fueron unas 15 mejoras importantes en total.

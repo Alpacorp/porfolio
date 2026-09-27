@@ -1,5 +1,5 @@
 export const profile = {
-  name: 'Alejandro Palacios',
+  name: 'Alejandro Palacios Arévalo',
   fullName: 'Alejandro Palacios Arévalo',
   role: 'Software Engineer',
   focus: 'Frontend, Backend, Automatización e IA',
@@ -44,12 +44,16 @@ export const languages = [
   },
 ];
 
-export const nav = [
+/**
+ * Sidebar / mobile bar / palette menu. Items with `page` link to a page instead of
+ * a home section (the archive has no section on the home page).
+ */
+export const nav: { id: string; label: string; page?: string }[] = [
   { id: 'sobre', label: 'Sobre mí' },
   { id: 'trayectoria', label: 'Trayectoria' },
   { id: 'casos', label: 'Casos' },
   { id: 'experiencia', label: 'Experiencia' },
   { id: 'formacion', label: 'Formación' },
-  { id: 'archivo', label: 'Archivo' },
+  { id: 'archivo', label: 'Archivo', page: '/archivo/' },
   { id: 'contacto', label: 'Contacto' },
 ];

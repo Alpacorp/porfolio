@@ -1,42 +1,50 @@
 import type { LogoId } from './logos';
 
-/** Hitos del carril «Empleo» de la línea de tiempo. */
+/**
+ * Timeline milestones («Empleo» lane). Kept short on purpose: each one links to
+ * the company page, where the full story lives.
+ */
 export const milestones = [
   {
     year: 2011,
+    more: { href: '/experiencia/servientrega/#facturacion', label: 'Ver la experiencia completa' },
     logo: 'servientrega' as LogoId,
     role: 'Analista de Facturación e In Company',
     org: 'Servientrega',
-    text: 'Facturación de clientes corporativos, bases de datos de cobro e indicadores de flujo de caja a nivel nacional. Aquí aprendí cómo se mueve el dinero en una empresa.',
+    text: 'Facturación corporativa e indicadores de flujo de caja a nivel nacional. Aquí aprendí cómo se mueve el dinero en una empresa.',
   },
   {
     year: 2015,
+    more: { href: '/experiencia/servientrega/#webmaster', label: 'Ver la experiencia completa' },
     logo: 'servientrega' as LogoId,
     role: 'Webmaster y Trafficker Digital',
     org: 'Servientrega',
-    text: 'Migré dos veces el sitio principal hasta su versión actual, hoy muy bien posicionado, y administré más de 12 portales del grupo. SEO, analítica y pauta en Google, Meta, LinkedIn y Twitter.',
+    text: 'Dos migraciones del portal, 12 sitios del grupo y el SEO que puso «Ya Mismo» en lo más alto de Google.',
   },
   {
     year: 2021,
+    more: { href: '/experiencia/jikkosoft/', label: 'Ver la experiencia completa' },
     logo: 'jikkosoft' as LogoId,
     role: 'Frontend Developer',
     org: 'Jikkosoft · Cali',
-    text: 'Plataforma para gestionar las obligaciones tributarias de empresas de Cali: impuestos, cuentas por pagar y cobranzas. React, Material UI, Redux, SOLID y pruebas unitarias.',
+    text: 'MVP de una plataforma tributaria para empresas de Cali, con facturación electrónica y pasarela de pagos. 100 % remoto.',
   },
   {
     year: 2022,
+    more: { href: '/experiencia/banco-caja-social/', label: 'Ver la experiencia completa' },
     logo: 'bcs' as LogoId,
     role: 'Frontend Developer',
     org: 'Banco Caja Social',
-    text: 'Creamos CDT Digital de punta a punta: más de 2.000 millones COP recaudados en dos años y mejor producto del banco tres años seguidos.',
+    text: 'De Marketing a CDT Digital: más de 2.000 millones COP recaudados y mejor producto del banco tres años seguidos.',
   },
   {
     year: 2024,
+    more: { href: '/experiencia/mercado-libre/', label: 'Ver la experiencia completa' },
     current: true,
     logo: 'mercadolibre' as LogoId,
     role: 'Software Engineer',
     org: 'Mercado Libre / Mercado Pago · OpsIT',
-    text: 'Todo el frontend de la plataforma de devoluciones y el de las plataformas de cashbacks, integradas con múltiples servicios internos. Último año enfocado en IA aplicada al desarrollo.',
+    text: 'Plataformas internas para CX, Benefits y Refunds: la nueva plataforma de Refunds procesa hoy millones de devoluciones.',
   },
 ];
 
@@ -47,6 +55,7 @@ export const freelanceSince = 2019;
 export const freelanceGroups = [
   {
     id: 'goma',
+    more: { href: '/casos/mr-goma-tires/', label: 'Leer el caso: Mr. Goma Tires' },
     label: 'Mr. Goma Tires',
     sub: 'EE. UU. · e-commerce + IA',
     period: '2024 →',
@@ -56,6 +65,7 @@ export const freelanceGroups = [
   },
   {
     id: 'bbdo',
+    more: { href: '/casos/bbdo-mexico/', label: 'Leer el caso: BBDO México' },
     label: 'BBDO México',
     sub: 'Agencia · 6 marcas',
     period: 'Agencia',
@@ -65,6 +75,7 @@ export const freelanceGroups = [
   },
   {
     id: 'empresas',
+    more: { href: '/archivo/?tipo=Freelance', label: 'Ver todos en el archivo' },
     label: 'Sitios para empresas',
     sub: 'Colombia · 9 empresas',
     period: '2019 →',
@@ -74,6 +85,7 @@ export const freelanceGroups = [
   },
   {
     id: 'novenas',
+    more: { href: '/casos/novenas-digitales/', label: 'Leer el caso: Novenas digitales' },
     label: 'Novenas digitales',
     sub: 'Marca blanca · 8 marcas',
     period: 'Producto',
@@ -83,65 +95,31 @@ export const freelanceGroups = [
   },
 ] as const;
 
-/** Experiencia (sección con filtros). */
-export const experience = [
-  {
-    dates: '2019 — hoy',
-    logo: 'alpacorp' as LogoId,
-    current: true,
-    role: 'Desarrollador full stack freelance',
-    org: 'alpacorp',
-    text: 'E-commerce y panel con IA para Mr. Goma Tires (EE. UU.); sitios y campañas para clientes de BBDO México y la web de la agencia; sitios, tiendas y SEO para 9 empresas en Colombia; novenas digitales de marca blanca para 8 empresas.',
-    tags: ['Next.js', 'Astro', 'React', 'WordPress', 'Drupal', 'Odoo', 'IA'],
-    filters: ['Freelance', 'Frontend', 'Backend + IA'],
-  },
-  {
-    dates: 'oct 2024 — hoy',
-    logo: 'mercadolibre' as LogoId,
-    current: true,
-    role: 'Software Engineer',
-    org: 'Mercado Libre / Mercado Pago',
-    text: 'Frontend completo de la plataforma de devoluciones (refunds) y de las plataformas de cashbacks en OpsIT, integradas con múltiples servicios internos. IA aplicada al desarrollo: asistentes internos, n8n y Python.',
-    tags: ['React', 'TypeScript', 'Node.js', 'Go', 'n8n', 'Python'],
-    filters: ['Fintech', 'Frontend', 'Backend + IA'],
-  },
-  {
-    dates: 'jun 2022 — oct 2024',
-    logo: 'bcs' as LogoId,
-    role: 'Frontend Developer',
-    org: 'Banco Caja Social',
-    text: 'Creamos CDT Digital de punta a punta: todo el frontend y las integraciones con el backend. Más de 2.000 millones COP recaudados en dos años y mejor producto del banco tres años seguidos.',
-    tags: ['React', 'Next.js', 'NestJS', 'Azure DevOps', 'SonarCloud'],
-    filters: ['Fintech', 'Frontend'],
-  },
-  {
-    dates: 'jul 2021 — jul 2022',
-    logo: 'jikkosoft' as LogoId,
-    role: 'Frontend Developer',
-    org: 'Jikkosoft',
-    text: 'Plataforma de obligaciones tributarias para empresas de Cali: impuestos, cuentas por pagar y cobranzas.',
-    tags: ['React', 'Material UI', 'Redux', 'Jest'],
-    filters: ['Fintech', 'Frontend'],
-  },
-  {
-    dates: 'oct 2015 — jun 2021',
-    logo: 'servientrega' as LogoId,
-    role: 'Webmaster y Trafficker Digital',
-    org: 'Servientrega',
-    text: 'Dos migraciones del sitio principal hasta su versión actual, muy bien posicionada; más de 12 portales del grupo, SEO, analítica y pauta digital.',
-    tags: ['WordPress', 'SEO', 'Google Analytics', 'Pauta'],
-    filters: ['Marketing', 'Frontend'],
-  },
-  {
-    dates: 'jul 2011 — sep 2015',
-    logo: 'servientrega' as LogoId,
-    role: 'Analista de Facturación e In Company',
-    org: 'Servientrega',
-    text: 'Facturación corporativa, indicadores de gestión y flujo de caja a nivel nacional.',
-    tags: ['Facturación', 'Indicadores'],
-    filters: ['Negocio', 'Fintech'],
-  },
-];
+/**
+ * Freelance work, shown in the experience list next to the companies. It has no
+ * company page of its own: it links to the freelance projects in the archive.
+ */
+export const freelanceExperience = {
+  id: 'freelance',
+  startYear: 2019,
+  start: '2019',
+  end: 'hoy',
+  current: true,
+  logo: 'alpacorp' as LogoId,
+  role: 'Desarrollador full stack freelance',
+  company: 'alpacorp',
+  summary:
+    'En paralelo a mi empleo, construyo producto para clientes en Colombia, México y EE. UU.: e-commerce, sitios corporativos, campañas y productos propios.',
+  highlights: [
+    'E-commerce y panel de vendedores con IA para Mr. Goma Tires (EE. UU.)',
+    'Sitios y campañas para marcas de BBDO México',
+    'Novenas digitales de marca blanca para 8 empresas',
+  ],
+  stack: ['Next.js', 'Astro', 'React', 'WordPress', 'Drupal', 'Odoo', 'IA'],
+  filters: ['Freelance', 'Frontend', 'Backend + IA'],
+  href: '/archivo/?tipo=Freelance',
+  hrefLabel: 'Ver los proyectos freelance',
+};
 
 export const experienceFilters = [
   'Todo',

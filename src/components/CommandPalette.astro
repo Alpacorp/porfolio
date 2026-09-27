@@ -2,15 +2,17 @@
 import Icon from './Icon.astro';
 import { nav, profile } from '../data/profile';
 import { getCases } from '../lib/projects';
+import { companyHref, getCompanies } from '../lib/experience';
 
-const cases = await getCases();
+const [cases, companies] = await Promise.all([getCases(), getCompanies()]);
 
 type Item = { group: string; label: string; href?: string; action?: string; hint?: string };
 
 const items: Item[] = [
-  ...nav.map((n) => ({ group: 'Secciones', label: n.label, href: `/#${n.id}` })),
+  ...nav.map((n) => ({ group: 'Secciones', label: n.label, href: n.page ?? `/#${n.id}` })),
   ...cases.map((c) => ({ group: 'Casos de estudio', label: c.data.title, href: `/casos/${c.id}/`, hint: c.data.client })),
-  { group: 'Páginas', label: 'Archivo completo de proyectos', href: '/archivo/' },
+  ...companies.map((c) => ({ group: 'Experiencia', label: c.data.company, href: companyHref(c), hint: c.data.role })),
+  { group: 'Páginas', label: 'Todos los casos de estudio', href: '/casos/' },
   { group: 'Páginas', label: 'CV imprimible', href: '/cv/' },
   { group: 'Acciones', label: 'Cambiar tema claro / oscuro', action: 'theme' },
   { group: 'Acciones', label: 'Copiar correo', action: 'copy-email', hint: profile.email },

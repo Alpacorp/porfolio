@@ -8,6 +8,7 @@ Portafolio de Alejandro Palacios. Astro 7, MDX y CSS propio, sin frameworks de U
 | ----------------- | ------------------------------------------ |
 | `npm install`     | Instala dependencias                       |
 | `npm run dev`     | Servidor local en `localhost:4321`         |
+| `npm run dev:fresh` | Dev server with a clean content cache — use it after switching branches or pulling if content looks stale |
 | `npm run check`   | Revisa tipos y el esquema del contenido    |
 | `npm run build`   | Genera el sitio estático en `dist/`        |
 | `npm run preview` | Sirve `dist/` para revisarlo antes de subir |
@@ -17,6 +18,7 @@ Portafolio de Alejandro Palacios. Astro 7, MDX y CSS propio, sin frameworks de U
 ```
 src/
 ├── content/proyectos/   Un archivo por proyecto (la fuente de casos, archivo y línea de tiempo)
+├── content/empresas/    One file per employer: summary, highlights and phases (page at /experiencia/<id>)
 ├── content.config.ts    Esquema de los proyectos
 ├── data/profile.ts      Nombre, frase, cifras, «tres idiomas», navegación
 ├── data/career.ts       Hitos, bloques freelance, experiencia, educación, habilidades
@@ -50,6 +52,16 @@ summary: Una o dos frases.
 Aparece solo en el archivo y, si tiene `group`, en su bloque de la línea de tiempo.
 
 **Convertirlo en caso de estudio:** renómbralo a `.mdx`, añade `featured: true`, `order` y `metric: { value, label }`, y escribe la historia en el cuerpo (`## El reto`, `## Qué hice`, `## Resultado`). Se crea sola su página en `/casos/<id>/`.
+
+## Adding or editing a company
+
+Each employer lives in `src/content/empresas/<id>.md` and gets its own page at `/experiencia/<id>/`:
+
+- `summary` and up to three `highlights` are what the home page shows.
+- `phases` tell the full story in order. Each phase can reference its projects by id (`projects: [cdt-digital]`); the build fails if an id doesn't exist.
+- A phase `id` is an anchor, so the timeline can link to `/experiencia/<id>/#<phase>`.
+
+Freelance work is not a company: it lives in `freelanceExperience` in `src/data/career.ts`.
 
 ## Logos
 

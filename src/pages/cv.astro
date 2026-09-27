@@ -1,11 +1,15 @@
 ---
 import Base from '../layouts/Base.astro';
 import Icon from '../components/Icon.astro';
-import { education, educationLinks, experience, skills } from '../data/career';
+import { education, educationLinks, skills } from '../data/career';
+import { getExperienceItems } from '../lib/experience';
 import { profile } from '../data/profile';
 import { getCases } from '../lib/projects';
 
-const cases = await getCases();
+const [allCases, experience] = await Promise.all([getCases(), getExperienceItems()]);
+// Employment case studies are already summarised under «Experiencia»; the printed
+// CV only adds the freelance ones, which have no other place in it.
+const cases = allCases.filter((c) => c.data.kind === 'freelance');
 ---
 
 <Base title="CV" description={`CV de ${profile.fullName}, ${profile.role}.`}>
@@ -46,12 +50,17 @@ const cases = await getCases();
             <li class="item">
               <div class="item__head">
                 <h3>
-                  {job.role} · {job.org}
+                  {job.role} · {job.company}
                 </h3>
                 <span class="mono muted">{job.dates}</span>
               </div>
-              <p>{job.text}</p>
-              <p class="mono muted small">{job.tags.join(' · ')}</p>
+              <p>{job.summary}</p>
+              <ul class="bullets">
+                {job.highlights.map((h) => (
+                  <li>{h}</li>
+                ))}
+              </ul>
+              <p class="mono muted small">{job.stack.join(' · ')}</p>
             </li>
           ))
         }
@@ -59,7 +68,7 @@ const cases = await getCases();
     </section>
 
     <section class="projects">
-      <h2 class="eyebrow">Proyectos destacados</h2>
+      <h2 class="eyebrow">Proyectos freelance destacados</h2>
       <ul class="list">
         {
           cases.map((c) => (
@@ -177,6 +186,15 @@ const cases = await getCases();
   .focus {
     font-size: 14px;
     margin-top: -4px;
+  }
+
+  .bullets {
+    margin: 2px 0;
+    padding-left: 18px;
+  }
+
+  .bullets li::marker {
+    color: var(--muted);
   }
 
   .result {
@@ -297,14 +315,21 @@ const cases = await getCases();
       padding: 0;
       max-width: none;
       font-size: 10pt;
-      line-height: 1.45;
-      gap: 14pt;
+      line-height: 1.4;
+      gap: 12pt;
     }
     section {
       gap: 8pt;
     }
     .list {
-      gap: 10pt;
+      gap: 8pt;
+    }
+    /* Education fits in a compact list on paper */
+    .list--tight {
+      gap: 5pt;
+    }
+    .list--tight .item h3 {
+      font-size: 10pt;
     }
     .header {
       padding-bottom: 12pt;
@@ -325,12 +350,16 @@ const cases = await getCases();
     .two-col {
       gap: 20pt;
     }
-    /* Los proyectos arrancan en la página 2 para que su título no quede huérfano */
-    .projects {
-      break-before: page;
+    /* Keep section titles with their content instead of forcing page breaks */
+    h2 {
+      break-after: avoid;
+    }
+    .item,
+    .skills > div {
+      break-inside: avoid;
     }
     @page {
-      margin: 16mm 14mm;
+      margin: 12mm 13mm;
     }
   }
 </style>
