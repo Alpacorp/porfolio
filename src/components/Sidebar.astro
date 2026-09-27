@@ -1,6 +1,7 @@
 ---
 import Icon from './Icon.astro';
 import ThemeToggle from './ThemeToggle.astro';
+import avatar from '../assets/profile/avatar.webp';
 import { nav, profile } from '../data/profile';
 
 interface Props {
@@ -29,7 +30,17 @@ const NameTag = home ? 'h1' : 'p';
   </div>
 
   <div class="intro">
-    <NameTag class="intro__name">Alejandro<br /><span class="intro__surname">Palacios Arévalo</span></NameTag>
+    <div class="intro__id">
+      <img
+        class="intro__photo"
+        src={avatar.src}
+        width="72"
+        height="72"
+        alt={`Foto de ${profile.name}`}
+        decoding="async"
+      />
+      <NameTag class="intro__name">Alejandro<br /><span class="intro__surname">Palacios Arévalo</span></NameTag>
+    </div>
     <p class="intro__role mono">
       <span class="intro__now">{profile.role} en {profile.current}</span>
       {profile.focus} · Bogotá
@@ -117,8 +128,29 @@ const NameTag = home ? 'h1' : 'p';
     gap: 14px;
   }
 
+  /* Photo beside the name: same height as its two lines, so the sidebar doesn't grow */
+  .intro__id {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .intro__photo {
+    flex-shrink: 0;
+    width: 72px;
+    height: 72px;
+    border-radius: 14px;
+    object-fit: cover;
+    border: 1.5px solid var(--line);
+    transition: border-color 0.2s;
+  }
+
+  .intro__id:hover .intro__photo {
+    border-color: var(--yellow);
+  }
+
   .intro__name {
-    font-size: clamp(32px, 9vw, 40px);
+    font-size: clamp(28px, 8vw, 34px);
     line-height: 1.04;
     font-weight: 700;
     letter-spacing: -0.035em;
@@ -287,7 +319,7 @@ const NameTag = home ? 'h1' : 'p';
       gap: 10px;
     }
     .intro__name {
-      font-size: 36px;
+      font-size: 32px;
     }
     .intro__tagline {
       font-size: 16px;
