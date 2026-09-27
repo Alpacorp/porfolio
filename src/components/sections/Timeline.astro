@@ -309,9 +309,11 @@ const current = milestones.find((m) => m.current);
     display: inline;
   }
 
+  /* Yellow border: the panel belongs to the year (or block) highlighted in yellow above */
   .panel {
     padding: clamp(20px, 3vw, 30px);
     scroll-margin: 24px;
+    border: 1.5px solid var(--yellow);
   }
 
   .panel[hidden] {

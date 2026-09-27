@@ -138,13 +138,12 @@ const { id, heading, role, org, text, items = [], hidden = false, current = fals
     font-weight: 500;
   }
 
+  /* Inline box (not flex) so the underline runs continuously under the text and the arrow */
   .more {
     align-self: flex-start;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    min-height: 44px;
-    margin-top: 6px;
+    display: inline-block;
+    padding: 12px 0;
+    margin-top: -6px;
     font-size: 13px;
   }
 
