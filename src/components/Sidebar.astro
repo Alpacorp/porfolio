@@ -297,10 +297,11 @@ const NameTag = home ? 'h1' : 'p';
 </style>
 
 <script>
-  // Marca en la navegación la sección visible.
-  const links = new Map(
-    [...document.querySelectorAll<HTMLAnchorElement>('[data-nav]')].map((a) => [a.dataset.nav!, a]),
-  );
+  // Highlight the section on screen in every menu that links to it (sidebar and mobile bar).
+  const links = new Map<string, HTMLAnchorElement[]>();
+  for (const a of document.querySelectorAll<HTMLAnchorElement>('[data-nav]')) {
+    links.set(a.dataset.nav!, [...(links.get(a.dataset.nav!) ?? []), a]);
+  }
   const sections = [...links.keys()]
     .map((id) => document.getElementById(id))
     .filter((el): el is HTMLElement => el !== null);
@@ -310,8 +311,11 @@ const NameTag = home ? 'h1' : 'p';
       (entries) => {
         for (const entry of entries) {
           if (!entry.isIntersecting) continue;
-          for (const a of links.values()) a.removeAttribute('aria-current');
-          links.get(entry.target.id)?.setAttribute('aria-current', 'true');
+          for (const group of links.values()) group.forEach((a) => a.removeAttribute('aria-current'));
+          for (const a of links.get(entry.target.id) ?? []) {
+            a.setAttribute('aria-current', 'true');
+            document.dispatchEvent(new CustomEvent('nav:active', { detail: a }));
+          }
         }
       },
       { rootMargin: '-35% 0px -60% 0px' },
