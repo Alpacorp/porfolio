@@ -19,7 +19,7 @@ const HOME_LIMIT = 12;
     Todo lo que he construido, en una sola lista. Los proyectos marcados con{' '}
     <span class="badge-case">CASO</span> tienen su historia completa; el resto enlaza al sitio en vivo.
   </p>
-  <ArchiveTable projects={projects.slice(0, HOME_LIMIT)} total={projects.length} />
+  <ArchiveTable projects={projects.slice(0, HOME_LIMIT)} total={projects.length} filters={false} />
 </section>
 
 <style>
