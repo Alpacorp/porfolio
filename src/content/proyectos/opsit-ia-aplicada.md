@@ -1,12 +1,12 @@
 ---
-title: "Asistentes internos y flujos de IA"
+title: "IA en el día a día del desarrollo"
 client: "Mercado Libre / Mercado Pago"
-year: 2025
+year: 2026
 yearEnd: hoy
 sector: "Fintech"
 kind: empleo
 logo: mercadolibre
-stack: ["n8n", "Python", "Node.js"]
+stack: ["Claude", "Codex", "Figma", "v0", "n8n"]
 status: internal
-summary: "Chats y asistentes internos, flujos automatizados con n8n, integraciones con Python y librerías internas basadas en JSON para acelerar el desarrollo."
+summary: "Cerca del 90 % de mi trabajo de los últimos seis meses se apoya en IA, junto con asistentes internos y flujos automatizados con n8n."
 ---

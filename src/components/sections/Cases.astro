@@ -4,16 +4,20 @@ import { formatYears, type Project } from '../../lib/projects';
 
 interface Props {
   cases: Project[];
+  /** Show only the first N cases and a link to /casos/ with all of them. */
+  limit?: number;
+  heading?: string;
 }
 
-const { cases } = Astro.props;
+const { cases, limit, heading = '03 — Casos de estudio' } = Astro.props;
+const shown = limit ? cases.slice(0, limit) : cases;
 ---
 
 <section id="casos" class="section" aria-labelledby="casos-titulo">
-  <h2 id="casos-titulo" class="eyebrow">03 — Casos de estudio</h2>
+  <h2 id="casos-titulo" class="eyebrow">{heading}</h2>
   <ul class="cases">
     {
-      cases.map((c) => (
+      shown.map((c) => (
         <li>
           <a class="card case logo-host" href={`/casos/${c.id}/`}>
             <div class="case__main">
@@ -38,6 +42,13 @@ const { cases } = Astro.props;
       ))
     }
   </ul>
+  {
+    shown.length < cases.length && (
+      <a class="all mono" href="/casos/">
+        Ver los {cases.length} casos de estudio <span aria-hidden="true">→</span>
+      </a>
+    )
+  }
 </section>
 
 <style>
@@ -72,6 +83,14 @@ const { cases } = Astro.props;
   .case__main :global(.case__logo) {
     align-self: flex-start;
     margin-bottom: 4px;
+  }
+
+  .all {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-size: 14px;
   }
 
   .case__meta,

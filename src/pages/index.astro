@@ -15,7 +15,7 @@ const [projects, cases] = await Promise.all([getProjects(), getCases()]);
 <Shell home>
   <About />
   <Timeline projects={projects} />
-  <Cases cases={cases} />
+  <Cases cases={cases} limit={4} />
   <Experience />
   <Education />
   <Archive projects={projects} />
