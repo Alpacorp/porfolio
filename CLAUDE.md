@@ -16,3 +16,4 @@ Lee `README.md` para la estructura y cómo añadir proyectos. `AGENTS.md` explic
 - Accesibilidad: botones reales con `aria-pressed`, objetivos táctiles de 44 px o más, foco visible, `prefers-reduced-motion`.
 - En Astro, un salto de línea entre texto y una etiqueta se come el espacio: usa `{' '}` o deja el texto en la misma línea.
 - Antes de dar algo por terminado: `npm run check` y `npm run build` sin errores, y revisar que no haya scroll horizontal a 390 px.
+- To check that each commit builds on its own, build it in a separate `git worktree`; never `git stash` untracked files while the dev server is running — it drops content collections from its cache until restarted (`npm run dev:fresh` recovers).

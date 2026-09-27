@@ -33,7 +33,7 @@ const phases = await Promise.all(
         {d.company} · {d.start} — {d.end} · {d.location}
       </p>
       <h1 class="title">
-        {d.role}
+        {d.role}{' '}
         {d.current && <span class="now mono">Actual</span>}
       </h1>
       <p class="summary">{d.summary}</p>
