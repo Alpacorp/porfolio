@@ -16,7 +16,10 @@ const base = home ? '' : '/';
     {
       nav.map((item) => (
         <li>
-          <a class="mnav__link mono" href={`${base}#${item.id}`} data-nav={item.id}>
+          <a class="mnav__link mono" href={item.page ?? `${base}#${item.id}`}
+          data-nav={item.page ? undefined : item.id}
+          aria-current={item.page && Astro.url.pathname.startsWith(item.page) ? 'page' : undefined}
+        >
             {item.label}
           </a>
         </li>
@@ -72,7 +75,7 @@ const base = home ? '' : '/';
     color: var(--muted);
   }
 
-  .mnav__link[aria-current='true'] {
+  .mnav__link[aria-current] {
     background: var(--yellow);
     color: var(--on-yellow);
     font-weight: 600;

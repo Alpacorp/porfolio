@@ -46,7 +46,10 @@ const NameTag = home ? 'h1' : 'p';
   <nav class="nav no-print" aria-label="Secciones">
     {
       nav.map((item) => (
-        <a class="nav__link mono" href={`${base}#${item.id}`} data-nav={item.id}>
+        <a class="nav__link mono" href={item.page ?? `${base}#${item.id}`}
+          data-nav={item.page ? undefined : item.id}
+          aria-current={item.page && Astro.url.pathname.startsWith(item.page) ? 'page' : undefined}
+        >
           <span class="nav__bar" aria-hidden="true" />
           <span class="nav__label">{item.label}</span>
         </a>
@@ -214,18 +217,18 @@ const NameTag = home ? 'h1' : 'p';
   }
 
   /* Sección en pantalla: el amarillo del resaltador, en la raya y bajo el texto */
-  .nav__link[aria-current='true'] {
+  .nav__link[aria-current] {
     color: var(--ink);
     font-weight: 600;
   }
 
-  .nav__link[aria-current='true'] .nav__bar {
+  .nav__link[aria-current] .nav__bar {
     width: 56px;
     height: 3px;
     background: var(--yellow);
   }
 
-  .nav__link[aria-current='true'] .nav__label {
+  .nav__link[aria-current] .nav__label {
     background-size: 100% 42%;
   }
 

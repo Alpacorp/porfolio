@@ -7,9 +7,11 @@ interface Props {
   /** Show only the first N cases and a link to /casos/ with all of them. */
   limit?: number;
   heading?: string;
+  /** When set, adds a link to the full archive (the home page no longer has an archive section). */
+  projectsTotal?: number;
 }
 
-const { cases, limit, heading = '03 — Casos de estudio' } = Astro.props;
+const { cases, limit, heading = '03 — Casos de estudio', projectsTotal } = Astro.props;
 const shown = limit ? cases.slice(0, limit) : cases;
 ---
 
@@ -42,13 +44,22 @@ const shown = limit ? cases.slice(0, limit) : cases;
       ))
     }
   </ul>
-  {
-    shown.length < cases.length && (
-      <a class="all mono" href="/casos/">
-        Ver los {cases.length} casos de estudio <span aria-hidden="true">→</span>
-      </a>
-    )
-  }
+  <div class="more-links">
+    {
+      shown.length < cases.length && (
+        <a class="all mono" href="/casos/">
+          Ver los {cases.length} casos de estudio <span aria-hidden="true">→</span>
+        </a>
+      )
+    }
+    {
+      projectsTotal && (
+        <a class="all mono" href="/archivo/">
+          Explorar los {projectsTotal} proyectos en el archivo <span aria-hidden="true">→</span>
+        </a>
+      )
+    }
+  </div>
 </section>
 
 <style>
@@ -83,6 +94,12 @@ const shown = limit ? cases.slice(0, limit) : cases;
   .case__main :global(.case__logo) {
     align-self: flex-start;
     margin-bottom: 4px;
+  }
+
+  .more-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 28px;
   }
 
   .all {
