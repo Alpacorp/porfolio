@@ -1,6 +1,7 @@
 ---
 import Shell from '../../layouts/Shell.astro';
 import Cases from '../../components/sections/Cases.astro';
+import BackLink from '../../components/BackLink.astro';
 import { getCases } from '../../lib/projects';
 
 const cases = await getCases();
@@ -8,11 +9,12 @@ const cases = await getCases();
 
 <Shell title="Casos de estudio" description="Casos de estudio de Alejandro Palacios Arévalo: banca, fintech, e-commerce, agencias y producto.">
   <div class="page">
+    <BackLink href="/#casos" label="Inicio" />
     <header class="header">
       <p class="eyebrow">Casos de estudio</p>
       <h1 class="title">Proyectos contados de principio a fin</h1>
       <p class="muted lead">
-        El reto, lo que decidí y lo que cambió. Para ver todos los proyectos, incluidos los que no tienen caso,
+        El reto, lo que decidí y lo que cambió. Para ver todos los proyectos, incluidos los que no tienen caso,{' '}
         <a href="/archivo/">visita el archivo</a>.
       </p>
     </header>

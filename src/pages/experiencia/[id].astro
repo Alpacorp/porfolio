@@ -1,7 +1,7 @@
 ---
 import { getEntries } from 'astro:content';
 import Shell from '../../layouts/Shell.astro';
-import Icon from '../../components/Icon.astro';
+import BackLink from '../../components/BackLink.astro';
 import Logo from '../../components/Logo.astro';
 import { companyHref, getCompanies } from '../../lib/experience';
 import { formatYears, projectHref, statusLabel } from '../../lib/projects';
@@ -25,7 +25,7 @@ const phases = await Promise.all(
 
 <Shell title={`${d.role} · ${d.company}`} description={d.summary}>
   <article class="company">
-    <a class="back mono" href="/#experiencia"><Icon name="arrow-left" size={16} /> Toda la experiencia</a>
+    <BackLink href="/#experiencia" label="Toda la experiencia" />
 
     <header class="header logo-host">
       <Logo id={d.logo} scale={1.3} class="header__logo" />
@@ -138,20 +138,6 @@ const phases = await Promise.all(
     max-width: 780px;
   }
 
-  .back {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    align-self: flex-start;
-    min-height: 44px;
-    font-size: 13px;
-    text-decoration: none;
-    color: var(--muted);
-  }
-
-  .back:hover {
-    color: var(--ink);
-  }
 
   .header {
     display: flex;
