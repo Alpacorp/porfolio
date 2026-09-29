@@ -1,24 +1,68 @@
 ---
+import { langs } from '../i18n';
 import { getI18n } from '../i18n/ui';
 
-/** Link to the same page in the other language. */
+/**
+ * «ES | EN» switch: the page language is highlighted, the other one links to
+ * the same page translated.
+ */
 interface Props {
+  /** Same page in the other language. */
   href: string;
 }
 
 const { href } = Astro.props;
-const { otherLang, ui } = getI18n(Astro.url);
+const { lang, ui } = getI18n(Astro.url);
 ---
 
-<!-- The accessible name starts with the visible text («EN · Read in English») -->
-<a class="icon-btn lang-switch mono" href={href} hreflang={otherLang} lang={otherLang} title={ui.switchLanguage}>
-  {otherLang.toUpperCase()}<span class="sr-only"> · {ui.switchLanguage}</span>
-</a>
+<div class="lang-switch mono" role="group" aria-label={ui.language}>
+  {
+    langs.map((option) =>
+      option === lang ? (
+        <span class="lang-switch__option" aria-current="true" title={ui.currentLanguage}>
+          {option.toUpperCase()}
+          <span class="sr-only"> · {ui.currentLanguage}</span>
+        </span>
+      ) : (
+        // The accessible name starts with the visible text («EN · Read in English»).
+        <a class="lang-switch__option" href={href} hreflang={option} lang={option} title={ui.switchLanguage}>
+          {option.toUpperCase()}
+          <span class="sr-only"> · {ui.switchLanguage}</span>
+        </a>
+      ),
+    )
+  }
+</div>
 
 <style>
   .lang-switch {
+    display: inline-flex;
+    padding: 3px;
+    gap: 2px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+  }
+
+  .lang-switch__option {
+    display: inline-grid;
+    place-items: center;
+    min-width: 32px;
+    min-height: 36px;
+    border-radius: 5px;
     font-size: 12px;
     font-weight: 600;
     text-decoration: none;
+    color: var(--muted);
+  }
+
+  /* The page language: the highlighter yellow, as for the active section */
+  .lang-switch__option[aria-current] {
+    background: var(--yellow);
+    color: var(--on-yellow);
+  }
+
+  a.lang-switch__option:hover {
+    color: var(--ink);
+    box-shadow: inset 0 0 0 1px var(--mag);
   }
 </style>

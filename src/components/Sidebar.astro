@@ -26,7 +26,7 @@ const tagline = profile.tagline[lang];
   <div class="sidebar__top">
     <a class="logo" href={href(lang, { name: 'home' })} aria-label={ui.homeAria(profile.site)}>
       <span class="logo__mark" aria-hidden="true">A</span>
-      <span class="mono">Alpacorp</span>
+      <span class="logo__word mono">Alpacorp</span>
     </a>
     <div class="sidebar__tools no-print">
       <button class="search-btn mono" type="button" data-open-palette aria-label={`${ui.searchOrNavigate} (⌘K)`}>
@@ -345,6 +345,22 @@ const tagline = profile.tagline[lang];
   @media (pointer: coarse) {
     .nav__link {
       min-height: 44px;
+    }
+  }
+
+  /* Narrow phones: the shortcut hint goes first, then the wordmark (the «A» stays) */
+  @media (max-width: 420px) {
+    .search-btn kbd {
+      display: none;
+    }
+  }
+
+  @media (max-width: 359px) {
+    .logo__word {
+      display: none;
+    }
+    .intro__surname {
+      white-space: normal;
     }
   }
 </style>
