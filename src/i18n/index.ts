@@ -29,7 +29,7 @@ const segments: L<{ cases: string; experience: string; archive: string; cv: stri
 };
 
 /** URL slug of each case study per language (the Spanish slug is the entry id). */
-const caseSlugs: Record<string, string> = {
+export const caseSlugs: Record<string, string> = {
   'cdt-digital': 'cdt-digital',
   'plataforma-refunds': 'refunds-platform',
   'mr-goma-tires': 'mr-goma-tires',

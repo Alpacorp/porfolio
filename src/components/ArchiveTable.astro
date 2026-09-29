@@ -3,6 +3,7 @@ import Logo from './Logo.astro';
 import { formatYears, projectHref, statusLabel, type Project } from '../lib/projects';
 import { langFromPath } from '../i18n';
 import { sectorName, useT } from '../i18n/ui';
+import { N } from '../lib/filters';
 
 interface Props {
   projects: Project[];
@@ -67,7 +68,7 @@ const filters = [
           class="count mono muted"
           aria-live="polite"
           data-count
-          data-template={t.countOf(0, total).replace('0', '{n}')}
+          data-template={t.countOf(N, total)}
         >
           {t.countOf(projects.length, total)}
         </p>
@@ -293,7 +294,7 @@ const filters = [
 </style>
 
 <script>
-  const normalize = (s: string) => s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
+  import { fill, matchesArchive } from '../lib/filters';
 
   for (const root of document.querySelectorAll<HTMLElement>('[data-archive]')) {
     // Rows also carry data-kind / data-search / data-sector, so target the controls by tag.
@@ -306,22 +307,18 @@ const filters = [
 
     // Filters only exist on the full archive page.
     if (count && empty) {
-      const template = count.dataset.template ?? '{n}';
+      const template = count.dataset.template ?? '';
       let kind = 'Todo';
 
       const apply = () => {
-        const q = normalize(search?.value.trim() ?? '');
-        const s = sector?.value ?? '';
+        const query = { kind, sector: sector?.value ?? '', text: search?.value ?? '' };
         let shown = 0;
         for (const row of rows) {
-          const byKind =
-            kind === 'Todo' || (kind === 'Casos' ? row.dataset.case === 'true' : row.dataset.kind === kind);
-          const bySector = !s || row.dataset.sector === s;
-          const byText = !q || normalize(row.dataset.search!).includes(q);
-          row.hidden = !(byKind && bySector && byText);
+          const { kind: rowKind = '', case: isCase, sector: rowSector = '', search: text = '' } = row.dataset;
+          row.hidden = !matchesArchive({ kind: rowKind, isCase: isCase === 'true', sector: rowSector, search: text }, query);
           if (!row.hidden) shown++;
         }
-        count.textContent = template.replace('{n}', String(shown));
+        count.textContent = fill(template, shown);
         empty.hidden = shown > 0;
       };
 

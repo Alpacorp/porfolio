@@ -18,7 +18,8 @@ const es = {
   email: 'Correo',
   current: 'Actual',
   present: 'hoy',
-  results: (n: number) => `${n} resultados`,
+  /** Counters also take a string, so N ('{n}') yields a template for client scripts. */
+  results: (n: number | string) => `${n} resultados`,
   technologies: 'Tecnologías',
 
   // Sections
@@ -90,7 +91,7 @@ const es = {
   searchPlaceholder: 'Buscar cliente, sector o tecnología…',
   sector: 'Sector',
   allSectors: 'Todos los sectores',
-  countOf: (shown: number, total: number) => `${shown} de ${total} proyectos`,
+  countOf: (shown: number | string, total: number) => `${shown} de ${total} proyectos`,
   ofWord: 'de',
   latestOf: (shown: number, total: number) => `Los ${shown} más recientes de ${total}`,
   colYear: 'Año',
@@ -272,7 +273,7 @@ export const useT = (lang: Lang) => dict[lang];
 export type T = Dict;
 
 /** Sector names used in project data (Spanish) → display name per language. */
-const sectorsEn: Record<string, string> = {
+export const sectorsEn: Record<string, string> = {
   Banca: 'Banking',
   Fintech: 'Fintech',
   Finanzas: 'Finance',

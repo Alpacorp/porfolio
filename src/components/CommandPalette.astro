@@ -5,6 +5,7 @@ import { getCases } from '../lib/projects';
 import { companyHref, getCompanies } from '../lib/experience';
 import { href, langFromPath, locale, otherLang, section } from '../i18n';
 import { useT } from '../i18n/ui';
+import { N } from '../lib/filters';
 
 interface Props {
   /** Same page in the other language. */
@@ -46,7 +47,7 @@ const items: Item[] = [
   class="palette"
   data-palette
   data-email={profile.email}
-  data-results={t.results(0).replace('0', '{n}')}
+  data-results={t.results(N)}
   data-copied={t.paletteCopied}
   aria-label={t.searchOrNavigate}
 >
@@ -196,6 +197,7 @@ const items: Item[] = [
 
 <script>
   import { toggleTheme } from '../lib/theme';
+  import { fill, matchesQuery, wrapIndex } from '../lib/filters';
 
   const dialog = document.querySelector<HTMLDialogElement>('[data-palette]')!;
   const input = dialog.querySelector<HTMLInputElement>('[data-palette-input]')!;
@@ -205,13 +207,12 @@ const items: Item[] = [
   const email = dialog.dataset.email ?? '';
   let active = 0;
 
-  const normalize = (s: string) => s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
   const visible = () => options.filter((o) => !o.hidden);
 
   function highlight(index: number) {
     const list = visible();
     if (!list.length) return;
-    active = (index + list.length) % list.length;
+    active = wrapIndex(index, list.length);
     options.forEach((o) => o.setAttribute('aria-selected', 'false'));
     const current = list[active];
     current.setAttribute('aria-selected', 'true');
@@ -220,11 +221,10 @@ const items: Item[] = [
   }
 
   function filter() {
-    const q = normalize(input.value.trim());
-    for (const o of options) o.hidden = q !== '' && !normalize(o.dataset.label ?? '').includes(q);
+    for (const o of options) o.hidden = !matchesQuery(o.dataset.label ?? '', input.value);
     const count = visible().length;
     empty.hidden = count > 0;
-    status.textContent = (dialog.dataset.results ?? '{n}').replace('{n}', String(count));
+    status.textContent = fill(dialog.dataset.results ?? '', count);
     highlight(0);
   }
 

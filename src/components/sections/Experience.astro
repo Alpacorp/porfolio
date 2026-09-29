@@ -4,6 +4,7 @@ import { experienceFilters } from '../../data/career';
 import { getExperienceItems } from '../../lib/experience';
 import { href, langFromPath } from '../../i18n';
 import { useT } from '../../i18n/ui';
+import { N } from '../../lib/filters';
 
 const lang = langFromPath(Astro.url.pathname);
 const t = useT(lang);
@@ -16,7 +17,7 @@ const items = await getExperienceItems(lang);
   class="section"
   aria-labelledby="experiencia-titulo"
   data-filterable
-  data-results={t.results(0).replace('0', '{n}')}
+  data-results={t.results(N)}
 >
   <h2 id="experiencia-titulo" class="eyebrow">{t.experience}</h2>
 
@@ -241,6 +242,8 @@ const items = await getExperienceItems(lang);
 </style>
 
 <script>
+  import { fill, matchesTag } from '../../lib/filters';
+
   for (const root of document.querySelectorAll<HTMLElement>('[data-filterable]')) {
     const chips = [...root.querySelectorAll<HTMLButtonElement>('[data-filter]')];
     const items = [...root.querySelectorAll<HTMLElement>('[data-tags]')];
@@ -252,11 +255,11 @@ const items = await getExperienceItems(lang);
         chips.forEach((c) => c.setAttribute('aria-pressed', String(c === chip)));
         let shown = 0;
         for (const item of items) {
-          const match = f === 'Todo' || item.dataset.tags!.split('|').includes(f);
+          const match = matchesTag(item.dataset.tags!.split('|'), f);
           item.hidden = !match;
           if (match) shown++;
         }
-        if (status) status.textContent = (root.dataset.results ?? '{n}').replace('{n}', String(shown));
+        if (status) status.textContent = fill(root.dataset.results ?? '', shown);
       });
     }
   }
