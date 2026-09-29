@@ -1,8 +1,12 @@
 ---
 import Icon from './Icon.astro';
+import { langFromPath } from '../i18n';
+import { useT } from '../i18n/ui';
+
+const t = useT(langFromPath(Astro.url.pathname));
 ---
 
-<button class="icon-btn theme-toggle" type="button" data-theme-toggle aria-label="Cambiar tema">
+<button class="icon-btn theme-toggle" type="button" data-theme-toggle aria-label={t.changeTheme}>
   <span class="theme-toggle__sun"><Icon name="sun" /></span>
   <span class="theme-toggle__moon"><Icon name="moon" /></span>
 </button>

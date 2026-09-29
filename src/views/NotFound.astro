@@ -1,0 +1,44 @@
+---
+import Shell from '../layouts/Shell.astro';
+import { href, langFromPath, otherLang } from '../i18n';
+import { useT } from '../i18n/ui';
+
+const lang = langFromPath(Astro.url.pathname);
+const t = useT(lang);
+---
+
+<Shell title={t.notFoundTitle} alternate={href(otherLang(lang), { name: 'home' })}>
+  <section class="nf">
+    <p class="eyebrow">Error 404</p>
+    {
+      lang === 'es' ? (
+        <>
+          <h1 class="title">Esta página <span class="hl">no existe</span>.</h1>
+          <p class="muted">Puede que el enlace esté viejo. Prueba con ⌘K o vuelve al inicio.</p>
+          <p><a href="/">Volver al inicio →</a></p>
+        </>
+      ) : (
+        <>
+          <h1 class="title">This page <span class="hl">doesn’t exist</span>.</h1>
+          <p class="muted">The link may be out of date. Try ⌘K or head back home.</p>
+          <p><a href="/en/">Back to home →</a></p>
+        </>
+      )
+    }
+  </section>
+</Shell>
+
+<style>
+  .nf {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .title {
+    font-size: clamp(34px, 5vw, 52px);
+    line-height: 1.05;
+    font-weight: 700;
+    letter-spacing: -0.035em;
+  }
+</style>

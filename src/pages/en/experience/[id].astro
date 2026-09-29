@@ -1,0 +1,14 @@
+---
+import View from '../../../views/Company.astro';
+import { getCompanies } from '../../../lib/experience';
+
+export async function getStaticPaths() {
+  const companies = await getCompanies('en');
+  return companies.map((entry, i) => ({
+    params: { id: entry.id },
+    props: { entry, next: companies[(i + 1) % companies.length] },
+  }));
+}
+---
+
+<View {...Astro.props} />

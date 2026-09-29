@@ -1,18 +1,33 @@
 ---
 import { languages, stats } from '../../data/profile';
+import { langFromPath } from '../../i18n';
+import { useT } from '../../i18n/ui';
+
+const lang = langFromPath(Astro.url.pathname);
+const t = useT(lang);
 ---
 
 <section id="sobre" class="section" aria-labelledby="sobre-titulo">
-  <h2 id="sobre-titulo" class="eyebrow">01 — Sobre mí</h2>
-  <p class="lead">
-    Hablo tres idiomas en un equipo: <span class="hl">negocio</span>, <span class="hl">marketing</span>{' '}
-    y <span class="hl">código</span>. Por eso mis interfaces no solo se ven bien: mueven los indicadores
-    que importan.
-  </p>
+  <h2 id="sobre-titulo" class="eyebrow">{t.about}</h2>
+  {
+    lang === 'es' ? (
+      <p class="lead">
+        Hablo tres idiomas en un equipo: <span class="hl">negocio</span>, <span class="hl">marketing</span>{' '}
+        y <span class="hl">código</span>. Por eso mis interfaces no solo se ven bien: mueven los indicadores
+        que importan.
+      </p>
+    ) : (
+      <p class="lead">
+        I speak three languages on a team: <span class="hl">business</span>, <span class="hl">marketing</span>{' '}
+        and <span class="hl">code</span>. That’s why my interfaces don’t just look good: they move the
+        metrics that matter.
+      </p>
+    )
+  }
 
   <div class="languages">
     {
-      languages.map((l) => (
+      languages[lang].map((l) => (
         <div class="card language">
           <span class="mono muted language__period">{l.period}</span>
           <h3 class="language__title">{l.title}</h3>
@@ -24,7 +39,7 @@ import { languages, stats } from '../../data/profile';
 
   <dl class="stats">
     {
-      stats.map((s) => (
+      stats[lang].map((s) => (
         <div class="stat">
           <dt class="mono muted">{s.label}</dt>
           <dd>{s.value}</dd>

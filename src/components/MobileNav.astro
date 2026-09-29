@@ -1,29 +1,35 @@
 ---
 import { nav } from '../data/profile';
+import { href, langFromPath, section } from '../i18n';
+import { useT } from '../i18n/ui';
 
 interface Props {
   /** On the home page links are anchors; elsewhere they point back to the home page. */
   home?: boolean;
 }
 
+const lang = langFromPath(Astro.url.pathname);
+const t = useT(lang);
 const { home = false } = Astro.props;
-const base = home ? '' : '/';
 ---
 
 <!-- Sticky section bar for small screens, where the sidebar menu is hidden -->
-<nav class="mnav no-print" aria-label="Secciones">
+<nav class="mnav no-print" aria-label={t.sections}>
   <ul class="mnav__list" data-mnav>
     {
-      nav.map((item) => (
-        <li>
-          <a class="mnav__link mono" href={item.page ?? `${base}#${item.id}`}
-          data-nav={item.page ? undefined : item.id}
-          aria-current={item.page && Astro.url.pathname.startsWith(item.page) ? 'page' : undefined}
-        >
-            {item.label}
-          </a>
-        </li>
-      ))
+      nav.map((item) => {
+        const page = item.page && href(lang, { name: item.page });
+        return (
+          <li>
+            <a class="mnav__link mono" href={page ?? (home ? `#${item.id}` : section(lang, item.id))}
+              data-nav={page ? undefined : item.id}
+              aria-current={page && Astro.url.pathname.startsWith(page) ? 'page' : undefined}
+            >
+              {item.label[lang]}
+            </a>
+          </li>
+        );
+      })
     }
   </ul>
 </nav>

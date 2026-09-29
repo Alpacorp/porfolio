@@ -1,30 +1,42 @@
 ---
 import Logo from './Logo.astro';
 import { formatYears, projectHref, statusLabel, type Project } from '../lib/projects';
+import { langFromPath } from '../i18n';
+import { sectorName, useT } from '../i18n/ui';
 
 interface Props {
   projects: Project[];
-  /** Total para el contador («X de N»). */
+  /** Total for the counter («X of N»). */
   total: number;
-  /** Página completa: añade buscador y filtro por sector. */
+  /** Full page: adds the search box and the sector filter. */
   full?: boolean;
   /** The home page shows a short preview without filters: filtering a partial list is misleading. */
   filters?: boolean;
 }
 
 const { projects, total, full = false, filters: showFilters = true } = Astro.props;
-const sectors = [...new Set(projects.map((p) => p.data.sector))].sort((a, b) => a.localeCompare(b, 'es'));
-const filters = ['Todo', 'Casos', 'Empleo', 'Freelance'];
+const lang = langFromPath(Astro.url.pathname);
+const t = useT(lang);
+const sectors = [...new Set(projects.map((p) => p.data.sector))]
+  .map((key) => ({ key, name: sectorName(key, lang) }))
+  .sort((a, b) => a.name.localeCompare(b.name, lang));
+// Keys stay in Spanish: they match the data and the ?tipo= deep links.
+const filters = [
+  { key: 'Todo', label: t.filterAll },
+  { key: 'Casos', label: t.filterCases },
+  { key: 'Empleo', label: t.employment },
+  { key: 'Freelance', label: t.freelance },
+];
 ---
 
 <div class="archive" data-archive>
   <div class="toolbar">
     {showFilters && (
-    <div class="filters" role="group" aria-label="Filtrar proyectos">
+    <div class="filters" role="group" aria-label={t.filterProjects}>
       {
         filters.map((f, i) => (
-          <button class="chip" type="button" aria-pressed={i === 0 ? "true" : "false"} data-kind={f}>
-            {f}
+          <button class="chip" type="button" aria-pressed={i === 0 ? "true" : "false"} data-kind={f.key}>
+            {f.label}
           </button>
         ))
       }
@@ -33,29 +45,34 @@ const filters = ['Todo', 'Casos', 'Empleo', 'Freelance'];
     {
       full && (
         <div class="search">
-          <label class="sr-only" for="archive-search">Buscar proyecto, cliente o tecnología</label>
+          <label class="sr-only" for="archive-search">{t.searchLabel}</label>
           <input
             id="archive-search"
             type="search"
-            placeholder="Buscar cliente, sector o tecnología…"
+            placeholder={t.searchPlaceholder}
             autocomplete="off"
             data-search
           />
-          <label class="sr-only" for="archive-sector">Sector</label>
+          <label class="sr-only" for="archive-sector">{t.sector}</label>
           <select id="archive-sector" data-sector>
-            <option value="">Todos los sectores</option>
-            {sectors.map((s) => <option value={s}>{s}</option>)}
+            <option value="">{t.allSectors}</option>
+            {sectors.map((s) => <option value={s.key}>{s.name}</option>)}
           </select>
         </div>
       )
     }
     {
       showFilters ? (
-        <p class="count mono muted" aria-live="polite" data-count>
-          {projects.length} de {total} proyectos
+        <p
+          class="count mono muted"
+          aria-live="polite"
+          data-count
+          data-template={t.countOf(0, total).replace('0', '{n}')}
+        >
+          {t.countOf(projects.length, total)}
         </p>
       ) : (
-        <p class="count mono muted">Los {projects.length} más recientes de {total}</p>
+        <p class="count mono muted">{t.latestOf(projects.length, total)}</p>
       )
     }
   </div>
@@ -63,19 +80,20 @@ const filters = ['Todo', 'Casos', 'Empleo', 'Freelance'];
   <table class="table">
     <thead class="mono">
       <tr>
-        <th scope="col">Año</th>
-        <th scope="col" class="col-logo"><span class="sr-only">Cliente</span></th>
-        <th scope="col">Proyecto</th>
-        <th scope="col" class="col-sector">Sector</th>
-        <th scope="col" class="col-stack">Stack</th>
-        <th scope="col"><span class="sr-only">Enlace</span></th>
+        <th scope="col">{t.colYear}</th>
+        <th scope="col" class="col-logo"><span class="sr-only">{t.colClient}</span></th>
+        <th scope="col">{t.colProject}</th>
+        <th scope="col" class="col-sector">{t.colSector}</th>
+        <th scope="col" class="col-stack">{t.colStack}</th>
+        <th scope="col"><span class="sr-only">{t.colLink}</span></th>
       </tr>
     </thead>
     <tbody>
       {
         projects.map((p) => {
-          const link = projectHref(p);
-          const search = [p.data.title, p.data.client, p.data.via, p.data.sector, ...p.data.stack]
+          const link = projectHref(p, lang);
+          const sector = sectorName(p.data.sector, lang);
+          const search = [p.data.title, p.data.client, p.data.via, sector, ...p.data.stack]
             .filter(Boolean)
             .join(' ')
             .toLowerCase();
@@ -88,28 +106,28 @@ const filters = ['Todo', 'Casos', 'Empleo', 'Freelance'];
               data-sector={p.data.sector}
               data-search={search}
             >
-              <td class="mono muted col-year">{formatYears(p.data)}</td>
+              <td class="mono muted col-year">{formatYears(p.data, lang)}</td>
               <td class="col-logo">{p.data.logo && <Logo id={p.data.logo} scale={0.7} />}</td>
               <td>
                 {link ? (
                   <a class="row-link" href={link.href} {...(link.external ? { rel: 'noopener', target: '_blank' } : {})}>
                     {p.data.title}
-                    {link.external && <span class="sr-only">(abre en otra pestaña)</span>}
+                    {link.external && <span class="sr-only">{t.opensNewTab}</span>}
                   </a>
                 ) : (
                   <span class="row-title">{p.data.title}</span>
                 )}
                 <span class="client mono muted">
                   {p.data.client}
-                  {p.data.via && ` · vía ${p.data.via}`}
-                  {!link && p.data.status !== 'live' && ` · ${statusLabel[p.data.status].toLowerCase()}`}
+                  {p.data.via && ` · ${t.via(p.data.via)}`}
+                  {!link && p.data.status !== 'live' && ` · ${statusLabel(p.data.status, lang).toLowerCase()}`}
                 </span>
               </td>
-              <td class="muted col-sector">{p.data.sector}</td>
+              <td class="muted col-sector">{sector}</td>
               <td class="mono muted col-stack">{p.data.stack.slice(0, 3).join(', ')}</td>
               <td class="col-mark mono">
                 {p.data.featured ? (
-                  <span class="badge-case">CASO</span>
+                  <span class="badge-case">{t.caseBadge}</span>
                 ) : link ? (
                   <span class="muted" aria-hidden="true">↗</span>
                 ) : null}
@@ -120,7 +138,7 @@ const filters = ['Todo', 'Casos', 'Empleo', 'Freelance'];
       }
     </tbody>
   </table>
-  <p class="empty mono muted" data-empty hidden>Ningún proyecto coincide con ese filtro.</p>
+  <p class="empty mono muted" data-empty hidden>{t.noMatches}</p>
 </div>
 
 <style>
@@ -288,7 +306,7 @@ const filters = ['Todo', 'Casos', 'Empleo', 'Freelance'];
 
     // Filters only exist on the full archive page.
     if (count && empty) {
-      const total = count.textContent!.trim().split(' de ')[1];
+      const template = count.dataset.template ?? '{n}';
       let kind = 'Todo';
 
       const apply = () => {
@@ -303,7 +321,7 @@ const filters = ['Todo', 'Casos', 'Empleo', 'Freelance'];
           row.hidden = !(byKind && bySector && byText);
           if (!row.hidden) shown++;
         }
-        count.textContent = `${shown} de ${total}`;
+        count.textContent = template.replace('{n}', String(shown));
         empty.hidden = shown > 0;
       };
 
@@ -317,7 +335,7 @@ const filters = ['Todo', 'Casos', 'Empleo', 'Freelance'];
       search?.addEventListener('input', apply);
       sector?.addEventListener('change', apply);
 
-      // Deep link from elsewhere (e.g. the timeline): /archivo/?tipo=Freelance preselects that filter.
+      // Deep link from elsewhere (e.g. the timeline): ?tipo=Freelance preselects that filter.
       const preset = new URLSearchParams(location.search).get('tipo');
       chips.find((c) => c.dataset.kind === preset)?.click();
     }

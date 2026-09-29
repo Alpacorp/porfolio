@@ -2,12 +2,18 @@
 import { freelanceGroups, freelanceSince, milestones, timelineRange } from '../../data/career';
 import { groupItems, type Project } from '../../lib/projects';
 import TimelinePanel from '../TimelinePanel.astro';
+import { href, langFromPath } from '../../i18n';
+import { useT } from '../../i18n/ui';
+import type { More } from '../../data/career';
 
 interface Props {
   projects: Project[];
 }
 
 const { projects } = Astro.props;
+const lang = langFromPath(Astro.url.pathname);
+const t = useT(lang);
+const link = (m: More) => ({ href: href(lang, m.route, m.suffix), label: m.label[lang] });
 const span = timelineRange.to - timelineRange.from;
 const pos = (year: number) => `${(((year - timelineRange.from) / span) * 100).toFixed(2)}%`;
 const initial = `y-${milestones.at(-1)!.year}`;
@@ -15,16 +21,16 @@ const current = milestones.find((m) => m.current);
 ---
 
 <section id="trayectoria" class="section" aria-labelledby="trayectoria-titulo" data-timeline>
-  <h2 id="trayectoria-titulo" class="eyebrow">02 — Trayectoria</h2>
+  <h2 id="trayectoria-titulo" class="eyebrow">{t.timeline}</h2>
 
-  <!-- Carril 1: empleo. Los años controlan el panel que va justo debajo. -->
+  <!-- Lane 1: employment. The years drive the panel right below. -->
   <div class="lane" data-lane>
-    <p class="lane-label mono muted">Empleo <span class="lane-hint">· toca un año</span></p>
-    <div class="axis" role="group" aria-label="Hitos de empleo">
+    <p class="lane-label mono muted">{t.employmentLane} <span class="lane-hint">{t.employmentHint}</span></p>
+    <div class="axis" role="group" aria-label={t.employmentAria}>
       <div class="axis__ticks" aria-hidden="true"></div>
       {current && (
         <div class="now-bar" style={`left: ${pos(current.year)}`} aria-hidden="true">
-          <span class="now-bar__label mono">hoy</span>
+          <span class="now-bar__label mono">{t.today}</span>
         </div>
       )}
       {
@@ -37,7 +43,7 @@ const current = milestones.find((m) => m.current);
               style={`left: ${pos(m.year)}`}
               aria-pressed={id === initial ? 'true' : 'false'}
               aria-controls="panel-empleo"
-              aria-label={`${m.year}: ${m.role}, ${m.org}`}
+              aria-label={`${m.year}: ${m.role[lang]}, ${m.org}`}
               data-target={id}
             >
               <span class="year__label mono">{m.year}</span>
@@ -52,13 +58,13 @@ const current = milestones.find((m) => m.current);
         milestones.map((m) => (
           <TimelinePanel
             id={`y-${m.year}`}
-            heading={m.current ? `${m.year} → hoy` : String(m.year)}
+            heading={m.current ? `${m.year} → ${t.today}` : String(m.year)}
             current={m.current}
             logo={m.logo}
-            more={m.more}
-            role={m.role}
+            more={link(m.more)}
+            role={m.role[lang]}
             org={m.org}
-            text={m.text}
+            text={m.text[lang]}
             hidden={`y-${m.year}` !== initial}
           />
         ))
@@ -66,15 +72,15 @@ const current = milestones.find((m) => m.current);
     </div>
   </div>
 
-  <!-- Carril 2: freelance. Empieza cerrado; cada bloque abre o cierra su lista de proyectos. -->
+  <!-- Lane 2: freelance. Starts closed; each block opens or closes its project list. -->
   <div class="lane" data-lane data-collapsible>
     <p class="lane-label mono muted">
-      Freelance · alpacorp, en paralelo <span class="lane-hint">· toca un bloque para ver sus proyectos</span>
+      {t.freelanceLane} <span class="lane-hint">{t.freelanceHint}</span>
     </p>
     <div class="axis axis--free" aria-hidden="true">
-      <div class="free-bar mono" style={`left: ${pos(freelanceSince)}`}>{freelanceSince} → hoy</div>
+      <div class="free-bar mono" style={`left: ${pos(freelanceSince)}`}>{freelanceSince} → {t.today}</div>
     </div>
-    <div class="groups" role="group" aria-label="Bloques freelance">
+    <div class="groups" role="group" aria-label={t.freelanceAria}>
       {
         freelanceGroups.map((g) => (
           <button
@@ -84,11 +90,11 @@ const current = milestones.find((m) => m.current);
             aria-controls="panel-freelance"
             data-target={`g-${g.id}`}
           >
-            <span class="group__label">{g.label}</span>
-            <span class="group__sub mono">{g.sub}</span>
+            <span class="group__label">{g.label[lang]}</span>
+            <span class="group__sub mono">{g.sub[lang]}</span>
             <span class="group__cta mono" aria-hidden="true">
-              <span class="group__open">Ver proyectos ↓</span>
-              <span class="group__close">Cerrar ↑</span>
+              <span class="group__open">{t.seeProjects}</span>
+              <span class="group__close">{t.close}</span>
             </span>
           </button>
         ))
@@ -99,12 +105,12 @@ const current = milestones.find((m) => m.current);
         freelanceGroups.map((g) => (
           <TimelinePanel
             id={`g-${g.id}`}
-            heading={g.label}
-            role={g.role}
-            org={g.org}
-            text={g.text}
-            items={groupItems(projects, g.id)}
-            more={g.more}
+            heading={g.label[lang]}
+            role={g.role[lang]}
+            org={g.org[lang]}
+            text={g.text[lang]}
+            items={groupItems(projects, g.id, lang)}
+            more={link(g.more)}
             hidden
           />
         ))
@@ -390,7 +396,7 @@ const current = milestones.find((m) => m.current);
 <script>
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
 
-  /** Si el panel quedó fuera de la pantalla (típico en móvil), lo trae a la vista. */
+  /** If the panel ended up off screen (typical on mobile), bring it into view. */
   function reveal(box: HTMLElement) {
     const r = box.getBoundingClientRect();
     if (r.top < 0 || r.top > innerHeight * 0.6) {
@@ -416,7 +422,7 @@ const current = milestones.find((m) => m.current);
     const box = lane.querySelector<HTMLElement>('[data-panel-box]')!;
     const panels = [...box.querySelectorAll<HTMLElement>('[data-panel]')];
     const collapsible = lane.hasAttribute('data-collapsible');
-    // Los años son un selector (aria-pressed); los bloques freelance, un acordeón (aria-expanded).
+    // Years are a selector (aria-pressed); freelance blocks, an accordion (aria-expanded).
     const state = collapsible ? 'aria-expanded' : 'aria-pressed';
 
     const update = () => {

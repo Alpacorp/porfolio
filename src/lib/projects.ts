@@ -1,8 +1,9 @@
-import { getCollection, type CollectionEntry } from 'astro:content';
+import { getCollection, getEntry, render, type CollectionEntry } from 'astro:content';
+import { href, type Lang } from '../i18n';
 
 export type Project = CollectionEntry<'proyectos'>;
 
-/** Más recientes primero; los que aún no tienen año van al final. Los casos, antes que el resto del mismo año. */
+/** Newest first; projects without a year go last. Case studies come before the rest of the same year. */
 function compare(a: Project, b: Project) {
   const ya = a.data.year ?? -1;
   const yb = b.data.year ?? -1;
@@ -11,38 +12,81 @@ function compare(a: Project, b: Project) {
   return a.data.title.localeCompare(b.data.title, 'es');
 }
 
-export async function getProjects() {
+/**
+ * Overlays the English text on a project. Spanish entries stay the source of
+ * truth for everything else (year, stack, links…), so a missing translation
+ * simply falls back to Spanish.
+ */
+export async function localize(p: Project, lang: Lang): Promise<Project> {
+  if (lang === 'es') return p;
+  const en = await getEntry('proyectosEn', p.id);
+  if (!en) return p;
+  const { title, summary, client, metric, linkNotes } = en.data;
+  return {
+    ...p,
+    data: {
+      ...p.data,
+      title,
+      summary,
+      client: client ?? p.data.client,
+      metric: p.data.metric && { value: metric?.value ?? p.data.metric.value, label: metric?.label ?? p.data.metric.label },
+      links: p.data.links?.map((l) => ({ ...l, note: linkNotes?.[l.name] ?? l.note })),
+    },
+  };
+}
+
+const localizeAll = (list: Project[], lang: Lang) => Promise.all(list.map((p) => localize(p, lang)));
+
+export async function getProjects(lang: Lang) {
   const all = await getCollection('proyectos');
-  return all.sort(compare);
+  return localizeAll(all.sort(compare), lang);
 }
 
-export async function getCases() {
+export async function getCases(lang: Lang) {
   const all = await getCollection('proyectos', ({ data }) => data.featured);
-  return all.sort((a, b) => a.data.order - b.data.order);
+  return localizeAll(all.sort((a, b) => a.data.order - b.data.order), lang);
 }
 
-export function formatYears({ year, yearEnd }: Project['data']) {
-  if (year === null) return yearEnd === 'hoy' ? 'hoy' : '—';
+/** Renders a case study body in a language (the English file carries its own body). */
+export async function renderCase(p: Project, lang: Lang) {
+  const en = lang === 'en' ? await getEntry('proyectosEn', p.id) : undefined;
+  return render(en ?? p);
+}
+
+const present = { es: 'hoy', en: 'present' } as const;
+
+export function formatYears({ year, yearEnd }: Project['data'], lang: Lang) {
+  if (year === null) return yearEnd === 'hoy' ? present[lang] : '—';
   if (yearEnd === undefined || yearEnd === year) return String(year);
-  return `${year} — ${yearEnd}`;
+  return `${year} — ${yearEnd === 'hoy' ? present[lang] : yearEnd}`;
 }
 
-/** Destino de una fila del archivo: su caso de estudio, el sitio en vivo o nada. */
-export function projectHref(p: Project) {
-  if (p.data.featured) return { href: `/casos/${p.id}/`, external: false };
+/** Where an archive row points: its case study, the live site or nothing. */
+export function projectHref(p: Project, lang: Lang) {
+  if (p.data.featured) return { href: href(lang, { name: 'case', id: p.id }), external: false };
   if (p.data.url && p.data.status === 'live') return { href: p.data.url, external: true };
   return null;
 }
 
-export const statusLabel: Record<Project['data']['status'], string> = {
-  live: 'En línea',
-  internal: 'Herramienta interna',
-  replaced: 'Versión ya reemplazada',
-  offline: 'Ya no está en línea',
+const statusLabels: Record<Lang, Record<Project['data']['status'], string>> = {
+  es: {
+    live: 'En línea',
+    internal: 'Herramienta interna',
+    replaced: 'Versión ya reemplazada',
+    offline: 'Ya no está en línea',
+  },
+  en: {
+    live: 'Live',
+    internal: 'Internal tool',
+    replaced: 'Since replaced',
+    offline: 'No longer online',
+  },
 };
 
-/** Proyectos de un bloque freelance, aplanados a filas {nombre, url, nota}. */
-export function groupItems(projects: Project[], group: string) {
+export const statusLabel = (status: Project['data']['status'], lang: Lang) => statusLabels[lang][status];
+
+/** Projects of a freelance block, flattened to {name, url, note} rows. */
+export function groupItems(projects: Project[], group: string, lang: Lang) {
   return projects
     .filter((p) => p.data.group === group)
     .flatMap((p) =>
@@ -57,7 +101,7 @@ export function groupItems(projects: Project[], group: string) {
                 p.data.title,
                 p.data.stack.slice(0, 2).join(', '),
                 p.data.status === 'replaced' || p.data.status === 'offline'
-                  ? statusLabel[p.data.status].toLowerCase()
+                  ? statusLabel(p.data.status, lang).toLowerCase()
                   : null,
               ]
                 .filter(Boolean)

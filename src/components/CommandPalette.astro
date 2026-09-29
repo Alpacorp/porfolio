@@ -3,31 +3,59 @@ import Icon from './Icon.astro';
 import { nav, profile } from '../data/profile';
 import { getCases } from '../lib/projects';
 import { companyHref, getCompanies } from '../lib/experience';
+import { href, langFromPath, locale, otherLang, section } from '../i18n';
+import { useT } from '../i18n/ui';
 
-const [cases, companies] = await Promise.all([getCases(), getCompanies()]);
+interface Props {
+  /** Same page in the other language. */
+  alternate: string;
+}
+
+const lang = langFromPath(Astro.url.pathname);
+const other = otherLang(lang);
+const t = useT(lang);
+const { alternate } = Astro.props;
+const [cases, companies] = await Promise.all([getCases(lang), getCompanies(lang)]);
 
 type Item = { group: string; label: string; href?: string; action?: string; hint?: string };
 
 const items: Item[] = [
-  ...nav.map((n) => ({ group: 'Secciones', label: n.label, href: n.page ?? `/#${n.id}` })),
-  ...cases.map((c) => ({ group: 'Casos de estudio', label: c.data.title, href: `/casos/${c.id}/`, hint: c.data.client })),
-  ...companies.map((c) => ({ group: 'Experiencia', label: c.data.company, href: companyHref(c), hint: c.data.role })),
-  { group: 'Páginas', label: 'Todos los casos de estudio', href: '/casos/' },
-  { group: 'Páginas', label: 'CV imprimible', href: '/cv/' },
-  { group: 'Acciones', label: 'Cambiar tema claro / oscuro', action: 'theme' },
-  { group: 'Acciones', label: 'Copiar correo', action: 'copy-email', hint: profile.email },
-  { group: 'Acciones', label: 'Escribir un correo', href: `mailto:${profile.email}` },
-  { group: 'Acciones', label: 'Abrir LinkedIn', href: profile.links.linkedin },
+  ...nav.map((n) => ({
+    group: t.groupSections,
+    label: n.label[lang],
+    href: n.page ? href(lang, { name: n.page }) : section(lang, n.id),
+  })),
+  ...cases.map((c) => ({
+    group: t.groupCases,
+    label: c.data.title,
+    href: href(lang, { name: 'case', id: c.id }),
+    hint: c.data.client,
+  })),
+  ...companies.map((c) => ({ group: t.groupExperience, label: c.data.company, href: companyHref(c, lang), hint: c.data.role })),
+  { group: t.groupPages, label: t.allCasesPage, href: href(lang, { name: 'cases' }) },
+  { group: t.groupPages, label: t.printableCv, href: href(lang, { name: 'cv' }) },
+  { group: t.groupActions, label: t.otherLanguage, href: alternate, hint: `${locale[other].name} · English Spanish español inglés` },
+  { group: t.groupActions, label: t.toggleTheme, action: 'theme' },
+  { group: t.groupActions, label: t.copyEmail, action: 'copy-email', hint: profile.email },
+  { group: t.groupActions, label: t.writeEmail, href: `mailto:${profile.email}` },
+  { group: t.groupActions, label: t.openLinkedIn, href: profile.links.linkedin },
 ];
 ---
 
-<dialog class="palette" data-palette data-email={profile.email} aria-label="Buscar o navegar">
+<dialog
+  class="palette"
+  data-palette
+  data-email={profile.email}
+  data-results={t.results(0).replace('0', '{n}')}
+  data-copied={t.paletteCopied}
+  aria-label={t.searchOrNavigate}
+>
   <div class="palette__search">
     <Icon name="search" size={18} />
     <input
       type="text"
-      placeholder="Busca una sección, un caso o una acción…"
-      aria-label="Buscar"
+      placeholder={t.palettePlaceholder}
+      aria-label={t.paletteSearch}
       role="combobox"
       aria-expanded="true"
       aria-controls="palette-list"
@@ -55,7 +83,7 @@ const items: Item[] = [
       ))
     }
   </ul>
-  <p class="palette__empty mono" data-palette-empty hidden>Sin resultados.</p>
+  <p class="palette__empty mono" data-palette-empty hidden>{t.paletteEmpty}</p>
   <p class="palette__status sr-only" aria-live="polite" data-palette-status></p>
 </dialog>
 
@@ -196,7 +224,7 @@ const items: Item[] = [
     for (const o of options) o.hidden = q !== '' && !normalize(o.dataset.label ?? '').includes(q);
     const count = visible().length;
     empty.hidden = count > 0;
-    status.textContent = `${count} resultados`;
+    status.textContent = (dialog.dataset.results ?? '{n}').replace('{n}', String(count));
     highlight(0);
   }
 
@@ -211,7 +239,7 @@ const items: Item[] = [
     const { href, action } = option.dataset;
     if (href) {
       dialog.close();
-      // Otros sitios en pestaña nueva; secciones y páginas propias, en la misma.
+      // Other sites open in a new tab; own sections and pages, in the same one.
       const external = /^https?:/.test(href) && new URL(href).host !== location.host;
       if (external) window.open(href, '_blank', 'noopener');
       else location.href = href;
@@ -221,7 +249,7 @@ const items: Item[] = [
     if (action === 'copy-email') {
       try {
         await navigator.clipboard.writeText(email);
-        status.textContent = 'Correo copiado';
+        status.textContent = dialog.dataset.copied ?? '';
       } catch {
         status.textContent = email;
       }
@@ -258,7 +286,7 @@ const items: Item[] = [
     o.addEventListener('mousemove', () => highlight(visible().indexOf(o)));
   }
 
-  // Cerrar al hacer clic fuera del cuadro.
+  // Close when clicking outside the box.
   dialog.addEventListener('click', (e) => {
     if (e.target === dialog) dialog.close();
   });

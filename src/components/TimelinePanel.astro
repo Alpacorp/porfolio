@@ -1,6 +1,8 @@
 ---
 import Logo from './Logo.astro';
 import type { LogoId } from '../data/logos';
+import { langFromPath } from '../i18n';
+import { useT } from '../i18n/ui';
 
 interface Props {
   id: string;
@@ -16,6 +18,7 @@ interface Props {
   more?: { href: string; label: string; internal?: boolean };
 }
 
+const t = useT(langFromPath(Astro.url.pathname));
 const { id, heading, role, org, text, items = [], hidden = false, current = false, logo, more } = Astro.props;
 ---
 
@@ -25,7 +28,7 @@ const { id, heading, role, org, text, items = [], hidden = false, current = fals
     {logo && <Logo id={logo} class="panel-logo" />}
     <h3 class="role">
       {role}
-      {current && <span class="now mono">Actual</span>}
+      {current && <span class="now mono">{t.current}</span>}
     </h3>
     <p class="mono muted org">{org}</p>
     <p class="muted text">{text}</p>
@@ -38,7 +41,7 @@ const { id, heading, role, org, text, items = [], hidden = false, current = fals
               {it.url ? (
                 <a href={it.url} rel="noopener" target="_blank">
                   {it.name} <span aria-hidden="true">↗</span>
-                  <span class="sr-only">(abre en otra pestaña)</span>
+                  <span class="sr-only">{t.opensNewTab}</span>
                 </a>
               ) : (
                 <span class="name">{it.name}</span>

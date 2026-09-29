@@ -1,17 +1,21 @@
 ---
 import Logo from '../Logo.astro';
 import { formatYears, type Project } from '../../lib/projects';
+import { href, langFromPath } from '../../i18n';
+import { sectorName, useT } from '../../i18n/ui';
 
 interface Props {
   cases: Project[];
-  /** Show only the first N cases and a link to /casos/ with all of them. */
+  /** Show only the first N cases and a link to the cases page with all of them. */
   limit?: number;
   heading?: string;
   /** When set, adds a link to the full archive (the home page no longer has an archive section). */
   projectsTotal?: number;
 }
 
-const { cases, limit, heading = '03 — Casos de estudio', projectsTotal } = Astro.props;
+const lang = langFromPath(Astro.url.pathname);
+const t = useT(lang);
+const { cases, limit, heading = t.cases, projectsTotal } = Astro.props;
 const shown = limit ? cases.slice(0, limit) : cases;
 ---
 
@@ -21,11 +25,11 @@ const shown = limit ? cases.slice(0, limit) : cases;
     {
       shown.map((c) => (
         <li>
-          <a class="card case logo-host" href={`/casos/${c.id}/`}>
+          <a class="card case logo-host" href={href(lang, { name: 'case', id: c.id })}>
             <div class="case__main">
               {c.data.logo && <Logo id={c.data.logo} scale={0.9} class="case__logo" />}
               <p class="mono muted case__meta">
-                {[c.data.client, c.data.sector, formatYears(c.data)].join(' · ').toUpperCase()}
+                {[c.data.client, sectorName(c.data.sector, lang), formatYears(c.data, lang)].join(' · ').toUpperCase()}
               </p>
               <h3 class="case__title">{c.data.title}</h3>
               <p class="muted case__summary">{c.data.summary}</p>
@@ -47,15 +51,15 @@ const shown = limit ? cases.slice(0, limit) : cases;
   <div class="more-links">
     {
       shown.length < cases.length && (
-        <a class="all mono" href="/casos/">
-          Ver los {cases.length} casos de estudio <span aria-hidden="true">→</span>
+        <a class="all mono" href={href(lang, { name: 'cases' })}>
+          {t.seeAllCases(cases.length)} <span aria-hidden="true">→</span>
         </a>
       )
     }
     {
       projectsTotal && (
-        <a class="all mono" href="/archivo/">
-          Explorar los {projectsTotal} proyectos en el archivo <span aria-hidden="true">→</span>
+        <a class="all mono" href={href(lang, { name: 'archive' })}>
+          {t.exploreArchive(projectsTotal)} <span aria-hidden="true">→</span>
         </a>
       )
     }

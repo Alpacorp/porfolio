@@ -8,14 +8,16 @@ interface Props {
   title?: string;
   description?: string;
   home?: boolean;
+  /** Same page in the other language (see Base). */
+  alternate?: string;
 }
 
-const { title, description, home = false } = Astro.props;
+const { title, description, home = false, alternate } = Astro.props;
 ---
 
-<Base title={title} description={description}>
+<Base title={title} description={description} alternate={alternate}>
   <div class="shell">
-    <Sidebar home={home} />
+    <Sidebar home={home} alternate={alternate} />
     <MobileNav home={home} />
     <main id="contenido" class="main" tabindex="-1">
       <slot />
@@ -52,8 +54,8 @@ const { title, description, home = false } = Astro.props;
     outline: none;
   }
 
-  /* Separador entre secciones: línea en color de texto con una pestaña amarilla al inicio.
-     El bloque de contacto (amarillo) ya separa por sí mismo. */
+  /* Section divider: an ink rule with a yellow tab at the start.
+     The (yellow) contact block is a divider on its own. */
   .main > :global(section:not(:first-child):not(.contact))::before {
     content: '';
     display: block;

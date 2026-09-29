@@ -1,6 +1,8 @@
-import { getCollection, type CollectionEntry } from 'astro:content';
+import { getCollection, getEntry, type CollectionEntry } from 'astro:content';
 import { freelanceExperience } from '../data/career';
 import type { LogoId } from '../data/logos';
+import { href, type Lang } from '../i18n';
+import { useT } from '../i18n/ui';
 
 export type Company = CollectionEntry<'empresas'>;
 
@@ -25,15 +27,35 @@ export type ExperienceItem = {
 const byRecency = (a: { current: boolean; startYear: number }, b: { current: boolean; startYear: number }) =>
   Number(b.current) - Number(a.current) || b.startYear - a.startYear;
 
-export async function getCompanies() {
-  const companies = await getCollection('empresas');
-  return companies.sort((a, b) => byRecency(a.data, b.data));
+/** Overlays the English text on a company; phases are matched by id. */
+async function localize(c: Company, lang: Lang): Promise<Company> {
+  if (lang === 'es') return c;
+  const en = await getEntry('empresasEn', c.id);
+  if (!en) return c;
+  const { phases, ...text } = en.data;
+  return {
+    ...c,
+    data: {
+      ...c.data,
+      ...text,
+      phases: c.data.phases.map((phase) => {
+        const t = phases.find((p) => p.id === phase.id);
+        return t ? { ...phase, ...t } : phase;
+      }),
+    },
+  };
 }
 
-export const companyHref = (company: Company) => `/experiencia/${company.id}/`;
+export async function getCompanies(lang: Lang) {
+  const companies = await getCollection('empresas');
+  return Promise.all(companies.sort((a, b) => byRecency(a.data, b.data)).map((c) => localize(c, lang)));
+}
 
-export async function getExperienceItems(): Promise<ExperienceItem[]> {
-  const companies = await getCompanies();
+export const companyHref = (company: Company, lang: Lang) => href(lang, { name: 'experience', id: company.id });
+
+export async function getExperienceItems(lang: Lang): Promise<ExperienceItem[]> {
+  const t = useT(lang);
+  const companies = await getCompanies(lang);
   const items: ExperienceItem[] = companies.map((c) => ({
     id: c.id,
     startYear: c.data.startYear,
@@ -46,10 +68,24 @@ export async function getExperienceItems(): Promise<ExperienceItem[]> {
     highlights: c.data.highlights,
     stack: c.data.stack,
     filters: c.data.filters,
-    href: companyHref(c),
-    hrefLabel: 'Ver la experiencia completa',
+    href: companyHref(c, lang),
+    hrefLabel: t.fullExperience,
   }));
   const f = freelanceExperience;
-  items.push({ ...f, dates: `${f.start} — ${f.end}` });
+  items.push({
+    id: f.id,
+    startYear: f.startYear,
+    dates: `${f.start[lang]} — ${f.end[lang]}`,
+    current: f.current,
+    logo: f.logo,
+    role: f.role[lang],
+    company: f.company,
+    summary: f.summary[lang],
+    highlights: f.highlights[lang],
+    stack: f.stack[lang],
+    filters: f.filters,
+    href: href(lang, f.more.route, f.more.suffix),
+    hrefLabel: f.more.label[lang],
+  });
   return items.sort(byRecency);
 }

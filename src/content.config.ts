@@ -81,4 +81,45 @@ const empresas = defineCollection({
   }),
 });
 
-export const collections = { proyectos, empresas };
+/**
+ * English translations. Each file mirrors a Spanish entry with the same id and
+ * only carries the text: dates, stack, logos and links stay in the Spanish file,
+ * which remains the single source of truth.
+ */
+const proyectosEn = defineCollection({
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/en/proyectos' }),
+  schema: z.object({
+    title: z.string(),
+    summary: z.string(),
+    /** Only when the Spanish client is a description rather than a name. */
+    client: z.string().optional(),
+    metric: z.object({ value: z.string().optional(), label: z.string() }).optional(),
+    /** Notes for the `links` list, keyed by the link name. */
+    linkNotes: z.record(z.string(), z.string()).optional(),
+  }),
+});
+
+const empresasEn = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/en/empresas' }),
+  schema: z.object({
+    role: z.string(),
+    start: z.string(),
+    end: z.string(),
+    location: z.string(),
+    summary: z.string(),
+    highlights: z.array(z.string()).min(1).max(3),
+    /** Matched to the Spanish phases by id. */
+    phases: z.array(
+      z.object({
+        id: z.string(),
+        period: z.string(),
+        title: z.string(),
+        role: z.string().optional(),
+        text: z.string(),
+        achievements: z.array(z.string()).default([]),
+      }),
+    ),
+  }),
+});
+
+export const collections = { proyectos, empresas, proyectosEn, empresasEn };

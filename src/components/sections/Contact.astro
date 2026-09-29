@@ -1,14 +1,19 @@
 ---
 import { profile } from '../../data/profile';
+import { href, langFromPath } from '../../i18n';
+import { useT } from '../../i18n/ui';
+
+const lang = langFromPath(Astro.url.pathname);
+const t = useT(lang);
 ---
 
 <section id="contacto" class="contact" aria-labelledby="contacto-titulo">
-  <h2 id="contacto-titulo" class="eyebrow contact__eyebrow">06 — Contacto</h2>
-  <p class="contact__title">¿Construimos algo que mueva los números?</p>
-  <p class="contact__text">Posiciones en fintech y producto, o proyectos freelance a través de alpacorp.</p>
+  <h2 id="contacto-titulo" class="eyebrow contact__eyebrow">{t.contact}</h2>
+  <p class="contact__title">{t.contactTitle}</p>
+  <p class="contact__text">{t.contactText}</p>
   <div class="contact__actions">
-    <a class="btn btn--dark" href={`mailto:${profile.email}`}>Escríbeme</a>
-    <a class="btn btn--outline" href="/cv/">Ver CV / descargar PDF</a>
+    <a class="btn btn--dark" href={`mailto:${profile.email}`}>{t.writeMe}</a>
+    <a class="btn btn--outline" href={href(lang, { name: 'cv' })}>{t.cvButton}</a>
   </div>
 </section>
 

@@ -2,45 +2,56 @@
 import '../styles/global.css';
 import CommandPalette from '../components/CommandPalette.astro';
 import { profile } from '../data/profile';
+import { href, langFromPath, locale, otherLang } from '../i18n';
+import { useT } from '../i18n/ui';
 
 interface Props {
   title?: string;
   description?: string;
+  /** Same page in the other language; defaults to its home page. */
+  alternate?: string;
 }
 
-const { title, description = profile.description } = Astro.props;
+const lang = langFromPath(Astro.url.pathname);
+const other = otherLang(lang);
+const t = useT(lang);
+const { title, description = profile.description[lang], alternate = href(other, { name: 'home' }) } = Astro.props;
 const fullTitle = title ? `${title} · ${profile.name}` : `${profile.name} · ${profile.role}`;
 const canonical = new URL(Astro.url.pathname, Astro.site);
+const alternates = { [lang]: canonical, [other]: new URL(alternate, Astro.site) };
 // Share card (1200×630) with photo, name and role; social networks need an absolute URL.
 const ogImage = new URL('/og.jpg', Astro.site);
 ---
 
 <!doctype html>
-<html lang="es">
+<html lang={locale[lang].html}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+    {Object.entries(alternates).map(([l, url]) => <link rel="alternate" hreflang={l} href={url} />)}
+    <link rel="alternate" hreflang="x-default" href={alternates.es} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="sitemap" href="/sitemap-index.xml" />
     <meta name="theme-color" content="#f6f4ee" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#0f0f0e" media="(prefers-color-scheme: dark)" />
 
     <meta property="og:type" content="website" />
-    <meta property="og:locale" content="es_CO" />
+    <meta property="og:locale" content={locale[lang].og} />
+    <meta property="og:locale:alternate" content={locale[other].og} />
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content={ogImage} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Alejandro Palacios Arévalo, Software Engineer en Mercado Libre / Mercado Pago" />
+    <meta property="og:image:alt" content={`${profile.name}, ${t.roleAt(profile.role, profile.current)}`} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content={ogImage} />
 
-    <!-- Aplica el tema guardado antes de pintar, para evitar el parpadeo -->
+    <!-- Apply the saved theme before first paint to avoid a flash -->
     <script is:inline>
       try {
         const t = localStorage.getItem('theme');
@@ -50,11 +61,11 @@ const ogImage = new URL('/og.jpg', Astro.site);
     <slot name="head" />
   </head>
   <body>
-    <a class="skip-link" href="#contenido">Saltar al contenido</a>
+    <a class="skip-link" href="#contenido">{t.skipToContent}</a>
     <slot />
-    <CommandPalette />
+    <CommandPalette alternate={alternate} />
 
-    <!-- Red de seguridad: todo enlace a otro sitio se abre en pestaña nueva, también los del contenido MDX -->
+    <!-- Safety net: every link to another site opens in a new tab, MDX content included -->
     <script>
       for (const a of document.querySelectorAll<HTMLAnchorElement>('a[href^="http"]')) {
         if (a.host === location.host || a.target) continue;

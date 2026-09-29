@@ -1,0 +1,23 @@
+---
+import Shell from '../layouts/Shell.astro';
+import About from '../components/sections/About.astro';
+import Timeline from '../components/sections/Timeline.astro';
+import Cases from '../components/sections/Cases.astro';
+import Experience from '../components/sections/Experience.astro';
+import Education from '../components/sections/Education.astro';
+import Contact from '../components/sections/Contact.astro';
+import { getCases, getProjects } from '../lib/projects';
+import { href, langFromPath, otherLang } from '../i18n';
+
+const lang = langFromPath(Astro.url.pathname);
+const [projects, cases] = await Promise.all([getProjects(lang), getCases(lang)]);
+---
+
+<Shell home alternate={href(otherLang(lang), { name: 'home' })}>
+  <About />
+  <Timeline projects={projects} />
+  <Cases cases={cases} limit={4} projectsTotal={projects.length} />
+  <Experience />
+  <Education />
+  <Contact />
+</Shell>

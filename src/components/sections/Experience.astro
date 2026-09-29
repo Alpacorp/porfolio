@@ -2,19 +2,29 @@
 import Logo from '../Logo.astro';
 import { experienceFilters } from '../../data/career';
 import { getExperienceItems } from '../../lib/experience';
+import { href, langFromPath } from '../../i18n';
+import { useT } from '../../i18n/ui';
 
+const lang = langFromPath(Astro.url.pathname);
+const t = useT(lang);
 // One row per company (plus freelance). The full story lives on each company page.
-const items = await getExperienceItems();
+const items = await getExperienceItems(lang);
 ---
 
-<section id="experiencia" class="section" aria-labelledby="experiencia-titulo" data-filterable>
-  <h2 id="experiencia-titulo" class="eyebrow">04 — Experiencia</h2>
+<section
+  id="experiencia"
+  class="section"
+  aria-labelledby="experiencia-titulo"
+  data-filterable
+  data-results={t.results(0).replace('0', '{n}')}
+>
+  <h2 id="experiencia-titulo" class="eyebrow">{t.experience}</h2>
 
-  <div class="filters" role="group" aria-label="Filtrar por enfoque">
+  <div class="filters" role="group" aria-label={t.filterByFocus}>
     {
       experienceFilters.map((f, i) => (
-        <button class="chip" type="button" aria-pressed={i === 0 ? "true" : "false"} data-filter={f}>
-          {f}
+        <button class="chip" type="button" aria-pressed={i === 0 ? "true" : "false"} data-filter={f.key}>
+          {f.label[lang]}
         </button>
       ))
     }
@@ -28,7 +38,7 @@ const items = await getExperienceItems();
             <span class="job__logo"><Logo id={job.logo} /></span>
             <p class="mono muted job__dates">
               {job.dates}
-              {job.current && <span class="now">Actual</span>}
+              {job.current && <span class="now">{t.current}</span>}
             </p>
           </div>
           <div class="job__body">
@@ -41,7 +51,7 @@ const items = await getExperienceItems();
                 <li>{h}</li>
               ))}
             </ul>
-            <ul class="job__tags" aria-label="Tecnologías">
+            <ul class="job__tags" aria-label={t.technologies}>
               {job.stack.slice(0, 6).map((t) => (
                 <li class="tag">{t}</li>
               ))}
@@ -57,7 +67,7 @@ const items = await getExperienceItems();
   </ol>
   <p class="sr-only" aria-live="polite" data-filter-status></p>
 
-  <a class="mono cv-link" href="/cv/">Ver CV completo · versión imprimible →</a>
+  <a class="mono cv-link" href={href(lang, { name: 'cv' })}>{t.fullCv}</a>
 </section>
 
 <style>
@@ -246,7 +256,7 @@ const items = await getExperienceItems();
           item.hidden = !match;
           if (match) shown++;
         }
-        if (status) status.textContent = `${shown} resultados`;
+        if (status) status.textContent = (root.dataset.results ?? '{n}').replace('{n}', String(shown));
       });
     }
   }

@@ -1,0 +1,23 @@
+---
+title: 'Interfaces written in JSON'
+summary: 'About 15 major improvements to an internal library that builds UIs from JSON files, including a pseudo-language to format data straight from the configuration.'
+metric:
+  label: 'major improvements to the internal UI library'
+---
+
+## The context
+
+Mercado Libre's internal platforms use a library that builds user interfaces from JSON files: instead of coding each screen, you describe which components it has and the library renders them. During my first year at OpsIT, while I was learning the company's in-house technologies and design systems, I worked on that library.
+
+## What I contributed
+
+- **New components** with a high degree of customization.
+- **A pseudo-language inside the JSON** to control how data is displayed without writing separate code:
+  - uppercase and other text transformations,
+  - date and currency formats,
+  - text sanitization,
+  - conditional rendering based on the context data the library handles.
+
+## Why it matters
+
+Every improvement to a library like this reaches every screen built with it, and makes the next interface faster to build. There were about 15 major improvements in total.
