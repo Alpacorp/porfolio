@@ -1,5 +1,9 @@
 ---
 import '../styles/global.css';
+// The two fonts every page shows above the fold; preloading them avoids the
+// text reflowing when they swap in. Same files global.css uses, so no double download.
+import geistFont from '@fontsource-variable/geist/files/geist-latin-wght-normal.woff2?url';
+import geistMonoFont from '@fontsource-variable/geist-mono/files/geist-mono-latin-wght-normal.woff2?url';
 import CommandPalette from '../components/CommandPalette.astro';
 import { profile } from '../data/profile';
 import { href, locale } from '../i18n';
@@ -48,6 +52,8 @@ const ogImage = new URL(locale[lang].shareImage, site);
         </>
       )
     }
+    <link rel="preload" href={geistFont} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={geistMonoFont} as="font" type="font/woff2" crossorigin />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="sitemap" href="/sitemap-index.xml" />
     <meta name="theme-color" content="#f6f4ee" media="(prefers-color-scheme: light)" />
