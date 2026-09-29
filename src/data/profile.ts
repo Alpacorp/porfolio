@@ -2,7 +2,6 @@ import type { L } from '../i18n';
 
 export const profile = {
   name: 'Alejandro Palacios Arévalo',
-  fullName: 'Alejandro Palacios Arévalo',
   role: 'Software Engineer',
   focus: {
     es: 'Frontend, Backend, Automatización e IA',

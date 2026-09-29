@@ -25,3 +25,6 @@ pnpm-debug.log*
 
 # Datos privados (inventario de proyectos, CV, clientes, NDAs)
 _privado/
+
+# Claude Code local state
+.claude/

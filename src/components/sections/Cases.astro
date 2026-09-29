@@ -1,46 +1,43 @@
 ---
 import Logo from '../Logo.astro';
-import { formatYears, type Project } from '../../lib/projects';
-import { href, langFromPath } from '../../i18n';
-import { sectorName, useT } from '../../i18n/ui';
+import { caseMeta, type Project } from '../../lib/projects';
+import { href } from '../../i18n';
+import { getI18n } from '../../i18n/ui';
 
 interface Props {
   cases: Project[];
   /** Show only the first N cases and a link to the cases page with all of them. */
   limit?: number;
   heading?: string;
-  /** When set, adds a link to the full archive (the home page no longer has an archive section). */
+  /** When set, adds a link to the full archive (the home page has no archive section). */
   projectsTotal?: number;
 }
 
-const lang = langFromPath(Astro.url.pathname);
-const t = useT(lang);
-const { cases, limit, heading = t.cases, projectsTotal } = Astro.props;
-const shown = limit ? cases.slice(0, limit) : cases;
+const { lang, ui } = getI18n(Astro.url);
+const { cases, limit, heading = ui.cases, projectsTotal } = Astro.props;
+const shownCases = limit ? cases.slice(0, limit) : cases;
 ---
 
 <section id="casos" class="section" aria-labelledby="casos-titulo">
   <h2 id="casos-titulo" class="eyebrow">{heading}</h2>
   <ul class="cases">
     {
-      shown.map((c) => (
+      shownCases.map((project) => (
         <li>
-          <a class="card case logo-host" href={href(lang, { name: 'case', id: c.id })}>
+          <a class="card case logo-host" href={href(lang, { name: 'case', id: project.id })}>
             <div class="case__main">
-              {c.data.logo && <Logo id={c.data.logo} scale={0.9} class="case__logo" />}
-              <p class="mono muted case__meta">
-                {[c.data.client, sectorName(c.data.sector, lang), formatYears(c.data, lang)].join(' · ').toUpperCase()}
-              </p>
-              <h3 class="case__title">{c.data.title}</h3>
-              <p class="muted case__summary">{c.data.summary}</p>
-              <p class="mono muted case__stack">{c.data.stack.slice(0, 5).join(' · ')}</p>
+              {project.data.logo && <Logo id={project.data.logo} scale={0.9} class="case__logo" />}
+              <p class="mono muted case__meta">{caseMeta(project, lang)}</p>
+              <h3 class="case__title">{project.data.title}</h3>
+              <p class="muted case__summary">{project.data.summary}</p>
+              <p class="mono muted case__stack">{project.data.stack.slice(0, 5).join(' · ')}</p>
             </div>
-            {c.data.metric && (
+            {project.data.metric && (
               <div class="case__metric">
                 <span class="case__value">
-                  <span class="hl">{c.data.metric.value}</span>
+                  <span class="hl">{project.data.metric.value}</span>
                 </span>
-                <span class="mono muted case__label">{c.data.metric.label}</span>
+                <span class="mono muted case__label">{project.data.metric.label}</span>
               </div>
             )}
           </a>
@@ -50,16 +47,16 @@ const shown = limit ? cases.slice(0, limit) : cases;
   </ul>
   <div class="more-links">
     {
-      shown.length < cases.length && (
-        <a class="all mono" href={href(lang, { name: 'cases' })}>
-          {t.seeAllCases(cases.length)} <span aria-hidden="true">→</span>
+      shownCases.length < cases.length && (
+        <a class="more-link" href={href(lang, { name: 'cases' })}>
+          {ui.seeAllCases(cases.length)} <span aria-hidden="true">→</span>
         </a>
       )
     }
     {
       projectsTotal && (
-        <a class="all mono" href={href(lang, { name: 'archive' })}>
-          {t.exploreArchive(projectsTotal)} <span aria-hidden="true">→</span>
+        <a class="more-link" href={href(lang, { name: 'archive' })}>
+          {ui.exploreArchive(projectsTotal)} <span aria-hidden="true">→</span>
         </a>
       )
     }
@@ -106,17 +103,15 @@ const shown = limit ? cases.slice(0, limit) : cases;
     gap: 0 28px;
   }
 
-  .all {
-    align-self: flex-start;
-    display: inline-block;
-    padding: 12px 0;
-    font-size: 14px;
-  }
 
   .case__meta,
   .case__stack {
     font-size: 12px;
     line-height: 1.5;
+  }
+
+  .case__meta {
+    text-transform: uppercase;
   }
 
   .case__title {

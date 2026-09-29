@@ -1,62 +1,36 @@
 ---
 import Icon from './Icon.astro';
-import { nav, profile } from '../data/profile';
+import { profile } from '../data/profile';
 import { getCases } from '../lib/projects';
-import { companyHref, getCompanies } from '../lib/experience';
-import { href, langFromPath, locale, otherLang, section } from '../i18n';
-import { useT } from '../i18n/ui';
-import { N } from '../lib/filters';
+import { getCompanies } from '../lib/experience';
+import { buildPaletteItems, searchText } from '../lib/palette';
+import { getI18n } from '../i18n/ui';
 
 interface Props {
   /** Same page in the other language. */
   alternate: string;
 }
 
-const lang = langFromPath(Astro.url.pathname);
-const other = otherLang(lang);
-const t = useT(lang);
+const { lang, ui } = getI18n(Astro.url);
 const { alternate } = Astro.props;
 const [cases, companies] = await Promise.all([getCases(lang), getCompanies(lang)]);
-
-type Item = { group: string; label: string; href?: string; action?: string; hint?: string };
-
-const items: Item[] = [
-  ...nav.map((n) => ({
-    group: t.groupSections,
-    label: n.label[lang],
-    href: n.page ? href(lang, { name: n.page }) : section(lang, n.id),
-  })),
-  ...cases.map((c) => ({
-    group: t.groupCases,
-    label: c.data.title,
-    href: href(lang, { name: 'case', id: c.id }),
-    hint: c.data.client,
-  })),
-  ...companies.map((c) => ({ group: t.groupExperience, label: c.data.company, href: companyHref(c, lang), hint: c.data.role })),
-  { group: t.groupPages, label: t.allCasesPage, href: href(lang, { name: 'cases' }) },
-  { group: t.groupPages, label: t.printableCv, href: href(lang, { name: 'cv' }) },
-  { group: t.groupActions, label: t.otherLanguage, href: alternate, hint: `${locale[other].name} · English Spanish español inglés` },
-  { group: t.groupActions, label: t.toggleTheme, action: 'theme' },
-  { group: t.groupActions, label: t.copyEmail, action: 'copy-email', hint: profile.email },
-  { group: t.groupActions, label: t.writeEmail, href: `mailto:${profile.email}` },
-  { group: t.groupActions, label: t.openLinkedIn, href: profile.links.linkedin },
-];
+const items = buildPaletteItems({ lang, cases, companies, alternate });
 ---
 
 <dialog
   class="palette"
   data-palette
   data-email={profile.email}
-  data-results={t.results(N)}
-  data-copied={t.paletteCopied}
-  aria-label={t.searchOrNavigate}
+  data-results={JSON.stringify(ui.results)}
+  data-copied={ui.paletteCopied}
+  aria-label={ui.searchOrNavigate}
 >
   <div class="palette__search">
     <Icon name="search" size={18} />
     <input
       type="text"
-      placeholder={t.palettePlaceholder}
-      aria-label={t.paletteSearch}
+      placeholder={ui.palettePlaceholder}
+      aria-label={ui.paletteSearch}
       role="combobox"
       aria-expanded="true"
       aria-controls="palette-list"
@@ -68,25 +42,30 @@ const items: Item[] = [
   </div>
   <ul class="palette__list" id="palette-list" role="listbox" data-palette-list>
     {
-      items.map((it, i) => (
+      items.map((item, index) => (
         <li
           role="option"
-          id={`palette-opt-${i}`}
+          id={`palette-opt-${index}`}
           aria-selected="false"
-          data-label={`${it.label} ${it.hint ?? ''} ${it.group}`.toLowerCase()}
-          data-href={it.href}
-          data-action={it.action}
+          data-label={searchText(item)}
+          data-href={item.href}
+          data-action={item.action}
         >
-          <span class="palette__group mono">{it.group}</span>
-          <span class="palette__label">{it.label}</span>
-          {it.hint && <span class="palette__hint mono">{it.hint}</span>}
+          <span class="palette__group mono">{item.group}</span>
+          <span class="palette__label">{item.label}</span>
+          {item.hint && (
+            <span class="palette__hint mono" data-hint>
+              {item.hint}
+            </span>
+          )}
         </li>
       ))
     }
   </ul>
-  <p class="palette__empty mono" data-palette-empty hidden>{t.paletteEmpty}</p>
-  <p class="palette__status sr-only" aria-live="polite" data-palette-status></p>
+  <p class="palette__empty mono" data-palette-empty hidden>{ui.paletteEmpty}</p>
 </dialog>
+<!-- Outside the dialog, so announcements survive it closing -->
+<p class="sr-only" aria-live="polite" data-palette-status></p>
 
 <style>
   .palette {
@@ -98,7 +77,7 @@ const items: Item[] = [
     border-radius: 14px;
     background: var(--surface);
     color: var(--ink);
-    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 24px 64px var(--shadow);
     overflow: hidden;
     flex-direction: column;
   }
@@ -108,7 +87,7 @@ const items: Item[] = [
   }
 
   .palette::backdrop {
-    background: rgba(15, 15, 14, 0.45);
+    background: var(--backdrop);
     backdrop-filter: blur(2px);
   }
 
@@ -172,6 +151,11 @@ const items: Item[] = [
     color: var(--muted);
   }
 
+  .palette__hint--select {
+    user-select: all;
+    color: var(--ink);
+  }
+
   .palette__label {
     overflow: hidden;
     text-overflow: ellipsis;
@@ -197,34 +181,38 @@ const items: Item[] = [
 
 <script>
   import { toggleTheme } from '../lib/theme';
-  import { fill, matchesQuery, wrapIndex } from '../lib/filters';
+  import { formatCount, matchesQuery, readPlural, wrapIndex } from '../lib/filters';
 
   const dialog = document.querySelector<HTMLDialogElement>('[data-palette]')!;
   const input = dialog.querySelector<HTMLInputElement>('[data-palette-input]')!;
   const options = [...dialog.querySelectorAll<HTMLLIElement>('[role="option"]')];
-  const empty = dialog.querySelector<HTMLElement>('[data-palette-empty]')!;
-  const status = dialog.querySelector<HTMLElement>('[data-palette-status]')!;
+  const emptyMessage = dialog.querySelector<HTMLElement>('[data-palette-empty]')!;
+  const status = document.querySelector<HTMLElement>('[data-palette-status]')!;
+  const resultsLabel = readPlural(dialog.dataset.results);
   const email = dialog.dataset.email ?? '';
-  let active = 0;
+  let activeIndex = 0;
 
-  const visible = () => options.filter((o) => !o.hidden);
+  const visibleOptions = () => options.filter((option) => !option.hidden);
 
   function highlight(index: number) {
-    const list = visible();
-    if (!list.length) return;
-    active = wrapIndex(index, list.length);
-    options.forEach((o) => o.setAttribute('aria-selected', 'false'));
-    const current = list[active];
-    current.setAttribute('aria-selected', 'true');
-    input.setAttribute('aria-activedescendant', current.id);
-    current.scrollIntoView({ block: 'nearest' });
+    const visible = visibleOptions();
+    if (!visible.length) {
+      input.removeAttribute('aria-activedescendant');
+      return;
+    }
+    activeIndex = wrapIndex(index, visible.length);
+    options.forEach((option) => option.setAttribute('aria-selected', 'false'));
+    const active = visible[activeIndex];
+    active.setAttribute('aria-selected', 'true');
+    input.setAttribute('aria-activedescendant', active.id);
+    active.scrollIntoView({ block: 'nearest' });
   }
 
   function filter() {
-    for (const o of options) o.hidden = !matchesQuery(o.dataset.label ?? '', input.value);
-    const count = visible().length;
-    empty.hidden = count > 0;
-    status.textContent = fill(dialog.dataset.results ?? '', count);
+    for (const option of options) option.hidden = !matchesQuery(option.dataset.label ?? '', input.value);
+    const count = visibleOptions().length;
+    emptyMessage.hidden = count > 0;
+    status.textContent = formatCount(resultsLabel, count);
     highlight(0);
   }
 
@@ -235,59 +223,71 @@ const items: Item[] = [
     input.focus();
   }
 
-  async function run(option: HTMLLIElement) {
-    const { href, action } = option.dataset;
-    if (href) {
-      dialog.close();
-      // Other sites open in a new tab; own sections and pages, in the same one.
-      const external = /^https?:/.test(href) && new URL(href).host !== location.host;
-      if (external) window.open(href, '_blank', 'noopener');
-      else location.href = href;
-      return;
+  async function copyEmail(option: HTMLLIElement) {
+    const hint = option.querySelector<HTMLElement>('[data-hint]');
+    try {
+      await navigator.clipboard.writeText(email);
+      const copied = dialog.dataset.copied ?? '';
+      status.textContent = copied;
+      // Show the confirmation for a moment before closing.
+      if (hint) hint.textContent = `✓ ${copied}`;
+      setTimeout(() => {
+        dialog.close();
+        if (hint) hint.textContent = email;
+      }, 900);
+    } catch {
+      // No clipboard access: keep the dialog open so the address can be copied by hand.
+      hint?.classList.add('palette__hint--select');
     }
-    if (action === 'theme') toggleTheme();
-    if (action === 'copy-email') {
-      try {
-        await navigator.clipboard.writeText(email);
-        status.textContent = dialog.dataset.copied ?? '';
-      } catch {
-        status.textContent = email;
-      }
-    }
-    dialog.close();
   }
 
-  document.addEventListener('keydown', (e) => {
-    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
-      e.preventDefault();
-      dialog.open ? dialog.close() : open();
+  function run(option: HTMLLIElement) {
+    const { href, action } = option.dataset;
+    if (action === 'copy-email') {
+      copyEmail(option);
+      return;
+    }
+    dialog.close();
+    if (action === 'theme') toggleTheme();
+    if (!href) return;
+    // Other sites open in a new tab; own sections and pages, in the same one.
+    const external = /^https?:/.test(href) && new URL(href).host !== location.host;
+    if (external) window.open(href, '_blank', 'noopener');
+    else location.href = href;
+  }
+
+  document.addEventListener('keydown', (event) => {
+    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+      event.preventDefault();
+      if (dialog.open) dialog.close();
+      else open();
     }
   });
 
-  for (const btn of document.querySelectorAll('[data-open-palette]')) btn.addEventListener('click', open);
+  for (const button of document.querySelectorAll('[data-open-palette]')) button.addEventListener('click', open);
 
   input.addEventListener('input', filter);
-  input.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowDown') {
-      e.preventDefault();
-      highlight(active + 1);
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      highlight(active - 1);
-    } else if (e.key === 'Enter') {
-      e.preventDefault();
-      const current = visible()[active];
-      if (current) run(current);
+  input.addEventListener('keydown', (event) => {
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      highlight(activeIndex + 1);
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      highlight(activeIndex - 1);
+    } else if (event.key === 'Enter') {
+      event.preventDefault();
+      const active = visibleOptions()[activeIndex];
+      if (active) run(active);
     }
   });
 
-  for (const o of options) {
-    o.addEventListener('click', () => run(o));
-    o.addEventListener('mousemove', () => highlight(visible().indexOf(o)));
+  for (const option of options) {
+    option.addEventListener('click', () => run(option));
+    option.addEventListener('mousemove', () => highlight(visibleOptions().indexOf(option)));
   }
 
   // Close when clicking outside the box.
-  dialog.addEventListener('click', (e) => {
-    if (e.target === dialog) dialog.close();
+  dialog.addEventListener('click', (event) => {
+    if (event.target === dialog) dialog.close();
   });
 </script>

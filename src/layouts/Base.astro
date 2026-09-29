@@ -2,23 +2,29 @@
 import '../styles/global.css';
 import CommandPalette from '../components/CommandPalette.astro';
 import { profile } from '../data/profile';
-import { href, langFromPath, locale, otherLang } from '../i18n';
-import { useT } from '../i18n/ui';
+import { href, locale } from '../i18n';
+import { getI18n } from '../i18n/ui';
+import { alternateLinks, pageTitle } from '../lib/seo';
 
 interface Props {
   title?: string;
   description?: string;
   /** Same page in the other language; defaults to its home page. */
   alternate?: string;
+  /** Keep the page out of search results (the 404), with no canonical or translations. */
+  noindex?: boolean;
 }
 
-const lang = langFromPath(Astro.url.pathname);
-const other = otherLang(lang);
-const t = useT(lang);
-const { title, description = profile.description[lang], alternate = href(other, { name: 'home' }) } = Astro.props;
-const fullTitle = title ? `${title} · ${profile.name}` : `${profile.name} · ${profile.role}`;
-const canonical = new URL(Astro.url.pathname, Astro.site);
-const alternates = { [lang]: canonical, [other]: new URL(alternate, Astro.site) };
+const { lang, otherLang, ui } = getI18n(Astro.url);
+const {
+  title,
+  description = profile.description[lang],
+  alternate = href(otherLang, { name: 'home' }),
+  noindex = false,
+} = Astro.props;
+const site = Astro.site!;
+const fullTitle = pageTitle(title, profile.name, profile.role);
+const canonical = new URL(Astro.url.pathname, site);
 // Share card (1200×630) with photo, name and role; social networks need an absolute URL.
 const ogImage = new URL('/og.jpg', Astro.site);
 ---
@@ -30,9 +36,18 @@ const ogImage = new URL('/og.jpg', Astro.site);
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
-    <link rel="canonical" href={canonical} />
-    {Object.entries(alternates).map(([l, url]) => <link rel="alternate" hreflang={l} href={url} />)}
-    <link rel="alternate" hreflang="x-default" href={alternates.es} />
+    {
+      noindex ? (
+        <meta name="robots" content="noindex" />
+      ) : (
+        <>
+          <link rel="canonical" href={canonical} />
+          {alternateLinks(site, Astro.url.pathname, lang, alternate).map((link) => (
+            <link rel="alternate" hreflang={link.hreflang} href={link.href} />
+          ))}
+        </>
+      )
+    }
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="sitemap" href="/sitemap-index.xml" />
     <meta name="theme-color" content="#f6f4ee" media="(prefers-color-scheme: light)" />
@@ -40,37 +55,37 @@ const ogImage = new URL('/og.jpg', Astro.site);
 
     <meta property="og:type" content="website" />
     <meta property="og:locale" content={locale[lang].og} />
-    <meta property="og:locale:alternate" content={locale[other].og} />
+    <meta property="og:locale:alternate" content={locale[otherLang].og} />
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content={ogImage} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content={`${profile.name}, ${t.roleAt(profile.role, profile.current)}`} />
+    <meta property="og:image:alt" content={`${profile.name}, ${ui.roleAt(profile.role, profile.current)}`} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content={ogImage} />
 
     <!-- Apply the saved theme before first paint to avoid a flash -->
     <script is:inline>
       try {
-        const t = localStorage.getItem('theme');
-        if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
-      } catch (e) {}
+        const theme = localStorage.getItem('theme');
+        if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
+      } catch (error) {}
     </script>
     <slot name="head" />
   </head>
   <body>
-    <a class="skip-link" href="#contenido">{t.skipToContent}</a>
+    <a class="skip-link" href="#contenido">{ui.skipToContent}</a>
     <slot />
     <CommandPalette alternate={alternate} />
 
     <!-- Safety net: every link to another site opens in a new tab, MDX content included -->
     <script>
-      for (const a of document.querySelectorAll<HTMLAnchorElement>('a[href^="http"]')) {
-        if (a.host === location.host || a.target) continue;
-        a.target = '_blank';
-        a.relList.add('noopener');
+      for (const link of document.querySelectorAll<HTMLAnchorElement>('a[href^="http"]')) {
+        if (link.host === location.host || link.target) continue;
+        link.target = '_blank';
+        link.relList.add('noopener');
       }
     </script>
   </body>

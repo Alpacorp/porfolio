@@ -4,9 +4,9 @@ import { getCompanies } from '../../lib/experience';
 
 export async function getStaticPaths() {
   const companies = await getCompanies('es');
-  return companies.map((entry, i) => ({
+  return companies.map((entry, index) => ({
     params: { id: entry.id },
-    props: { entry, next: companies[(i + 1) % companies.length] },
+    props: { entry, next: companies[(index + 1) % companies.length] },
   }));
 }
 ---

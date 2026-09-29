@@ -2,37 +2,38 @@ import { defineCollection, reference } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
 import { logoIds } from './data/logos';
+import { experienceTags } from './data/career';
 
 /**
- * Un archivo por proyecto. Los que tienen `featured: true` son casos de estudio
- * (su cuerpo MDX es la historia completa y tienen página en /casos/<id>);
- * el resto solo aparece como una línea en el archivo.
+ * One file per project. Those with `featured: true` are case studies (their MDX
+ * body is the full story and they get a page at /casos/<id>); the rest only
+ * appear as a row in the archive.
  */
 const proyectos = defineCollection({
   loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/proyectos' }),
   schema: z.object({
     title: z.string(),
     client: z.string(),
-    /** Agencia o intermediario, p. ej. «BBDO México». */
+    /** Agency or intermediary, e.g. «BBDO México». */
     via: z.string().optional(),
     year: z.number().int().nullable(),
     yearEnd: z.union([z.number().int(), z.literal('hoy')]).optional(),
     sector: z.string(),
     kind: z.enum(['empleo', 'freelance']),
-    /** Bloque freelance de la línea de tiempo al que pertenece. */
+    /** Freelance block of the timeline it belongs to. */
     group: z.enum(['goma', 'bbdo', 'empresas', 'novenas']).optional(),
     stack: z.array(z.string()).default([]),
-    /** Logo del cliente (ver src/data/logos.ts). */
+    /** Client logo (see src/data/logos.ts). */
     logo: z.enum(logoIds).optional(),
     url: z.url().optional(),
-    /** live = en línea · internal = herramienta interna · replaced = ya reemplazado · offline = ya no existe */
+    /** live = online · internal = internal tool · replaced = since replaced · offline = gone */
     status: z.enum(['live', 'internal', 'replaced', 'offline']).default('live'),
     summary: z.string(),
     featured: z.boolean().default(false),
-    /** Orden de los casos de estudio (menor = primero). */
+    /** Case study order (lower = first). */
     order: z.number().default(99),
     metric: z.object({ value: z.string(), label: z.string() }).optional(),
-    /** Enlaces relacionados (p. ej. las 8 novenas de marca blanca). */
+    /** Related links (e.g. the 8 white-label novenas). */
     links: z
       .array(z.object({ name: z.string(), url: z.url(), note: z.string().optional(), logo: z.enum(logoIds).optional() }))
       .optional(),
@@ -62,7 +63,7 @@ const empresas = defineCollection({
     highlights: z.array(z.string()).min(1).max(3),
     stack: z.array(z.string()).default([]),
     /** Home page experience filters this company belongs to. */
-    filters: z.array(z.string()).default([]),
+    filters: z.array(z.enum(experienceTags)).default([]),
     phases: z
       .array(
         z.object({
@@ -91,8 +92,9 @@ const proyectosEn = defineCollection({
   schema: z.object({
     title: z.string(),
     summary: z.string(),
-    /** Only when the Spanish client is a description rather than a name. */
+    /** Only when the Spanish client or agency name reads differently in English. */
     client: z.string().optional(),
+    via: z.string().optional(),
     metric: z.object({ value: z.string().optional(), label: z.string() }).optional(),
     /** Notes for the `links` list, keyed by the link name. */
     linkNotes: z.record(z.string(), z.string()).optional(),

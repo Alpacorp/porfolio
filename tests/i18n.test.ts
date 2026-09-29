@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import { caseSlug, href, langFromPath, langs, otherLang, section } from '../src/i18n';
-import { sectorName, useT } from '../src/i18n/ui';
+import { getI18n, sectorName, useT } from '../src/i18n/ui';
 
 describe('langFromPath', () => {
   test.each([
@@ -11,8 +11,8 @@ describe('langFromPath', () => {
     ['/en/cases/', 'en'],
     // A Spanish path that merely starts with «en» is not English.
     ['/entregas/', 'es'],
-  ])('%s → %s', (path, lang) => {
-    expect(langFromPath(path)).toBe(lang);
+  ])('%s → %s', (pathname, expected) => {
+    expect(langFromPath(pathname)).toBe(expected);
   });
 });
 
@@ -76,11 +76,28 @@ describe('UI dictionaries', () => {
     }
   });
 
+  test('plural templates carry the count placeholder', () => {
+    for (const lang of langs) {
+      expect(useT(lang).results.one).toContain('{count}');
+      expect(useT(lang).results.other).toContain('{count}');
+    }
+  });
+
   test('interpolated strings', () => {
-    expect(useT('es').countOf(3, 35)).toBe('3 de 35 proyectos');
-    expect(useT('en').countOf(3, 35)).toBe('3 of 35 projects');
+    expect(useT('es').countOf(35)).toEqual({ one: '{count} de 35 proyectos', other: '{count} de 35 proyectos' });
+    expect(useT('en').results).toEqual({ one: '{count} result', other: '{count} results' });
     expect(useT('en').roleAt('Software Engineer', 'Mercado Pago')).toBe('Software Engineer at Mercado Pago');
     expect(useT('es').via('BBDO México')).toBe('vía BBDO México');
+  });
+});
+
+describe('getI18n', () => {
+  test('reads the language from the URL and pairs it with its dictionary', () => {
+    const english = getI18n(new URL('https://alpacorp.net/en/cases/'));
+    expect(english.lang).toBe('en');
+    expect(english.otherLang).toBe('es');
+    expect(english.ui).toBe(useT('en'));
+    expect(getI18n(new URL('https://alpacorp.net/casos/')).lang).toBe('es');
   });
 });
 

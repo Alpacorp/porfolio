@@ -7,13 +7,13 @@ import Experience from '../components/sections/Experience.astro';
 import Education from '../components/sections/Education.astro';
 import Contact from '../components/sections/Contact.astro';
 import { getCases, getProjects } from '../lib/projects';
-import { href, langFromPath, otherLang } from '../i18n';
+import { getI18n } from '../i18n/ui';
 
-const lang = langFromPath(Astro.url.pathname);
+const { lang } = getI18n(Astro.url);
 const [projects, cases] = await Promise.all([getProjects(lang), getCases(lang)]);
 ---
 
-<Shell home alternate={href(otherLang(lang), { name: 'home' })}>
+<Shell home>
   <About />
   <Timeline projects={projects} />
   <Cases cases={cases} limit={4} projectsTotal={projects.length} />

@@ -1,58 +1,49 @@
 ---
-import { getEntries } from 'astro:content';
 import Shell from '../layouts/Shell.astro';
 import BackLink from '../components/BackLink.astro';
 import Logo from '../components/Logo.astro';
-import { companyHref, type Company } from '../lib/experience';
-import { formatYears, localize, projectHref, statusLabel } from '../lib/projects';
-import { href, langFromPath, otherLang, section } from '../i18n';
-import { useT } from '../i18n/ui';
+import { companyHref, resolvePhases, type Company } from '../lib/experience';
+import { formatYears, projectHref, statusLabel } from '../lib/projects';
+import { href, section } from '../i18n';
+import { getI18n } from '../i18n/ui';
 
 interface Props {
   entry: Company;
   next: Company;
 }
 
-const lang = langFromPath(Astro.url.pathname);
-const t = useT(lang);
+const { lang, otherLang, ui } = getI18n(Astro.url);
 const { entry, next } = Astro.props;
-const d = entry.data;
-
-// Resolve each phase's project references once, keeping their order.
-const phases = await Promise.all(
-  d.phases.map(async (phase) => ({
-    ...phase,
-    projects: await Promise.all((await getEntries(phase.projects)).map((p) => localize(p, lang))),
-  })),
-);
+const company = entry.data;
+const phases = await resolvePhases(entry, lang);
 ---
 
 <Shell
-  title={`${d.role} · ${d.company}`}
-  description={d.summary}
-  alternate={href(otherLang(lang), { name: 'experience', id: entry.id })}
+  title={`${company.role} · ${company.company}`}
+  description={company.summary}
+  alternate={href(otherLang, { name: 'experience', id: entry.id })}
 >
   <article class="company">
-    <BackLink href={section(lang, 'experiencia')} label={t.allExperience} />
+    <BackLink href={section(lang, 'experiencia')} label={ui.allExperience} />
 
     <header class="header logo-host">
-      <Logo id={d.logo} scale={1.3} class="header__logo" />
+      <Logo id={company.logo} scale={1.3} class="header__logo" />
       <p class="eyebrow">
-        {d.company} · {d.start} — {d.end} · {d.location}
+        {company.company} · {company.start} — {company.end} · {company.location}
       </p>
-      <h1 class="title">
-        {d.role}{' '}
-        {d.current && <span class="now mono">{t.current}</span>}
+      <h1 class="page-title">
+        {company.role}{' '}
+        {company.current && <span class="pill-now">{ui.current}</span>}
       </h1>
-      <p class="summary">{d.summary}</p>
+      <p class="summary">{company.summary}</p>
     </header>
 
     <ul class="highlights">
-      {d.highlights.map((h) => <li>{h}</li>)}
+      {company.highlights.map((highlight) => <li>{highlight}</li>)}
     </ul>
 
     <section class="phases" aria-labelledby="etapas-titulo">
-      <h2 id="etapas-titulo" class="eyebrow">{t.phases}</h2>
+      <h2 id="etapas-titulo" class="eyebrow">{ui.phases}</h2>
       <ol class="phase-list">
         {
           phases.map((phase) => (
@@ -64,24 +55,24 @@ const phases = await Promise.all(
                 <p class="phase__text">{phase.text}</p>
                 {phase.achievements.length > 0 && (
                   <ul class="phase__achievements">
-                    {phase.achievements.map((a) => (
-                      <li>{a}</li>
+                    {phase.achievements.map((achievement) => (
+                      <li>{achievement}</li>
                     ))}
                   </ul>
                 )}
                 {phase.stack.length > 0 && (
-                  <ul class="phase__stack" aria-label={t.technologies}>
-                    {phase.stack.map((t) => (
-                      <li class="tag">{t}</li>
+                  <ul class="phase__stack" aria-label={ui.technologies}>
+                    {phase.stack.map((technology) => (
+                      <li class="tag">{technology}</li>
                     ))}
                   </ul>
                 )}
                 {phase.projects.length > 0 && (
                   <div class="phase__projects">
-                    <p class="eyebrow">{t.phaseProjects}</p>
+                    <p class="eyebrow">{ui.phaseProjects}</p>
                     <ul>
-                      {phase.projects.map((p) => {
-                        const link = projectHref(p, lang);
+                      {phase.projects.map((project) => {
+                        const link = projectHref(project, lang);
                         return (
                           <li class="project logo-host">
                             <div class="project__main">
@@ -91,21 +82,21 @@ const phases = await Promise.all(
                                   href={link.href}
                                   {...(link.external ? { rel: 'noopener', target: '_blank' } : {})}
                                 >
-                                  {p.data.title} <span aria-hidden="true">{link.external ? '↗' : '→'}</span>
-                                  {link.external && <span class="sr-only">{t.opensNewTab}</span>}
+                                  {project.data.title} <span aria-hidden="true">{link.external ? '↗' : '→'}</span>
+                                  {link.external && <span class="sr-only">{ui.opensNewTab}</span>}
                                 </a>
                               ) : (
-                                <span class="project__title">{p.data.title}</span>
+                                <span class="project__title">{project.data.title}</span>
                               )}
-                              <p class="muted project__summary">{p.data.summary}</p>
+                              <p class="muted project__summary">{project.data.summary}</p>
                             </div>
                             <p class="mono muted project__meta">
-                              {p.data.featured ? (
-                                <span class="badge-case">{t.caseBadge}</span>
+                              {project.data.featured ? (
+                                <span class="badge-case">{ui.caseBadge}</span>
                               ) : (
-                                p.data.status !== 'live' && statusLabel(p.data.status, lang)
+                                project.data.status !== 'live' && statusLabel(project.data.status, lang)
                               )}
-                              <span>{formatYears(p.data, lang)}</span>
+                              <span>{formatYears(project.data, lang)}</span>
                             </p>
                           </li>
                         );
@@ -122,9 +113,9 @@ const phases = await Promise.all(
 
     {
       next.id !== entry.id && (
-        <nav class="next card card--interactive logo-host" aria-label={t.nextExperience}>
+        <nav class="next card card--interactive logo-host" aria-label={ui.nextExperience}>
           <a href={companyHref(next, lang)}>
-            <span class="eyebrow">{t.nextExperience}</span>
+            <span class="eyebrow">{ui.nextExperience}</span>
             <span class="next__row">
               <Logo id={next.data.logo} scale={0.9} />
               <span class="next__title">
@@ -146,7 +137,6 @@ const phases = await Promise.all(
     max-width: 780px;
   }
 
-
   .header {
     display: flex;
     flex-direction: column;
@@ -157,23 +147,16 @@ const phases = await Promise.all(
     margin-bottom: 4px;
   }
 
-  .title {
+  /* A notch smaller than other pages: role titles run long */
+  .company .page-title {
     font-size: clamp(32px, 5vw, 48px);
     line-height: 1.08;
-    font-weight: 700;
-    letter-spacing: -0.035em;
   }
 
-  .now {
-    display: inline-block;
-    vertical-align: middle;
+  .page-title .pill-now {
     margin-left: 10px;
     padding: 4px 10px;
-    border-radius: 999px;
-    background: var(--yellow);
-    color: var(--on-yellow);
     font-size: 12px;
-    font-weight: 500;
     letter-spacing: 0;
   }
 
@@ -253,7 +236,7 @@ const phases = await Promise.all(
   }
 
   .phase:target .phase__title {
-    background: linear-gradient(transparent 56%, var(--hl) 56%, var(--hl) 94%, transparent 94%);
+    background: var(--hl-band);
   }
 
   .phase__period {

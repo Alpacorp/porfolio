@@ -1,52 +1,62 @@
 ---
 /**
- * Logo de empresa o cliente (decorativo: el nombre siempre aparece también como texto).
+ * Company or client logo (decorative: the name always appears as text too).
  *
- * - En reposo: monocromo en el color del texto, pintado con una máscara
- *   (<id>.mono.webp), así funciona igual en claro y en oscuro.
- * - Al pasar el cursor por el elemento contenedor con clase `logo-host`: el
- *   original a color (<id>.webp), solo en tema claro. Reglas en global.css.
+ * - At rest: monochrome in the text color, painted through a mask
+ *   (<id>.mono.webp), so it works the same in light and dark.
+ * - On hover of the enclosing `logo-host` element: the original in color
+ *   (<id>.webp), light theme only. Rules in global.css.
  *
- * Registro, tamaños y fuentes: src/data/logos.ts.
+ * Both images are resized to twice the displayed height (sharp on retina, a
+ * fraction of the original weight). Registry, sizes and sources: src/data/logos.ts.
  */
+import { getImage } from 'astro:assets';
 import { logos, type LogoId } from '../data/logos';
 
 interface Props {
   id: LogoId;
-  /** Multiplica el alto configurado (p. ej. 0.8 en listas compactas). */
+  /** Multiplies the configured height (e.g. 0.8 in compact lists). */
   scale?: number;
   class?: string;
 }
 
-// Importar la imagen da su URL y sus dimensiones: así el espacio se reserva antes de cargarla.
+// Importing the image gives its URL and dimensions, so the space is reserved before it loads.
 const files = import.meta.glob<ImageMetadata>('../assets/logos/*.webp', { eager: true, import: 'default' });
-const file = (name: string) => files[`../assets/logos/${name}.webp`];
+const findFile = (name: string) => files[`../assets/logos/${name}.webp`];
 
 const { id, scale = 1, class: className } = Astro.props;
 const config: { height: number; hoverColor?: boolean } = logos[id];
 const height = Math.round(config.height * scale);
-const color = id === 'alpacorp' ? undefined : file(id);
-const mono = id === 'alpacorp' ? undefined : file(`${id}.mono`);
+const isOwnBrand = id === 'alpacorp';
+const showsColor = config.hoverColor !== false;
 
-if (id !== 'alpacorp' && (!color || !mono)) {
-  throw new Error(`Faltan los archivos del logo «${id}» en src/assets/logos/`);
+const colorFile = isOwnBrand ? undefined : findFile(id);
+const monoFile = isOwnBrand ? undefined : findFile(`${id}.mono`);
+if (!isOwnBrand && (!colorFile || !monoFile)) {
+  throw new Error(`Missing logo files for «${id}» in src/assets/logos/`);
 }
-const width = color ? Math.round((height * color.width) / color.height) : 0;
+const width = colorFile ? Math.round((height * colorFile.width) / colorFile.height) : 0;
+const resize = (file: ImageMetadata) => getImage({ src: file, height: height * 2, format: 'webp' });
+const mono = monoFile && (await resize(monoFile));
+// Logos whose original is white never show it, so it isn't downloaded at all.
+const color = colorFile && showsColor ? await resize(colorFile) : undefined;
 ---
 
 {
-  id === 'alpacorp' ? (
+  isOwnBrand ? (
     <span class:list={['logo', 'logo--alpacorp', className]} style={`--h: ${height}px`} aria-hidden="true">
       <span class="logo__a">A</span>
       <span class="logo__word">alpacorp</span>
     </span>
   ) : (
     <span
-      class:list={['logo', className, { 'logo--color': config.hoverColor !== false }]}
+      class:list={['logo', className, { 'logo--color': showsColor }]}
       style={`--h: ${height}px; width: ${width}px; --mono: url('${mono!.src}')`}
       aria-hidden="true"
     >
-      <img class="logo__color" src={color!.src} width={width} height={height} alt="" loading="lazy" decoding="async" />
+      {color && (
+        <img class="logo__color" src={color.src} width={width} height={height} alt="" loading="lazy" decoding="async" />
+      )}
       <span class="logo__mono" />
     </span>
   )
@@ -60,12 +70,12 @@ const width = color ? Math.round((height * color.width) / color.height) : 0;
     line-height: 0;
     flex-shrink: 0;
     vertical-align: middle;
-    /* Dentro de grid/flex no debe estirarse ni centrarse: el ancho lo da la proporción del logo */
+    /* Inside grid/flex it must not stretch or centre: its width comes from the logo's ratio */
     justify-self: start;
     align-self: flex-start;
   }
 
-  /* El original fija el tamaño (alto fijo, ancho según su proporción); invisible en reposo */
+  /* The color original fills the box set on .logo; invisible at rest */
   .logo__color {
     height: 100%;
     width: auto;
@@ -97,7 +107,7 @@ const width = color ? Math.round((height * color.width) / color.height) : 0;
     height: 100%;
     aspect-ratio: 1;
     border-radius: 5px;
-    /* Es la marca propia: mismo cuadro amarillo que el encabezado del sitio */
+    /* The own brand: the same yellow square as the site header */
     background: var(--yellow);
     color: var(--on-yellow);
     font-weight: 800;

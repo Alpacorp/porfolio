@@ -1,134 +1,104 @@
 ---
 import Logo from './Logo.astro';
-import { formatYears, projectHref, statusLabel, type Project } from '../lib/projects';
-import { langFromPath } from '../i18n';
-import { sectorName, useT } from '../i18n/ui';
-import { N } from '../lib/filters';
+import {
+  formatYears,
+  kindKey,
+  projectHref,
+  searchText,
+  sectorOptions,
+  statusLabel,
+  type Project,
+} from '../lib/projects';
+import { getI18n, sectorName } from '../i18n/ui';
+import { formatCount } from '../lib/filters';
 
 interface Props {
   projects: Project[];
-  /** Total for the counter («X of N»). */
-  total: number;
-  /** Full page: adds the search box and the sector filter. */
-  full?: boolean;
-  /** The home page shows a short preview without filters: filtering a partial list is misleading. */
-  filters?: boolean;
 }
 
-const { projects, total, full = false, filters: showFilters = true } = Astro.props;
-const lang = langFromPath(Astro.url.pathname);
-const t = useT(lang);
-const sectors = [...new Set(projects.map((p) => p.data.sector))]
-  .map((key) => ({ key, name: sectorName(key, lang) }))
-  .sort((a, b) => a.name.localeCompare(b.name, lang));
+const { projects } = Astro.props;
+const { lang, ui } = getI18n(Astro.url);
 // Keys stay in Spanish: they match the data and the ?tipo= deep links.
-const filters = [
-  { key: 'Todo', label: t.filterAll },
-  { key: 'Casos', label: t.filterCases },
-  { key: 'Empleo', label: t.employment },
-  { key: 'Freelance', label: t.freelance },
+const kindFilters = [
+  { key: 'Todo', label: ui.filterAll },
+  { key: 'Casos', label: ui.filterCases },
+  { key: 'Empleo', label: ui.employment },
+  { key: 'Freelance', label: ui.freelance },
 ];
 ---
 
 <div class="archive" data-archive>
   <div class="toolbar">
-    {showFilters && (
-    <div class="filters" role="group" aria-label={t.filterProjects}>
+    <div class="filters" role="group" aria-label={ui.filterProjects}>
       {
-        filters.map((f, i) => (
-          <button class="chip" type="button" aria-pressed={i === 0 ? "true" : "false"} data-kind={f.key}>
-            {f.label}
+        kindFilters.map((filter, index) => (
+          <button class="chip" type="button" aria-pressed={index === 0 ? 'true' : 'false'} data-kind={filter.key}>
+            {filter.label}
           </button>
         ))
       }
     </div>
-    )}
-    {
-      full && (
-        <div class="search">
-          <label class="sr-only" for="archive-search">{t.searchLabel}</label>
-          <input
-            id="archive-search"
-            type="search"
-            placeholder={t.searchPlaceholder}
-            autocomplete="off"
-            data-search
-          />
-          <label class="sr-only" for="archive-sector">{t.sector}</label>
-          <select id="archive-sector" data-sector>
-            <option value="">{t.allSectors}</option>
-            {sectors.map((s) => <option value={s.key}>{s.name}</option>)}
-          </select>
-        </div>
-      )
-    }
-    {
-      showFilters ? (
-        <p
-          class="count mono muted"
-          aria-live="polite"
-          data-count
-          data-template={t.countOf(N, total)}
-        >
-          {t.countOf(projects.length, total)}
-        </p>
-      ) : (
-        <p class="count mono muted">{t.latestOf(projects.length, total)}</p>
-      )
-    }
+    <div class="search">
+      <label class="sr-only" for="archive-search">{ui.searchLabel}</label>
+      <input id="archive-search" type="search" placeholder={ui.searchPlaceholder} autocomplete="off" data-search />
+      <label class="sr-only" for="archive-sector">{ui.sector}</label>
+      <select id="archive-sector" data-sector>
+        <option value="">{ui.allSectors}</option>
+        {sectorOptions(projects, lang).map((sector) => <option value={sector.key}>{sector.name}</option>)}
+      </select>
+    </div>
+    <p class="count mono muted" aria-live="polite" data-count data-template={JSON.stringify(ui.countOf(projects.length))}>
+      {formatCount(ui.countOf(projects.length), projects.length)}
+    </p>
   </div>
 
   <table class="table">
     <thead class="mono">
       <tr>
-        <th scope="col">{t.colYear}</th>
-        <th scope="col" class="col-logo"><span class="sr-only">{t.colClient}</span></th>
-        <th scope="col">{t.colProject}</th>
-        <th scope="col" class="col-sector">{t.colSector}</th>
-        <th scope="col" class="col-stack">{t.colStack}</th>
-        <th scope="col"><span class="sr-only">{t.colLink}</span></th>
+        <th scope="col">{ui.colYear}</th>
+        <th scope="col" class="col-logo"><span class="sr-only">{ui.colClient}</span></th>
+        <th scope="col">{ui.colProject}</th>
+        <th scope="col" class="col-sector">{ui.colSector}</th>
+        <th scope="col" class="col-stack">{ui.colStack}</th>
+        <th scope="col"><span class="sr-only">{ui.colLink}</span></th>
       </tr>
     </thead>
     <tbody>
       {
-        projects.map((p) => {
-          const link = projectHref(p, lang);
-          const sector = sectorName(p.data.sector, lang);
-          const search = [p.data.title, p.data.client, p.data.via, sector, ...p.data.stack]
-            .filter(Boolean)
-            .join(' ')
-            .toLowerCase();
+        projects.map((project) => {
+          const { data } = project;
+          const link = projectHref(project, lang);
           return (
             <tr
               class="logo-host"
               data-row
-              data-kind={p.data.kind === 'empleo' ? 'Empleo' : 'Freelance'}
-              data-case={String(p.data.featured)}
-              data-sector={p.data.sector}
-              data-search={search}
+              data-kind={kindKey(project)}
+              data-case={String(data.featured)}
+              data-sector={data.sector}
+              data-search={searchText(project, lang)}
             >
-              <td class="mono muted col-year">{formatYears(p.data, lang)}</td>
-              <td class="col-logo">{p.data.logo && <Logo id={p.data.logo} scale={0.7} />}</td>
+              <td class="mono muted col-year">{formatYears(data, lang)}</td>
+              <td class="col-logo">{data.logo && <Logo id={data.logo} scale={0.7} />}</td>
               <td>
                 {link ? (
                   <a class="row-link" href={link.href} {...(link.external ? { rel: 'noopener', target: '_blank' } : {})}>
-                    {p.data.title}
-                    {link.external && <span class="sr-only">{t.opensNewTab}</span>}
+                    {data.title}
+                    {link.external && <span class="sr-only">{ui.opensNewTab}</span>}
                   </a>
                 ) : (
-                  <span class="row-title">{p.data.title}</span>
+                  <span class="row-title">{data.title}</span>
                 )}
                 <span class="client mono muted">
-                  {p.data.client}
-                  {p.data.via && ` · ${t.via(p.data.via)}`}
-                  {!link && p.data.status !== 'live' && ` · ${statusLabel(p.data.status, lang).toLowerCase()}`}
+                  {data.client}
+                  {data.via && ` · ${ui.via(data.via)}`}
+                  {!link && data.status !== 'live' && ` · ${statusLabel(data.status, lang).toLowerCase()}`}
                 </span>
               </td>
-              <td class="muted col-sector">{sector}</td>
-              <td class="mono muted col-stack">{p.data.stack.slice(0, 3).join(', ')}</td>
+              <td class="muted col-sector">{sectorName(data.sector, lang)}</td>
+              <td class="mono muted col-stack">{data.stack.slice(0, 3).join(', ')}</td>
               <td class="col-mark mono">
-                {p.data.featured ? (
-                  <span class="badge-case">{t.caseBadge}</span>
+                {data.featured ? (
+                  <span class="badge-case">{ui.caseBadge}</span>
                 ) : link ? (
                   <span class="muted" aria-hidden="true">↗</span>
                 ) : null}
@@ -139,7 +109,7 @@ const filters = [
       }
     </tbody>
   </table>
-  <p class="empty mono muted" data-empty hidden>{t.noMatches}</p>
+  <p class="empty mono muted" data-empty hidden>{ui.noMatches}</p>
 </div>
 
 <style>
@@ -265,7 +235,7 @@ const filters = [
     text-decoration-color: var(--mag);
   }
 
-  /* Toda la fila es clicable a través de su enlace */
+  /* The whole row is clickable through its link */
   tbody tr:has(.row-link) {
     cursor: pointer;
   }
@@ -294,55 +264,52 @@ const filters = [
 </style>
 
 <script>
-  import { fill, matchesArchive } from '../lib/filters';
+  import { formatCount, matchesArchive, readPlural } from '../lib/filters';
 
-  for (const root of document.querySelectorAll<HTMLElement>('[data-archive]')) {
+  const root = document.querySelector<HTMLElement>('[data-archive]');
+  if (root) {
     // Rows also carry data-kind / data-search / data-sector, so target the controls by tag.
     const rows = [...root.querySelectorAll<HTMLTableRowElement>('tr[data-row]')];
     const chips = [...root.querySelectorAll<HTMLButtonElement>('button[data-kind]')];
-    const search = root.querySelector<HTMLInputElement>('input[data-search]');
-    const sector = root.querySelector<HTMLSelectElement>('select[data-sector]');
-    const count = root.querySelector<HTMLElement>('[data-count]');
-    const empty = root.querySelector<HTMLElement>('[data-empty]');
+    const search = root.querySelector<HTMLInputElement>('input[data-search]')!;
+    const sector = root.querySelector<HTMLSelectElement>('select[data-sector]')!;
+    const count = root.querySelector<HTMLElement>('[data-count]')!;
+    const emptyMessage = root.querySelector<HTMLElement>('[data-empty]')!;
+    const countLabel = readPlural(count.dataset.template);
+    let kind = 'Todo';
 
-    // Filters only exist on the full archive page.
-    if (count && empty) {
-      const template = count.dataset.template ?? '';
-      let kind = 'Todo';
-
-      const apply = () => {
-        const query = { kind, sector: sector?.value ?? '', text: search?.value ?? '' };
-        let shown = 0;
-        for (const row of rows) {
-          const { kind: rowKind = '', case: isCase, sector: rowSector = '', search: text = '' } = row.dataset;
-          row.hidden = !matchesArchive({ kind: rowKind, isCase: isCase === 'true', sector: rowSector, search: text }, query);
-          if (!row.hidden) shown++;
-        }
-        count.textContent = fill(template, shown);
-        empty.hidden = shown > 0;
-      };
-
-      for (const chip of chips) {
-        chip.addEventListener('click', () => {
-          kind = chip.dataset.kind!;
-          chips.forEach((c) => c.setAttribute('aria-pressed', String(c === chip)));
-          apply();
-        });
+    const apply = () => {
+      const query = { kind, sector: sector.value, text: search.value };
+      let shown = 0;
+      for (const row of rows) {
+        const { kind: rowKind = '', case: isCase, sector: rowSector = '', search: rowText = '' } = row.dataset;
+        row.hidden = !matchesArchive({ kind: rowKind, isCase: isCase === 'true', sector: rowSector, search: rowText }, query);
+        if (!row.hidden) shown++;
       }
-      search?.addEventListener('input', apply);
-      sector?.addEventListener('change', apply);
+      count.textContent = formatCount(countLabel, shown);
+      emptyMessage.hidden = shown > 0;
+    };
 
-      // Deep link from elsewhere (e.g. the timeline): ?tipo=Freelance preselects that filter.
-      const preset = new URLSearchParams(location.search).get('tipo');
-      chips.find((c) => c.dataset.kind === preset)?.click();
+    for (const chip of chips) {
+      chip.addEventListener('click', () => {
+        kind = chip.dataset.kind!;
+        chips.forEach((other) => other.setAttribute('aria-pressed', String(other === chip)));
+        apply();
+      });
     }
+    search.addEventListener('input', apply);
+    sector.addEventListener('change', apply);
+
+    // Deep link from elsewhere (e.g. the timeline): ?tipo=Freelance preselects that filter.
+    const preset = new URLSearchParams(location.search).get('tipo');
+    chips.find((chip) => chip.dataset.kind === preset)?.click();
 
     // Clicking anywhere on a row follows its link.
     for (const row of rows) {
       const link = row.querySelector<HTMLAnchorElement>('.row-link');
       if (!link) continue;
-      row.addEventListener('click', (e) => {
-        if ((e.target as HTMLElement).closest('a')) return;
+      row.addEventListener('click', (event) => {
+        if ((event.target as HTMLElement).closest('a')) return;
         link.click();
       });
     }

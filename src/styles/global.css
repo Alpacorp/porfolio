@@ -2,51 +2,43 @@
 @import '@fontsource-variable/geist-mono';
 
 /* ------------------------------------------------------------------
-   Tokens · concepto «Papel y resaltador»
-   Claro = papel · Oscuro = tinta · Amarillo = resaltador · Magenta = interacción
+   Tokens · «Paper and highlighter» concept
+   Light = paper · Dark = ink · Yellow = highlighter · Magenta = interaction
+   Each color is declared once with light-dark(): the theme follows the system
+   unless the visitor picked one (data-theme), which only switches color-scheme.
 ------------------------------------------------------------------- */
 :root {
-  --paper: #f6f4ee;
-  --surface: #ffffff;
-  --ink: #151515;
-  --muted: #57544e;
-  --line: #dcd7cb;
-  --hl: #ffdd00;
-  --mag: #c4006b;
+  color-scheme: light dark;
 
+  --paper: light-dark(#f6f4ee, #0f0f0e);
+  --surface: light-dark(#ffffff, #181816);
+  --ink: light-dark(#151515, #edeae2);
+  --muted: light-dark(#57544e, #a09c92);
+  --line: light-dark(#dcd7cb, #2e2d29);
+  --hl: light-dark(#ffdd00, rgba(255, 221, 0, 0.34));
+  --mag: light-dark(#c4006b, #ff5cb4);
+  --shadow: light-dark(rgba(0, 0, 0, 0.18), rgba(0, 0, 0, 0.5));
+  --backdrop: rgba(15, 15, 14, 0.45);
+  /* The highlighter: a yellow band across the lower half of the text */
+  --hl-band: linear-gradient(180deg, transparent 56%, var(--hl) 56%, var(--hl) 94%, transparent 94%);
+
+  /* The yellow and the text on it are the same in both themes. */
   --yellow: #ffdd00;
   --on-yellow: #151515;
+  --on-dark: #ffffff;
 
   --font-sans: 'Geist Variable', system-ui, sans-serif;
   --font-mono: 'Geist Mono Variable', ui-monospace, monospace;
 
   --radius: 12px;
   --gutter: clamp(20px, 5vw, 56px);
+}
 
+:root[data-theme='light'] {
   color-scheme: light;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) {
-    --paper: #0f0f0e;
-    --surface: #181816;
-    --ink: #edeae2;
-    --muted: #a09c92;
-    --line: #2e2d29;
-    --hl: rgba(255, 221, 0, 0.34);
-    --mag: #ff5cb4;
-    color-scheme: dark;
-  }
-}
-
 :root[data-theme='dark'] {
-  --paper: #0f0f0e;
-  --surface: #181816;
-  --ink: #edeae2;
-  --muted: #a09c92;
-  --line: #2e2d29;
-  --hl: rgba(255, 221, 0, 0.34);
-  --mag: #ff5cb4;
   color-scheme: dark;
 }
 
@@ -127,7 +119,7 @@ a:hover {
   color: var(--on-yellow);
 }
 
-/* ------------------------------------------------------------------ Utilidades */
+/* ------------------------------------------------------------------ Utilities */
 .mono {
   font-family: var(--font-mono);
 }
@@ -136,15 +128,8 @@ a:hover {
   color: var(--muted);
 }
 
-/* El resaltador: banda amarilla en la mitad inferior del texto */
 .hl {
-  background: linear-gradient(
-    180deg,
-    transparent 56%,
-    var(--hl) 56%,
-    var(--hl) 94%,
-    transparent 94%
-  );
+  background: var(--hl-band);
   padding: 0 3px;
   margin: 0 -3px;
   -webkit-box-decoration-break: clone;
@@ -187,7 +172,7 @@ a:hover {
   top: 16px;
 }
 
-/* Chips / botones de filtro */
+/* Filter chips */
 .chip {
   display: inline-flex;
   align-items: center;
@@ -268,12 +253,12 @@ a.card:hover,
 }
 
 .btn--dark {
-  background: #151515;
+  background: var(--on-yellow);
   color: var(--yellow);
 }
 
 .btn--dark:hover {
-  color: #ffffff;
+  color: var(--on-dark);
 }
 
 .btn--outline {
@@ -284,7 +269,58 @@ a.card:hover,
 
 .btn--outline:hover {
   color: inherit;
-  background: rgba(0, 0, 0, 0.06);
+  background: color-mix(in srgb, currentColor 8%, transparent);
+}
+
+/* ------------------------------------------------------------------ Inner pages
+   Shared by the archive, the case studies and the other pages outside the home. */
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+}
+
+.page-header {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.page-title {
+  font-size: clamp(34px, 5vw, 52px);
+  line-height: 1.05;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+}
+
+.page-lead {
+  font-size: 17px;
+  line-height: 1.55;
+  max-width: 640px;
+}
+
+/* «Read more →» link under a card or panel; tall enough to tap */
+.more-link {
+  align-self: flex-start;
+  display: inline-block;
+  min-height: 44px;
+  padding: 12px 0;
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+
+/* «Current» pill next to a role that is still going on */
+.pill-now {
+  display: inline-block;
+  vertical-align: middle;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--yellow);
+  color: var(--on-yellow);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
 }
 
 .icon-btn {
@@ -306,8 +342,8 @@ a.card:hover,
 }
 
 /* ------------------------------------------------------------------ Logos
-   Monocromos en gris; al pasar el cursor por su contenedor (.logo-host) toman el
-   color del texto y, en tema claro, se revela el original a color. */
+   Monochrome grey at rest; hovering their container (.logo-host) turns them to
+   the text color and, in the light theme, reveals the color original. */
 .logo-host .logo {
   color: var(--muted);
   transition: color 0.2s;
@@ -335,10 +371,14 @@ a.card:hover,
   }
 }
 
-/* ------------------------------------------------------------------ Impresión */
+/* ------------------------------------------------------------------ Print
+   Always paper and ink, whatever the screen theme. */
 @media print {
   :root,
-  :root[data-theme='dark'] {
+  :root[data-theme] {
+    color-scheme: light;
+  }
+  :root {
     --paper: #ffffff;
     --surface: #ffffff;
     --ink: #000000;

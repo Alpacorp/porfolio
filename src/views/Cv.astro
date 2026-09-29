@@ -1,49 +1,48 @@
 ---
 import Base from '../layouts/Base.astro';
 import Icon from '../components/Icon.astro';
+import BackLink from '../components/BackLink.astro';
+import LangSwitch from '../components/LangSwitch.astro';
 import { education, educationLinks, skills } from '../data/career';
 import { getExperienceItems } from '../lib/experience';
 import { profile } from '../data/profile';
 import { getCases } from '../lib/projects';
-import { href, langFromPath, otherLang } from '../i18n';
-import { useT } from '../i18n/ui';
+import { displayUrl } from '../lib/format';
+import { href } from '../i18n';
+import { getI18n } from '../i18n/ui';
 
-const lang = langFromPath(Astro.url.pathname);
-const other = otherLang(lang);
-const t = useT(lang);
+const { lang, otherLang, ui } = getI18n(Astro.url);
 const [allCases, experience] = await Promise.all([getCases(lang), getExperienceItems(lang)]);
 // Employment case studies are already summarised under «Experience»; the printed
 // CV only adds the freelance ones, which have no other place in it.
-const cases = allCases.filter((c) => c.data.kind === 'freelance');
+const cases = allCases.filter((project) => project.data.kind === 'freelance');
 ---
 
-<Base title={t.cvTitle} description={t.cvDescription(profile.fullName, profile.role)} alternate={href(other, { name: 'cv' })}>
+<Base title={ui.cvTitle} description={ui.cvDescription(profile.name, profile.role)} alternate={href(otherLang, { name: 'cv' })}>
   <main id="contenido" class="cv" tabindex="-1">
     <div class="toolbar no-print">
-      <a class="mono back" href={href(lang, { name: 'home' })}><Icon name="arrow-left" size={16} /> alpacorp.net</a>
+      <BackLink href={href(lang, { name: 'home' })} label={profile.site} />
       <div class="toolbar__actions">
-        <a class="icon-btn lang-btn mono" href={href(other, { name: 'cv' })} hreflang={other} lang={other} aria-label={t.switchLanguage} title={t.switchLanguage}>
-          {other.toUpperCase()}
-        </a>
-        <button class="btn btn--dark" type="button" data-print><Icon name="print" size={16} /> {t.print}</button>
+        <LangSwitch href={href(otherLang, { name: 'cv' })} />
+        <button class="btn btn--dark" type="button" data-print><Icon name="print" size={16} /> {ui.print}</button>
       </div>
     </div>
 
     <header class="header">
-      <h1 class="name">{profile.fullName}</h1>
-      <p class="role">{t.roleAt(profile.role, profile.current)}</p>
+      <h1 class="name">{profile.name}</h1>
+      <p class="role">{ui.roleAt(profile.role, profile.current)}</p>
       <p class="focus muted">{profile.focus[lang]}</p>
       <ul class="mono muted contact">
         <li>{profile.location}</li>
         <li><a href={`mailto:${profile.email}`}>{profile.email}</a></li>
-        <li><a href={profile.links.linkedin} rel="noopener" target="_blank">linkedin.com/in/alejandro-palacios88</a></li>
-        <li><a href={profile.links.github} rel="noopener" target="_blank">github.com/Alpacorp</a></li>
+        <li><a href={profile.links.linkedin} rel="noopener" target="_blank">{displayUrl(profile.links.linkedin)}</a></li>
+        <li><a href={profile.links.github} rel="noopener" target="_blank">{displayUrl(profile.links.github)}</a></li>
         <li><a href={href(lang, { name: 'home' })}>{profile.site}</a></li>
       </ul>
     </header>
 
     <section>
-      <h2 class="eyebrow">{t.profileHeading}</h2>
+      <h2 class="eyebrow">{ui.profileHeading}</h2>
       {
         lang === 'es' ? (
           <p>
@@ -64,7 +63,7 @@ const cases = allCases.filter((c) => c.data.kind === 'freelance');
     </section>
 
     <section>
-      <h2 class="eyebrow">{t.experienceHeading}</h2>
+      <h2 class="eyebrow">{ui.experienceHeading}</h2>
       <ol class="list">
         {
           experience.map((job) => (
@@ -77,8 +76,8 @@ const cases = allCases.filter((c) => c.data.kind === 'freelance');
               </div>
               <p>{job.summary}</p>
               <ul class="bullets">
-                {job.highlights.map((h) => (
-                  <li>{h}</li>
+                {job.highlights.map((highlight) => (
+                  <li>{highlight}</li>
                 ))}
               </ul>
               <p class="mono muted small">{job.stack.join(' · ')}</p>
@@ -88,24 +87,24 @@ const cases = allCases.filter((c) => c.data.kind === 'freelance');
       </ol>
     </section>
 
-    <section class="projects">
-      <h2 class="eyebrow">{t.freelanceHighlights}</h2>
+    <section>
+      <h2 class="eyebrow">{ui.freelanceHighlights}</h2>
       <ul class="list">
         {
-          cases.map((c) => (
+          cases.map((project) => (
             <li class="item">
               <div class="item__head">
                 <h3>
-                  <a href={href(lang, { name: 'case', id: c.id })}>{c.data.title}</a>
+                  <a href={href(lang, { name: 'case', id: project.id })}>{project.data.title}</a>
                 </h3>
-                <span class="mono muted">{c.data.client}</span>
+                <span class="mono muted">{project.data.client}</span>
               </div>
-              <p>{c.data.summary}</p>
-              {c.data.metric && (
+              <p>{project.data.summary}</p>
+              {project.data.metric && (
                 <p class="result">
-                  <span class="mono muted">{t.result}</span>
+                  <span class="mono muted">{ui.result}</span>
                   <strong>
-                    {c.data.metric.value} {c.data.metric.label}
+                    {project.data.metric.value} {project.data.metric.label}
                   </strong>
                 </p>
               )}
@@ -117,33 +116,33 @@ const cases = allCases.filter((c) => c.data.kind === 'freelance');
 
     <section class="two-col">
       <div>
-        <h2 class="eyebrow">{t.educationHeading}</h2>
+        <h2 class="eyebrow">{ui.educationHeading}</h2>
         <ul class="list list--tight">
           {
-            education.map((e) => (
+            education.map((degree) => (
               <li class="item">
-                <h3>{e.title[lang]}</h3>
+                <h3>{degree.title[lang]}</h3>
                 <p class="mono muted small">
-                  {e.org} · {e.dates}
+                  {degree.org} · {degree.dates}
                 </p>
               </li>
             ))
           }
         </ul>
         <p class="small links">
-          <a href={educationLinks.education} rel="noopener" target="_blank">{t.educationFull}</a> {t.and}{' '}
-          <a href={educationLinks.certifications} rel="noopener" target="_blank">{t.certificatesLower}</a> {t.on}{' '}
-          <span class="mono">linkedin.com/in/alejandro-palacios88</span>
+          <a href={educationLinks.education} rel="noopener" target="_blank">{ui.educationFull}</a> {ui.and}{' '}
+          <a href={educationLinks.certifications} rel="noopener" target="_blank">{ui.certificatesLower}</a> {ui.on}{' '}
+          <span class="mono">{displayUrl(profile.links.linkedin)}</span>
         </p>
       </div>
       <div>
-        <h2 class="eyebrow">{t.skillsHeading}</h2>
+        <h2 class="eyebrow">{ui.skillsHeading}</h2>
         <dl class="skills">
           {
-            skills[lang].map((s) => (
+            skills[lang].map((skill) => (
               <div>
-                <dt>{s.area}</dt>
-                <dd class="muted">{s.items}</dd>
+                <dt>{skill.area}</dt>
+                <dd class="muted">{skill.items}</dd>
               </div>
             ))
           }
@@ -180,21 +179,7 @@ const cases = allCases.filter((c) => c.data.kind === 'freelance');
     gap: 8px;
   }
 
-  .lang-btn {
-    font-size: 12px;
-    font-weight: 600;
-    text-decoration: none;
-  }
 
-  .back {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    min-height: 44px;
-    font-size: 13px;
-    text-decoration: none;
-    color: var(--muted);
-  }
 
   .header {
     display: flex;
@@ -243,9 +228,6 @@ const cases = allCases.filter((c) => c.data.kind === 'freelance');
     letter-spacing: 0.06em;
   }
 
-  .list--tight {
-    gap: 12px;
-  }
 
   .links a {
     font-weight: 500;
@@ -280,6 +262,10 @@ const cases = allCases.filter((c) => c.data.kind === 'freelance');
     display: flex;
     flex-direction: column;
     gap: 18px;
+  }
+
+  .list--tight {
+    gap: 12px;
   }
 
   .item {
@@ -386,10 +372,6 @@ const cases = allCases.filter((c) => c.data.kind === 'freelance');
     /* Keep section titles with their content instead of forcing page breaks */
     h2 {
       break-after: avoid;
-    }
-    .item,
-    .skills > div {
-      break-inside: avoid;
     }
     @page {
       margin: 12mm 13mm;

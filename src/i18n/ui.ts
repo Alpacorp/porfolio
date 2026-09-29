@@ -1,4 +1,7 @@
-import type { Lang } from './index';
+import { langFromPath, otherLang, type Lang } from './index';
+
+/** A count in singular and plural; `{count}` is replaced by the number. */
+export type Plural = { one: string; other: string };
 
 /**
  * Interface strings. Content (projects, companies, career data) is localised
@@ -12,14 +15,12 @@ const es = {
   photoAlt: (name: string) => `Foto de ${name}`,
   roleAt: (role: string, company: string) => `${role} en ${company}`,
   searchOrNavigate: 'Buscar o navegar',
-  changeTheme: 'Cambiar tema',
+  darkTheme: 'Tema oscuro',
   switchLanguage: 'Read in English',
   opensNewTab: '(abre en otra pestaña)',
   email: 'Correo',
   current: 'Actual',
-  present: 'hoy',
-  /** Counters also take a string, so N ('{n}') yields a template for client scripts. */
-  results: (n: number | string) => `${n} resultados`,
+  results: { one: '{count} resultado', other: '{count} resultados' } as Plural,
   technologies: 'Tecnologías',
 
   // Sections
@@ -42,8 +43,8 @@ const es = {
   today: 'hoy',
 
   // Cases
-  seeAllCases: (n: number) => `Ver los ${n} casos de estudio`,
-  exploreArchive: (n: number) => `Explorar los ${n} proyectos en el archivo`,
+  seeAllCases: (count: number) => `Ver los ${count} casos de estudio`,
+  exploreArchive: (count: number) => `Explorar los ${count} proyectos en el archivo`,
   allCases: 'Todos los casos',
   casesTitle: 'Proyectos contados de principio a fin',
   casesLead: 'El reto, lo que decidí y lo que cambió. Para ver todos los proyectos, incluidos los que no tienen caso,',
@@ -81,6 +82,9 @@ const es = {
 
   // Archive
   archiveEyebrow: 'Archivo',
+  archivePageTitle: 'Archivo de proyectos',
+  archiveDescription: (name: string) => `Todos los proyectos de ${name}: banca, fintech, e-commerce, agencias y freelance.`,
+  casesDescription: (name: string) => `Casos de estudio de ${name}: banca, fintech, e-commerce, agencias y producto.`,
   archiveTitle: 'Todo lo que he construido',
   archiveLead: 'Empleo y freelance en una sola lista. Filtra por tipo o sector, o busca por cliente o tecnología. Los proyectos con',
   archiveLeadEnd: 'tienen su historia completa.',
@@ -91,9 +95,8 @@ const es = {
   searchPlaceholder: 'Buscar cliente, sector o tecnología…',
   sector: 'Sector',
   allSectors: 'Todos los sectores',
-  countOf: (shown: number | string, total: number) => `${shown} de ${total} proyectos`,
-  ofWord: 'de',
-  latestOf: (shown: number, total: number) => `Los ${shown} más recientes de ${total}`,
+  /** «{count} of N projects»: the total is fixed on the server, the count changes on the client. */
+  countOf: (total: number): Plural => ({ one: `{count} de ${total} proyectos`, other: `{count} de ${total} proyectos` }),
   colYear: 'Año',
   colClient: 'Cliente',
   colProject: 'Proyecto',
@@ -119,7 +122,6 @@ const es = {
   copyEmail: 'Copiar correo',
   writeEmail: 'Escribir un correo',
   openLinkedIn: 'Abrir LinkedIn',
-  otherLanguage: 'Read in English',
 
   // CV
   cvTitle: 'CV',
@@ -137,12 +139,18 @@ const es = {
   on: 'en',
 
   // 404
-  notFoundTitle: 'Página no encontrada',
 } as const;
 
-type Dict = { [K in keyof typeof es]: (typeof es)[K] extends (...a: infer A) => string ? (...a: A) => string : string };
+/** English must define every Spanish key with the same shape. */
+type Dictionary = {
+  [Key in keyof typeof es]: (typeof es)[Key] extends (...args: infer Args) => infer Result
+    ? (...args: Args) => Result
+    : (typeof es)[Key] extends string
+      ? string
+      : (typeof es)[Key];
+};
 
-const en: Dict = {
+const en: Dictionary = {
   skipToContent: 'Skip to content',
   home: 'Home',
   sections: 'Sections',
@@ -150,13 +158,12 @@ const en: Dict = {
   photoAlt: (name) => `Photo of ${name}`,
   roleAt: (role, company) => `${role} at ${company}`,
   searchOrNavigate: 'Search or jump to',
-  changeTheme: 'Change theme',
+  darkTheme: 'Dark theme',
   switchLanguage: 'Leer en español',
   opensNewTab: '(opens in a new tab)',
   email: 'Email',
   current: 'Current',
-  present: 'present',
-  results: (n) => `${n} results`,
+  results: { one: '{count} result', other: '{count} results' },
   technologies: 'Technologies',
 
   about: '01 — About',
@@ -176,8 +183,8 @@ const en: Dict = {
   close: 'Close ↑',
   today: 'present',
 
-  seeAllCases: (n) => `See all ${n} case studies`,
-  exploreArchive: (n) => `Browse all ${n} projects in the archive`,
+  seeAllCases: (count) => `See all ${count} case studies`,
+  exploreArchive: (count) => `Browse all ${count} projects in the archive`,
   allCases: 'All case studies',
   casesTitle: 'Projects told from start to finish',
   casesLead: 'The challenge, what I decided and what changed. To see every project, including those without a case study,',
@@ -211,6 +218,9 @@ const en: Dict = {
   cvButton: 'View CV / download PDF',
 
   archiveEyebrow: 'Archive',
+  archivePageTitle: 'Project archive',
+  archiveDescription: (name) => `Every project by ${name}: banking, fintech, e-commerce, agencies and freelance.`,
+  casesDescription: (name) => `Case studies by ${name}: banking, fintech, e-commerce, agencies and product.`,
   archiveTitle: 'Everything I’ve built',
   archiveLead: 'Employment and freelance in one list. Filter by type or sector, or search by client or technology. Projects marked',
   archiveLeadEnd: 'have their full story.',
@@ -221,9 +231,7 @@ const en: Dict = {
   searchPlaceholder: 'Search client, sector or technology…',
   sector: 'Sector',
   allSectors: 'All sectors',
-  countOf: (shown, total) => `${shown} of ${total} projects`,
-  ofWord: 'of',
-  latestOf: (shown, total) => `The ${shown} most recent of ${total}`,
+  countOf: (total) => ({ one: `{count} of ${total} projects`, other: `{count} of ${total} projects` }),
   colYear: 'Year',
   colClient: 'Client',
   colProject: 'Project',
@@ -248,7 +256,6 @@ const en: Dict = {
   copyEmail: 'Copy email',
   writeEmail: 'Write an email',
   openLinkedIn: 'Open LinkedIn',
-  otherLanguage: 'Leer en español',
 
   cvTitle: 'CV',
   cvDescription: (name, role) => `CV of ${name}, ${role}.`,
@@ -264,15 +271,19 @@ const en: Dict = {
   certificatesLower: 'certificates',
   on: 'on',
 
-  notFoundTitle: 'Page not found',
 };
 
-const dict = { es: es as Dict, en };
+const dictionaries: Record<Lang, Dictionary> = { es, en };
 
-export const useT = (lang: Lang) => dict[lang];
-export type T = Dict;
+export const useT = (lang: Lang) => dictionaries[lang];
 
-/** Sector names used in project data (Spanish) → display name per language. */
+/** Language of the current page, the other one, and the UI strings, from its URL. */
+export function getI18n(url: URL) {
+  const lang = langFromPath(url.pathname);
+  return { lang, otherLang: otherLang(lang), ui: dictionaries[lang] };
+}
+
+/** Sector names used in project data (Spanish) → English display name. */
 export const sectorsEn: Record<string, string> = {
   Banca: 'Banking',
   Fintech: 'Fintech',
@@ -295,4 +306,5 @@ export const sectorsEn: Record<string, string> = {
   Varios: 'Various',
 };
 
-export const sectorName = (sector: string, lang: Lang) => (lang === 'en' ? (sectorsEn[sector] ?? sector) : sector);
+export const sectorName = (sector: string, lang: Lang) =>
+  lang === 'en' ? (sectorsEn[sector] ?? sector) : sector;

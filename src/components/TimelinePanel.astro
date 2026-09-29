@@ -1,8 +1,7 @@
 ---
 import Logo from './Logo.astro';
 import type { LogoId } from '../data/logos';
-import { langFromPath } from '../i18n';
-import { useT } from '../i18n/ui';
+import { getI18n } from '../i18n/ui';
 
 interface Props {
   id: string;
@@ -15,10 +14,10 @@ interface Props {
   current?: boolean;
   logo?: LogoId;
   /** Where to keep reading: a case study, an experience entry or the archive. */
-  more?: { href: string; label: string; internal?: boolean };
+  more?: { href: string; label: string };
 }
 
-const t = useT(langFromPath(Astro.url.pathname));
+const { ui } = getI18n(Astro.url);
 const { id, heading, role, org, text, items = [], hidden = false, current = false, logo, more } = Astro.props;
 ---
 
@@ -28,25 +27,25 @@ const { id, heading, role, org, text, items = [], hidden = false, current = fals
     {logo && <Logo id={logo} class="panel-logo" />}
     <h3 class="role">
       {role}
-      {current && <span class="now mono">{t.current}</span>}
+      {current && <span class="pill-now">{ui.current}</span>}
     </h3>
     <p class="mono muted org">{org}</p>
     <p class="muted text">{text}</p>
     {
       items.length > 0 && (
         <ul class="list">
-          {items.map((it) => (
+          {items.map((item) => (
             <li class="logo-host">
-              <span class="slot">{it.logo && <Logo id={it.logo} scale={0.8} />}</span>
-              {it.url ? (
-                <a href={it.url} rel="noopener" target="_blank">
-                  {it.name} <span aria-hidden="true">↗</span>
-                  <span class="sr-only">{t.opensNewTab}</span>
+              <span class="slot">{item.logo && <Logo id={item.logo} scale={0.8} />}</span>
+              {item.url ? (
+                <a href={item.url} rel="noopener" target="_blank">
+                  {item.name} <span aria-hidden="true">↗</span>
+                  <span class="sr-only">{ui.opensNewTab}</span>
                 </a>
               ) : (
-                <span class="name">{it.name}</span>
+                <span class="name">{item.name}</span>
               )}
-              <span class="mono muted note">{it.note}</span>
+              <span class="mono muted note">{item.note}</span>
             </li>
           ))}
         </ul>
@@ -54,8 +53,8 @@ const { id, heading, role, org, text, items = [], hidden = false, current = fals
     }
     {
       more && (
-        <a class="more mono" href={more.href}>
-          {more.label} <span aria-hidden="true">{more.internal ? '↓' : '→'}</span>
+        <a class="more-link" href={more.href}>
+          {more.label} <span aria-hidden="true">→</span>
         </a>
       )
     }
@@ -63,6 +62,10 @@ const { id, heading, role, org, text, items = [], hidden = false, current = fals
 </div>
 
 <style>
+  .role .pill-now {
+    margin-left: 8px;
+  }
+
   .item {
     display: flex;
     flex-direction: column;
@@ -142,13 +145,6 @@ const { id, heading, role, org, text, items = [], hidden = false, current = fals
   }
 
   /* Inline box (not flex) so the underline runs continuously under the text and the arrow */
-  .more {
-    align-self: flex-start;
-    display: inline-block;
-    padding: 12px 0;
-    margin-top: -6px;
-    font-size: 13px;
-  }
 
   .note {
     font-size: 12px;

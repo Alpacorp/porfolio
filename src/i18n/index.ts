@@ -53,21 +53,21 @@ export type Route =
 /** URL of a route in a language, with an optional #hash or ?query suffix. */
 export function href(lang: Lang, route: Route, suffix = ''): string {
   const base = lang === defaultLang ? '/' : `/${lang}/`;
-  const seg = segments[lang];
+  const segment = segments[lang];
   const path = (() => {
     switch (route.name) {
       case 'home':
         return base;
       case 'cases':
-        return `${base}${seg.cases}/`;
+        return `${base}${segment.cases}/`;
       case 'archive':
-        return `${base}${seg.archive}/`;
+        return `${base}${segment.archive}/`;
       case 'cv':
-        return `${base}${seg.cv}/`;
+        return `${base}${segment.cv}/`;
       case 'case':
-        return `${base}${seg.cases}/${caseSlug(route.id, lang)}/`;
+        return `${base}${segment.cases}/${caseSlug(route.id, lang)}/`;
       case 'experience':
-        return `${base}${seg.experience}/${route.id}/`;
+        return `${base}${segment.experience}/${route.id}/`;
     }
   })();
   return path + suffix;

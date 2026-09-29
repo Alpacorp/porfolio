@@ -10,21 +10,25 @@ interface Props {
   home?: boolean;
   /** Same page in the other language (see Base). */
   alternate?: string;
+  noindex?: boolean;
 }
 
-const { title, description, home = false, alternate } = Astro.props;
+const { title, description, home = false, alternate, noindex } = Astro.props;
 ---
 
-<Base title={title} description={description} alternate={alternate}>
+<Base title={title} description={description} alternate={alternate} noindex={noindex}>
   <div class="shell">
     <Sidebar home={home} alternate={alternate} />
     <MobileNav home={home} />
-    <main id="contenido" class="main" tabindex="-1">
-      <slot />
+    <div class="column">
+      <main id="contenido" class="main" tabindex="-1">
+        <slot />
+      </main>
+      <!-- Outside <main>, so it keeps its contentinfo landmark -->
       <footer class="footer mono">
         <span>© {new Date().getFullYear()} {profile.name} · {profile.site}</span>
       </footer>
-    </main>
+    </div>
   </div>
 </Base>
 
@@ -45,9 +49,15 @@ const { title, description, home = false, alternate } = Astro.props;
     }
   }
 
-  .main {
+  .column {
     flex: 1;
     min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(64px, 8vw, 88px);
+  }
+
+  .main {
     display: flex;
     flex-direction: column;
     gap: clamp(64px, 8vw, 88px);

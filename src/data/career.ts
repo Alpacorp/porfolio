@@ -1,10 +1,11 @@
 import type { LogoId } from './logos';
 import type { L, Route } from '../i18n';
 
-/** A «read more» link: a route (resolved per language) plus an optional #hash or ?query. */
-export type More = { route: Route; suffix?: string; label: L };
-
-const fullStory: L = { es: 'Ver la experiencia completa', en: 'See the full story' };
+/**
+ * A «read more» link: a route (resolved per language) plus an optional #hash or
+ * ?query. Without a label, it reads «See the full story» (ui.fullExperience).
+ */
+export type More = { route: Route; suffix?: string; label?: L };
 
 /**
  * Timeline milestones («Empleo» lane). Kept short on purpose: each one links to
@@ -28,7 +29,7 @@ export const milestones: {
       es: 'Facturación corporativa e indicadores de flujo de caja a nivel nacional. Aquí aprendí cómo se mueve el dinero en una empresa.',
       en: 'Corporate billing and cash flow metrics across the country. This is where I learned how money moves through a company.',
     },
-    more: { route: { name: 'experience', id: 'servientrega' }, suffix: '#facturacion', label: fullStory },
+    more: { route: { name: 'experience', id: 'servientrega' }, suffix: '#facturacion' },
   },
   {
     year: 2015,
@@ -39,7 +40,7 @@ export const milestones: {
       es: 'Dos migraciones del portal, 12 sitios del grupo y el SEO que puso «Ya Mismo» en lo más alto de Google.',
       en: 'Two migrations of the main site, 12 group websites and the SEO that took «Ya Mismo» to the top of Google.',
     },
-    more: { route: { name: 'experience', id: 'servientrega' }, suffix: '#webmaster', label: fullStory },
+    more: { route: { name: 'experience', id: 'servientrega' }, suffix: '#webmaster' },
   },
   {
     year: 2021,
@@ -50,7 +51,7 @@ export const milestones: {
       es: 'MVP de una plataforma tributaria para empresas de Cali, con facturación electrónica y pasarela de pagos. 100 % remoto.',
       en: 'MVP of a tax platform for companies in Cali, with e-invoicing and a payment gateway. Fully remote.',
     },
-    more: { route: { name: 'experience', id: 'jikkosoft' }, label: fullStory },
+    more: { route: { name: 'experience', id: 'jikkosoft' } },
   },
   {
     year: 2022,
@@ -61,7 +62,7 @@ export const milestones: {
       es: 'De Marketing a CDT Digital: más de 2.000 millones COP recaudados y mejor producto del banco tres años seguidos.',
       en: 'From Marketing to CDT Digital: over COP 2 billion raised and the bank’s best product three years running.',
     },
-    more: { route: { name: 'experience', id: 'banco-caja-social' }, label: fullStory },
+    more: { route: { name: 'experience', id: 'banco-caja-social' } },
   },
   {
     year: 2024,
@@ -73,7 +74,7 @@ export const milestones: {
       es: 'Plataformas internas para CX, Benefits y Refunds: la nueva plataforma de Refunds procesa hoy millones de devoluciones.',
       en: 'Internal platforms for CX, Benefits and Refunds: the new Refunds platform now processes millions of refunds.',
     },
-    more: { route: { name: 'experience', id: 'mercado-libre' }, label: fullStory },
+    more: { route: { name: 'experience', id: 'mercado-libre' } },
   },
 ];
 
@@ -168,8 +169,6 @@ export const freelanceGroups: {
 export const freelanceExperience = {
   id: 'freelance',
   startYear: 2019,
-  start: { es: '2019', en: '2019' } satisfies L,
-  end: { es: 'hoy', en: 'present' } satisfies L,
   current: true,
   logo: 'alpacorp' as LogoId,
   role: { es: 'Desarrollador full stack freelance', en: 'Freelance Full Stack Developer' } satisfies L,
@@ -190,17 +189,16 @@ export const freelanceExperience = {
       'White-label digital novenas for 8 companies',
     ],
   } satisfies L<string[]>,
-  stack: { es: ['Next.js', 'Astro', 'React', 'WordPress', 'Drupal', 'Odoo', 'IA'], en: ['Next.js', 'Astro', 'React', 'WordPress', 'Drupal', 'Odoo', 'AI'] } satisfies L<string[]>,
-  filters: ['Freelance', 'Frontend', 'Backend + IA'],
-  more: {
-    route: { name: 'archive' },
-    suffix: '?tipo=Freelance',
-    label: { es: 'Ver los proyectos freelance', en: 'See freelance projects' },
-  } satisfies More,
+  stack: {
+    es: ['Next.js', 'Astro', 'React', 'WordPress', 'Drupal', 'Odoo', 'IA'],
+    en: ['Next.js', 'Astro', 'React', 'WordPress', 'Drupal', 'Odoo', 'AI'],
+  } satisfies L<string[]>,
+  filters: ['Freelance', 'Frontend', 'Backend + IA'] as ExperienceFilter[],
+  more: { route: { name: 'archive' }, suffix: '?tipo=Freelance' } satisfies More,
 };
 
 /** Filter keys (stored in the data, Spanish) and their labels. */
-export const experienceFilters: { key: string; label: L }[] = [
+export const experienceFilters = [
   { key: 'Todo', label: { es: 'Todo', en: 'All' } },
   { key: 'Fintech', label: { es: 'Fintech', en: 'Fintech' } },
   { key: 'Frontend', label: { es: 'Frontend', en: 'Frontend' } },
@@ -208,6 +206,13 @@ export const experienceFilters: { key: string; label: L }[] = [
   { key: 'Freelance', label: { es: 'Freelance', en: 'Freelance' } },
   { key: 'Marketing', label: { es: 'Marketing', en: 'Marketing' } },
   { key: 'Negocio', label: { es: 'Negocio', en: 'Business' } },
+] as const satisfies readonly { key: string; label: L }[];
+
+export type ExperienceFilter = (typeof experienceFilters)[number]['key'];
+/** The keys a company or the freelance work can be tagged with («Todo» is the reset chip). */
+export const experienceTags = experienceFilters.map((filter) => filter.key).filter((key) => key !== 'Todo') as [
+  Exclude<ExperienceFilter, 'Todo'>,
+  ...Exclude<ExperienceFilter, 'Todo'>[],
 ];
 
 /** UNAD and SENA dates follow the latest CV; Acámica and INCAP follow LinkedIn. */

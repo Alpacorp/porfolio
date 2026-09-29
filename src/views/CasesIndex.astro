@@ -2,57 +2,30 @@
 import Shell from '../layouts/Shell.astro';
 import Cases from '../components/sections/Cases.astro';
 import BackLink from '../components/BackLink.astro';
+import { profile } from '../data/profile';
 import { getCases } from '../lib/projects';
-import { href, langFromPath, otherLang, section } from '../i18n';
-import { useT } from '../i18n/ui';
+import { href, section } from '../i18n';
+import { getI18n } from '../i18n/ui';
 
-const lang = langFromPath(Astro.url.pathname);
-const t = useT(lang);
+const { lang, otherLang, ui } = getI18n(Astro.url);
 const cases = await getCases(lang);
-const description = {
-  es: 'Casos de estudio de Alejandro Palacios Arévalo: banca, fintech, e-commerce, agencias y producto.',
-  en: 'Case studies by Alejandro Palacios Arévalo: banking, fintech, e-commerce, agencies and product.',
-}[lang];
 ---
 
-<Shell title={t.caseLabel} description={description} alternate={href(otherLang(lang), { name: 'cases' })}>
+<Shell
+  title={ui.caseLabel}
+  description={ui.casesDescription(profile.name)}
+  alternate={href(otherLang, { name: 'cases' })}
+>
   <div class="page">
-    <BackLink href={section(lang, 'casos')} label={t.home} />
-    <header class="header">
-      <p class="eyebrow">{t.caseLabel}</p>
-      <h1 class="title">{t.casesTitle}</h1>
-      <p class="muted lead">
-        {t.casesLead}{' '}
-        <a href={href(lang, { name: 'archive' })}>{t.visitArchive}</a>.
+    <BackLink href={section(lang, 'casos')} label={ui.home} />
+    <header class="page-header">
+      <p class="eyebrow">{ui.caseLabel}</p>
+      <h1 class="page-title">{ui.casesTitle}</h1>
+      <p class="muted page-lead">
+        {ui.casesLead}{' '}
+        <a href={href(lang, { name: 'archive' })}>{ui.visitArchive}</a>.
       </p>
     </header>
-    <Cases cases={cases} heading={t.allCases} />
+    <Cases cases={cases} heading={ui.allCases} />
   </div>
 </Shell>
-
-<style>
-  .page {
-    display: flex;
-    flex-direction: column;
-    gap: 36px;
-  }
-
-  .header {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-
-  .title {
-    font-size: clamp(34px, 5vw, 52px);
-    line-height: 1.05;
-    font-weight: 700;
-    letter-spacing: -0.035em;
-  }
-
-  .lead {
-    font-size: 17px;
-    line-height: 1.55;
-    max-width: 640px;
-  }
-</style>

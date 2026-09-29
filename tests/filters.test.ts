@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { fill, matchesArchive, matchesQuery, matchesTag, N, normalize, wrapIndex } from '../src/lib/filters';
+import { formatCount, matchesArchive, matchesQuery, matchesTag, normalize, readPlural, wrapIndex } from '../src/lib/filters';
 
 describe('normalize', () => {
   test('lowercases and strips accents', () => {
@@ -7,12 +7,30 @@ describe('normalize', () => {
   });
 });
 
-describe('fill', () => {
-  test('replaces the {n} placeholder', () => {
-    expect(fill(`${N} of 35 projects`, 7)).toBe('7 of 35 projects');
+describe('formatCount', () => {
+  const results = { one: '{count} resultado', other: '{count} resultados' };
+
+  test('uses the singular for exactly one', () => {
+    expect(formatCount(results, 1)).toBe('1 resultado');
   });
-  test('leaves strings without a placeholder untouched', () => {
-    expect(fill('no placeholder', 3)).toBe('no placeholder');
+  test('uses the plural for zero and many', () => {
+    expect(formatCount(results, 0)).toBe('0 resultados');
+    expect(formatCount(results, 12)).toBe('12 resultados');
+  });
+});
+
+describe('readPlural', () => {
+  test('reads the templates sent in a data attribute', () => {
+    expect(readPlural('{"one":"{count} result","other":"{count} results"}')).toEqual({
+      one: '{count} result',
+      other: '{count} results',
+    });
+  });
+  test('falls back to the bare number when the attribute is missing or broken', () => {
+    const bareNumber = { one: '{count}', other: '{count}' };
+    expect(readPlural(undefined)).toEqual(bareNumber);
+    expect(readPlural('not json')).toEqual(bareNumber);
+    expect(readPlural('{"one":1}')).toEqual(bareNumber);
   });
 });
 
@@ -27,27 +45,28 @@ describe('matchesTag', () => {
 });
 
 describe('matchesArchive', () => {
+  // Rows carry their search text already normalized (see searchText in lib/projects).
   const row = { kind: 'Freelance', isCase: true, sector: 'Automotriz', search: 'mr. goma tires next.js stripe' };
-  const all = { kind: 'Todo', sector: '', text: '' };
+  const noFilters = { kind: 'Todo', sector: '', text: '' };
 
   test('matches with no filters', () => {
-    expect(matchesArchive(row, all)).toBe(true);
+    expect(matchesArchive(row, noFilters)).toBe(true);
   });
   test('filters by type', () => {
-    expect(matchesArchive(row, { ...all, kind: 'Freelance' })).toBe(true);
-    expect(matchesArchive(row, { ...all, kind: 'Empleo' })).toBe(false);
+    expect(matchesArchive(row, { ...noFilters, kind: 'Freelance' })).toBe(true);
+    expect(matchesArchive(row, { ...noFilters, kind: 'Empleo' })).toBe(false);
   });
   test('«Casos» matches case studies of any type', () => {
-    expect(matchesArchive(row, { ...all, kind: 'Casos' })).toBe(true);
-    expect(matchesArchive({ ...row, isCase: false }, { ...all, kind: 'Casos' })).toBe(false);
+    expect(matchesArchive(row, { ...noFilters, kind: 'Casos' })).toBe(true);
+    expect(matchesArchive({ ...row, isCase: false }, { ...noFilters, kind: 'Casos' })).toBe(false);
   });
   test('filters by sector', () => {
-    expect(matchesArchive(row, { ...all, sector: 'Automotriz' })).toBe(true);
-    expect(matchesArchive(row, { ...all, sector: 'Banca' })).toBe(false);
+    expect(matchesArchive(row, { ...noFilters, sector: 'Automotriz' })).toBe(true);
+    expect(matchesArchive(row, { ...noFilters, sector: 'Banca' })).toBe(false);
   });
   test('searches text ignoring case, accents and surrounding spaces', () => {
-    expect(matchesArchive(row, { ...all, text: '  STRÍPE ' })).toBe(true);
-    expect(matchesArchive(row, { ...all, text: 'wordpress' })).toBe(false);
+    expect(matchesArchive(row, { ...noFilters, text: '  STRÍPE ' })).toBe(true);
+    expect(matchesArchive(row, { ...noFilters, text: 'wordpress' })).toBe(false);
   });
   test('all conditions must hold at once', () => {
     expect(matchesArchive(row, { kind: 'Freelance', sector: 'Automotriz', text: 'drupal' })).toBe(false);

@@ -8,8 +8,9 @@ export default defineConfig({
   site: 'https://alpacorp.net',
   integrations: [
     mdx(),
-    // Links each page with its translation (hreflang) in the sitemap.
-    sitemap({ i18n: { defaultLocale: 'es', locales: { es: 'es-CO', en: 'en-US' } } }),
+    // Translations are linked with hreflang in each page's <head> (see lib/seo.ts);
+    // the sitemap's i18n option can't pair them because the slugs differ per language.
+    sitemap(),
   ],
   // Keep old URLs working after a case study is renamed.
   redirects: {

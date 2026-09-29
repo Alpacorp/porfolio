@@ -2,12 +2,10 @@
 import Logo from '../Logo.astro';
 import { experienceFilters } from '../../data/career';
 import { getExperienceItems } from '../../lib/experience';
-import { href, langFromPath } from '../../i18n';
-import { useT } from '../../i18n/ui';
-import { N } from '../../lib/filters';
+import { href } from '../../i18n';
+import { getI18n } from '../../i18n/ui';
 
-const lang = langFromPath(Astro.url.pathname);
-const t = useT(lang);
+const { lang, ui } = getI18n(Astro.url);
 // One row per company (plus freelance). The full story lives on each company page.
 const items = await getExperienceItems(lang);
 ---
@@ -17,15 +15,15 @@ const items = await getExperienceItems(lang);
   class="section"
   aria-labelledby="experiencia-titulo"
   data-filterable
-  data-results={t.results(N)}
+  data-results={JSON.stringify(ui.results)}
 >
-  <h2 id="experiencia-titulo" class="eyebrow">{t.experience}</h2>
+  <h2 id="experiencia-titulo" class="eyebrow">{ui.experience}</h2>
 
-  <div class="filters" role="group" aria-label={t.filterByFocus}>
+  <div class="filters" role="group" aria-label={ui.filterByFocus}>
     {
-      experienceFilters.map((f, i) => (
-        <button class="chip" type="button" aria-pressed={i === 0 ? "true" : "false"} data-filter={f.key}>
-          {f.label[lang]}
+      experienceFilters.map((filter, index) => (
+        <button class="chip" type="button" aria-pressed={index === 0 ? 'true' : 'false'} data-filter={filter.key}>
+          {filter.label[lang]}
         </button>
       ))
     }
@@ -34,12 +32,12 @@ const items = await getExperienceItems(lang);
   <ol class="jobs">
     {
       items.map((job) => (
-        <li class="job logo-host" id={`exp-${job.id}`} data-tags={job.filters.join('|')}>
+        <li class="job logo-host" data-tags={job.filters.join('|')}>
           <div class="job__side">
             <span class="job__logo"><Logo id={job.logo} /></span>
             <p class="mono muted job__dates">
               {job.dates}
-              {job.current && <span class="now">{t.current}</span>}
+              {job.current && <span class="pill-now">{ui.current}</span>}
             </p>
           </div>
           <div class="job__body">
@@ -48,16 +46,16 @@ const items = await getExperienceItems(lang);
             </h3>
             <p class="muted job__text">{job.summary}</p>
             <ul class="job__highlights">
-              {job.highlights.map((h) => (
-                <li>{h}</li>
+              {job.highlights.map((highlight) => (
+                <li>{highlight}</li>
               ))}
             </ul>
-            <ul class="job__tags" aria-label={t.technologies}>
-              {job.stack.slice(0, 6).map((t) => (
-                <li class="tag">{t}</li>
+            <ul class="job__tags" aria-label={ui.technologies}>
+              {job.stack.slice(0, 6).map((technology) => (
+                <li class="tag">{technology}</li>
               ))}
             </ul>
-            <a class="job__more mono" href={job.href}>
+            <a class="more-link" href={job.href}>
               {job.hrefLabel}{' '}
               <span aria-hidden="true">→</span>
             </a>
@@ -68,7 +66,7 @@ const items = await getExperienceItems(lang);
   </ol>
   <p class="sr-only" aria-live="polite" data-filter-status></p>
 
-  <a class="mono cv-link" href={href(lang, { name: 'cv' })}>{t.fullCv}</a>
+  <a class="mono cv-link" href={href(lang, { name: 'cv' })}>{ui.fullCv}</a>
 </section>
 
 <style>
@@ -98,31 +96,8 @@ const items = await getExperienceItems(lang);
     border-top: 1px solid var(--line);
   }
 
-  .job {
-    scroll-margin-top: 32px;
-  }
-
-  /* Arriving from a timeline link: flash the entry with the highlighter */
-  .job:target {
-    animation: target-flash 1.6s ease-out;
-  }
-
-  @keyframes target-flash {
-    from {
-      background: var(--hl);
-    }
-    to {
-      background: transparent;
-    }
-  }
-
   .job[hidden] {
     display: none;
-  }
-
-  .job__dates {
-    font-size: 13px;
-    line-height: 1.5;
   }
 
   .job__side {
@@ -131,7 +106,7 @@ const items = await getExperienceItems(lang);
     gap: 10px;
   }
 
-  /* Hueco de alto fijo: las fechas quedan a la misma altura en todas las filas */
+  /* Fixed-height slot: the dates line up across rows whatever the logo */
   .job__logo {
     height: 34px;
     display: flex;
@@ -143,15 +118,8 @@ const items = await getExperienceItems(lang);
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
-  }
-
-  .now {
-    padding: 3px 8px;
-    border-radius: 999px;
-    background: var(--yellow);
-    color: var(--on-yellow);
-    font-size: 11px;
-    font-weight: 500;
+    font-size: 13px;
+    line-height: 1.5;
   }
 
   .job__body {
@@ -202,12 +170,6 @@ const items = await getExperienceItems(lang);
     background: var(--yellow);
   }
 
-  .job__more {
-    align-self: flex-start;
-    display: inline-block;
-    padding: 12px 0;
-    font-size: 13px;
-  }
 
   .job__tags {
     list-style: none;
@@ -242,24 +204,25 @@ const items = await getExperienceItems(lang);
 </style>
 
 <script>
-  import { fill, matchesTag } from '../../lib/filters';
+  import { formatCount, matchesTag, readPlural } from '../../lib/filters';
 
-  for (const root of document.querySelectorAll<HTMLElement>('[data-filterable]')) {
+  const root = document.querySelector<HTMLElement>('[data-filterable]');
+  if (root) {
     const chips = [...root.querySelectorAll<HTMLButtonElement>('[data-filter]')];
-    const items = [...root.querySelectorAll<HTMLElement>('[data-tags]')];
-    const status = root.querySelector<HTMLElement>('[data-filter-status]');
+    const jobs = [...root.querySelectorAll<HTMLElement>('[data-tags]')];
+    const status = root.querySelector<HTMLElement>('[data-filter-status]')!;
+    const resultsLabel = readPlural(root.dataset.results);
 
     for (const chip of chips) {
       chip.addEventListener('click', () => {
-        const f = chip.dataset.filter!;
-        chips.forEach((c) => c.setAttribute('aria-pressed', String(c === chip)));
+        const filter = chip.dataset.filter!;
+        chips.forEach((other) => other.setAttribute('aria-pressed', String(other === chip)));
         let shown = 0;
-        for (const item of items) {
-          const match = matchesTag(item.dataset.tags!.split('|'), f);
-          item.hidden = !match;
-          if (match) shown++;
+        for (const job of jobs) {
+          job.hidden = !matchesTag(job.dataset.tags!.split('|'), filter);
+          if (!job.hidden) shown++;
         }
-        if (status) status.textContent = fill(root.dataset.results ?? '', shown);
+        status.textContent = formatCount(resultsLabel, shown);
       });
     }
   }

@@ -1,13 +1,13 @@
 /**
- * Logos de empresas y clientes. Cada id tiene en src/assets/logos/:
- *   <id>.webp       el original a color (se muestra al pasar el cursor)
- *   <id>.mono.webp  la máscara monocroma (lo que se ve en reposo)
+ * Company and client logos. Each id has two files in src/assets/logos/:
+ *   <id>.webp       the color original (shown on hover)
+ *   <id>.mono.webp  the monochrome mask (what shows at rest)
  *
- * `height`: alto en px, ajustado a ojo para que todos pesen parecido.
- * `hoverColor: false`: el original es blanco o muy claro y no se leería sobre papel.
+ * `height`: height in px, tuned by eye so they all carry similar weight.
+ * `hoverColor: false`: the original is white or very light and would not read on paper.
  *
- * Fuentes: webs oficiales de cada marca; Banco Caja Social, Bayer, BMW y FedEx,
- * Wikimedia Commons (dominio público); novenas, las apps construidas por Alejandro.
+ * Sources: each brand's official website; Banco Caja Social, Bayer, BMW and FedEx
+ * from Wikimedia Commons (public domain); the novenas, from the apps Alejandro built.
  */
 export const logos = {
   alpacorp: { label: 'alpacorp', height: 26 },

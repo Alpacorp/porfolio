@@ -3,65 +3,68 @@ import Shell from '../layouts/Shell.astro';
 import Icon from '../components/Icon.astro';
 import BackLink from '../components/BackLink.astro';
 import Logo from '../components/Logo.astro';
-import { formatYears, renderCase, statusLabel, type Project } from '../lib/projects';
-import { href, langFromPath, otherLang } from '../i18n';
-import { sectorName, useT } from '../i18n/ui';
+import { caseMeta, renderCase, statusLabel, type Project } from '../lib/projects';
+import { href } from '../i18n';
+import { getI18n } from '../i18n/ui';
 
 interface Props {
   entry: Project;
   next: Project;
 }
 
-const lang = langFromPath(Astro.url.pathname);
-const t = useT(lang);
+const { lang, otherLang, ui } = getI18n(Astro.url);
 const { entry, next } = Astro.props;
 const { Content } = await renderCase(entry, lang);
-const d = entry.data;
+const project = entry.data;
 ---
 
-<Shell title={d.title} description={d.summary} alternate={href(otherLang(lang), { name: 'case', id: entry.id })}>
+<Shell
+  title={project.title}
+  description={project.summary}
+  alternate={href(otherLang, { name: 'case', id: entry.id })}
+>
   <article class="case">
-    <BackLink href={href(lang, { name: 'cases' })} label={t.allCases} />
+    <BackLink href={href(lang, { name: 'cases' })} label={ui.allCases} />
 
     <header class="header logo-host">
-      {d.logo && <Logo id={d.logo} scale={1.2} class="header__logo" />}
-      <p class="eyebrow">{[d.client, sectorName(d.sector, lang), formatYears(d, lang)].join(' · ')}</p>
-      <h1 class="title">{d.title}</h1>
-      <p class="summary">{d.summary}</p>
+      {project.logo && <Logo id={project.logo} scale={1.2} class="header__logo" />}
+      <p class="eyebrow">{caseMeta(entry, lang)}</p>
+      <h1 class="page-title">{project.title}</h1>
+      <p class="summary">{project.summary}</p>
     </header>
 
     <dl class="facts">
       {
-        d.metric && (
+        project.metric && (
           <div class="fact fact--metric">
-            <dt class="mono muted">{d.metric.label}</dt>
+            <dt class="mono muted">{project.metric.label}</dt>
             <dd>
-              <span class="hl">{d.metric.value}</span>
+              <span class="hl">{project.metric.value}</span>
             </dd>
           </div>
         )
       }
       <div class="fact">
-        <dt class="mono muted">{t.kind}</dt>
-        <dd>{d.kind === 'empleo' ? t.employment : t.freelance}{d.via && ` · ${t.via(d.via)}`}</dd>
+        <dt class="mono muted">{ui.kind}</dt>
+        <dd>{project.kind === 'empleo' ? ui.employment : ui.freelance}{project.via && ` · ${ui.via(project.via)}`}</dd>
       </div>
       <div class="fact">
-        <dt class="mono muted">{t.stack}</dt>
+        <dt class="mono muted">{ui.stack}</dt>
         <dd>
-          <ul class="stack">{d.stack.map((s) => <li class="tag">{s}</li>)}</ul>
+          <ul class="stack">{project.stack.map((technology) => <li class="tag">{technology}</li>)}</ul>
         </dd>
       </div>
       <div class="fact">
-        <dt class="mono muted">{t.status}</dt>
+        <dt class="mono muted">{ui.status}</dt>
         <dd>
           {
-            d.url && d.status === 'live' ? (
-              <a href={d.url} rel="noopener" target="_blank">
-                {t.viewLive} <Icon name="arrow-up-right" size={14} />
-                <span class="sr-only">{t.opensNewTab}</span>
+            project.url && project.status === 'live' ? (
+              <a href={project.url} rel="noopener" target="_blank">
+                {ui.viewLive} <Icon name="arrow-up-right" size={14} />
+                <span class="sr-only">{ui.opensNewTab}</span>
               </a>
             ) : (
-              statusLabel(d.status, lang)
+              statusLabel(project.status, lang)
             )
           }
         </dd>
@@ -73,18 +76,18 @@ const d = entry.data;
     </div>
 
     {
-      d.links && (
+      project.links && (
         <section class="links" aria-labelledby="links-titulo">
-          <h2 id="links-titulo" class="eyebrow">{t.liveVersions}</h2>
+          <h2 id="links-titulo" class="eyebrow">{ui.liveVersions}</h2>
           <ul>
-            {d.links.map((l) => (
+            {project.links.map((link) => (
               <li class="logo-host">
-                {l.logo && <Logo id={l.logo} scale={0.8} />}
-                <a href={l.url} rel="noopener" target="_blank">
-                  {l.name} <span aria-hidden="true">↗</span>
-                  <span class="sr-only">{t.opensNewTab}</span>
+                {link.logo && <Logo id={link.logo} scale={0.8} />}
+                <a href={link.url} rel="noopener" target="_blank">
+                  {link.name} <span aria-hidden="true">↗</span>
+                  <span class="sr-only">{ui.opensNewTab}</span>
                 </a>
-                {l.note && <span class="mono muted">{l.note}</span>}
+                {link.note && <span class="mono muted">{link.note}</span>}
               </li>
             ))}
           </ul>
@@ -92,9 +95,9 @@ const d = entry.data;
       )
     }
 
-    <nav class="next card card--interactive" aria-label={t.nextCase}>
+    <nav class="next card card--interactive" aria-label={ui.nextCase}>
       <a href={href(lang, { name: 'case', id: next.id })}>
-        <span class="eyebrow">{t.nextCase}</span>
+        <span class="eyebrow">{ui.nextCase}</span>
         <span class="next__title">{next.data.title} →</span>
       </a>
     </nav>
@@ -109,7 +112,6 @@ const d = entry.data;
     max-width: 760px;
   }
 
-
   .header {
     display: flex;
     flex-direction: column;
@@ -120,12 +122,6 @@ const d = entry.data;
     align-self: flex-start;
   }
 
-  .title {
-    font-size: clamp(34px, 5vw, 52px);
-    line-height: 1.05;
-    font-weight: 700;
-    letter-spacing: -0.035em;
-  }
 
   .summary {
     font-size: 19px;
@@ -234,7 +230,6 @@ const d = entry.data;
     grid-template-columns: 110px minmax(0, 1fr) auto;
     align-items: center;
     gap: 16px;
-    flex-wrap: wrap;
     padding: 12px 0;
     border-bottom: 1px solid var(--line);
   }

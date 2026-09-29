@@ -1,74 +1,88 @@
 # alpacorp.net
 
-Portafolio de Alejandro Palacios. Astro 7, MDX y CSS propio, sin frameworks de UI.
+Alejandro Palacios's portfolio. Astro 7, MDX and hand-written CSS, no UI frameworks. Spanish at `/`, English at `/en/`.
 
-## Comandos
+## Commands
 
-| Comando           | Qué hace                                   |
-| ----------------- | ------------------------------------------ |
-| `npm install`     | Instala dependencias                       |
-| `npm run dev`     | Servidor local en `localhost:4321`         |
-| `npm run dev:fresh` | Dev server with a clean content cache — use it after switching branches or pulling if content looks stale |
-| `npm run check`   | Revisa tipos y el esquema del contenido    |
-| `npm run build`   | Genera el sitio estático en `dist/`        |
-| `npm run preview` | Sirve `dist/` para revisarlo antes de subir |
+| Command               | What it does                                                                        |
+| --------------------- | ----------------------------------------------------------------------------------- |
+| `npm install`         | Installs dependencies                                                               |
+| `npm run dev`         | Local server at `localhost:4321`                                                    |
+| `npm run dev:fresh`   | Dev server with a clean content cache — use it after switching branches or pulling  |
+| `npm run check`       | Type-checks the code and validates the content schema                               |
+| `npm test`            | Unit and content-integrity tests (Vitest)                                           |
+| `npm run test:watch`  | Tests in watch mode                                                                 |
+| `npm run build`       | Check, tests, then the static site in `dist/`                                       |
+| `npm run preview`     | Serves `dist/` to review it before pushing                                          |
 
-## Dónde está cada cosa
+## Where things live
 
 ```
 src/
-├── content/proyectos/   Un archivo por proyecto (la fuente de casos, archivo y línea de tiempo)
-├── content/empresas/    One file per employer: summary, highlights and phases (page at /experiencia/<id>)
-├── content.config.ts    Esquema de los proyectos
-├── data/profile.ts      Nombre, frase, cifras, «tres idiomas», navegación
-├── data/career.ts       Hitos, bloques freelance, experiencia, educación, habilidades
-├── components/          Barra lateral, ⌘K, tabla del archivo, secciones de la home
-├── layouts/             Base (head, tema) y Shell (dos columnas)
-├── pages/               Home, /casos/[id], /archivo, /cv, 404
-└── styles/global.css    Tokens de diseño «papel y resaltador» y utilidades
+├── content/proyectos/    One file per project (source for case studies, archive and timeline)
+├── content/empresas/     One file per employer: summary, highlights and phases
+├── content/en/           English text for the entries above, matched by id
+├── content.config.ts     Content schemas
+├── data/profile.ts       Name, tagline, stats, «three languages», menu
+├── data/career.ts        Milestones, freelance blocks, freelance experience, education, skills
+├── data/logos.ts         Logo registry
+├── i18n/index.ts         Languages and localized routes (href, case slugs)
+├── i18n/ui.ts            Interface strings in both languages, getI18n(url)
+├── lib/                  Pure logic, unit tested: projects, experience, filters, nav, seo…
+├── components/           Sidebar, ⌘K palette, archive table, home page sections
+├── layouts/              Base (head, theme, SEO) and Shell (two columns)
+├── views/                Page bodies, shared by both languages
+├── pages/                Thin routes: Spanish at the root, English under pages/en/
+└── styles/global.css     «Paper and highlighter» design tokens and utilities
+tests/                    Vitest suites (run against the real content)
 ```
 
-## Añadir un proyecto
+## Adding a project
 
-Crea `src/content/proyectos/<id>.md`:
+Create `src/content/proyectos/<id>.md`:
 
 ```yaml
 ---
-title: Qué se hizo, en pocas palabras
-client: Nombre del cliente
-via: BBDO México          # opcional: agencia o intermediario
-year: 2025                # null si no se sabe
-yearEnd: hoy              # opcional: año o «hoy»
+title: What was done, in a few words
+client: Client name
+via: BBDO México          # optional: agency or intermediary
+year: 2025                # null if unknown
+yearEnd: hoy              # optional: a year or «hoy»
 sector: Fintech
 kind: freelance           # empleo | freelance
-group: empresas           # opcional: goma | bbdo | empresas | novenas (bloque freelance de la línea de tiempo)
+group: empresas           # optional: goma | bbdo | empresas | novenas (timeline freelance block)
 stack: [Astro, TypeScript]
-url: https://…            # opcional
+url: https://…            # optional
 status: live              # live | internal | replaced | offline
-summary: Una o dos frases.
+summary: One or two sentences.
 ---
 ```
 
-Aparece solo en el archivo y, si tiene `group`, en su bloque de la línea de tiempo.
+Then add its English text in `src/content/en/proyectos/<id>.md` (`title`, `summary`, and `client` / `via` only if they read differently in English). The tests fail if a translation is missing, and a new sector needs its English name in `sectorsEn` (`src/i18n/ui.ts`).
 
-**Convertirlo en caso de estudio:** renómbralo a `.mdx`, añade `featured: true`, `order` y `metric: { value, label }`, y escribe la historia en el cuerpo (`## El reto`, `## Qué hice`, `## Resultado`). Se crea sola su página en `/casos/<id>/`.
+The project shows up in the archive and, if it has a `group`, in its timeline block.
+
+**Turning it into a case study:** rename it to `.mdx`, add `featured: true`, `order` and `metric: { value, label }`, and write the story in the body (`## El reto`, `## Qué hice`, `## Resultado`). Its English version is an `.mdx` in `src/content/en/proyectos/` with the translated body, and its English URL slug goes in `caseSlugs` (`src/i18n/index.ts`). Pages are created at `/casos/<id>/` and `/en/cases/<slug>/`.
 
 ## Adding or editing a company
 
-Each employer lives in `src/content/empresas/<id>.md` and gets its own page at `/experiencia/<id>/`:
+Each employer lives in `src/content/empresas/<id>.md` and gets a page at `/experiencia/<id>/` (and `/en/experience/<id>/`):
 
 - `summary` and up to three `highlights` are what the home page shows.
 - `phases` tell the full story in order. Each phase can reference its projects by id (`projects: [cdt-digital]`); the build fails if an id doesn't exist.
 - A phase `id` is an anchor, so the timeline can link to `/experiencia/<id>/#<phase>`.
+- `filters` must be keys of `experienceFilters` in `src/data/career.ts`.
+
+Its English text lives in `src/content/en/empresas/<id>.md`, with the same phase ids.
 
 Freelance work is not a company: it lives in `freelanceExperience` in `src/data/career.ts`.
 
 ## Logos
 
-Cada logo son dos archivos en `src/assets/logos/`: `<id>.webp` (el original a color, que aparece al pasar el cursor en tema claro) y `<id>.mono.webp` (la máscara monocroma que se ve en reposo). Se registran en `src/data/logos.ts` con su alto y, si el original es blanco, `hoverColor: false`. Un proyecto lo usa con `logo: <id>` en su frontmatter.
+Each logo is two files in `src/assets/logos/`: `<id>.webp` (the color original, revealed on hover in the light theme) and `<id>.mono.webp` (the monochrome mask shown at rest). Register it in `src/data/logos.ts` with its height and, if the original is white, `hoverColor: false` (its color file is then never downloaded). A project uses it with `logo: <id>` in its frontmatter.
 
-## Diseño
+## Design
 
-- **Claro = papel, oscuro = tinta.** El tema sigue al sistema y se puede cambiar con el botón o con ⌘K.
-- **Amarillo `#FFDD00`** como resaltador (`.hl`) y en el bloque de contacto. **Magenta** solo en hover y foco.
-- **Geist** para textos y **Geist Mono** para datos (fechas, stack, cifras), autoalojadas con Fontsource.
+- **Light = paper, dark = ink.** The theme follows the system and can be switched with the button or ⌘K. Colors are declared once in `global.css` with `light-dark()`.
+- **Yellow `#FFDD00`** as the highlighter (`.hl`) and on the contact block. **Magenta** only on hover and focus.
+- **Geist** for text and **Geist Mono** for data (dates, stack, figures), self-hosted with Fontsource.
