@@ -4,6 +4,7 @@ import '../styles/global.css';
 // text reflowing when they swap in. Same files global.css uses, so no double download.
 import geistFont from '@fontsource-variable/geist/files/geist-latin-wght-normal.woff2?url';
 import geistMonoFont from '@fontsource-variable/geist-mono/files/geist-mono-latin-wght-normal.woff2?url';
+import Analytics from '@vercel/analytics/astro';
 import CommandPalette from '../components/CommandPalette.astro';
 import { profile } from '../data/profile';
 import { href, locale } from '../i18n';
@@ -85,6 +86,8 @@ const ogImage = new URL(locale[lang].shareImage, site);
     <a class="skip-link" href="#contenido">{ui.skipToContent}</a>
     <slot />
     <CommandPalette alternate={alternate} />
+    <!-- Vercel Web Analytics: cookieless page views (only reports on Vercel deployments) -->
+    <Analytics />
 
     <!-- Safety net: every link to another site opens in a new tab, MDX content included -->
     <script>

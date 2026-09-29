@@ -86,3 +86,7 @@ Each logo is two files in `src/assets/logos/`: `<id>.webp` (the color original, 
 - **Light = paper, dark = ink.** The theme follows the system and can be switched with the button or ⌘K. Colors are declared once in `global.css` with `light-dark()`.
 - **Yellow `#FFDD00`** as the highlighter (`.hl`) and on the contact block. **Magenta** only on hover and focus.
 - **Geist** for text and **Geist Mono** for data (dates, stack, figures), self-hosted with Fontsource.
+
+## Analytics
+
+[Vercel Web Analytics](https://vercel.com/docs/analytics) (`<Analytics />` in `src/layouts/Base.astro`): page views without cookies, so no consent banner is needed. It only reports from Vercel deployments; see the numbers in the project's Analytics tab.
