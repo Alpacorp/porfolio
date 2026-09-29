@@ -15,10 +15,10 @@ export function langFromPath(pathname: string): Lang {
   return pathname === '/en' || pathname.startsWith('/en/') ? 'en' : 'es';
 }
 
-/** Locale tags for <html lang>, Open Graph and date formatting. */
-export const locale: L<{ html: string; og: string; name: string }> = {
-  es: { html: 'es', og: 'es_CO', name: 'Español' },
-  en: { html: 'en', og: 'en_US', name: 'English' },
+/** Locale tags for <html lang> and Open Graph, and each language's share card (1200×630, in public/). */
+export const locale: L<{ html: string; og: string; name: string; shareImage: string }> = {
+  es: { html: 'es', og: 'es_CO', name: 'Español', shareImage: '/og.jpg' },
+  en: { html: 'en', og: 'en_US', name: 'English', shareImage: '/og-en.jpg' },
 };
 
 // --- Routes ------------------------------------------------------------------

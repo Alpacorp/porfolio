@@ -2,11 +2,12 @@
  * Content integrity: every Spanish entry has its English text, and every
  * internal link in the hand-written data points somewhere that exists.
  */
+import { readFileSync } from 'node:fs';
 import { describe, expect, test } from 'vitest';
 import { getCollection } from 'astro:content';
 import { experienceFilters, freelanceExperience, freelanceGroups, milestones, type More } from '../src/data/career';
 import { nav } from '../src/data/profile';
-import { caseSlugs } from '../src/i18n';
+import { caseSlugs, langs, locale } from '../src/i18n';
 import { sectorsEn } from '../src/i18n/ui';
 
 const [projects, projectsEn, companies, companiesEn] = await Promise.all([
@@ -116,4 +117,22 @@ test('every experience filter chip except «Todo» matches something', () => {
   const usedTags = new Set([...companies.flatMap((company) => company.data.filters), ...freelanceExperience.filters]);
   const chipKeys = experienceFilters.map((filter) => filter.key).filter((key) => key !== 'Todo');
   for (const key of chipKeys) expect(usedTags.has(key), key).toBe(true);
+});
+
+describe('share cards', () => {
+  test('every language has its own 1200×630 JPEG in public/', () => {
+    const images = langs.map((lang) => locale[lang].shareImage);
+    expect(new Set(images).size).toBe(langs.length);
+    for (const image of images) {
+      const bytes = readFileSync(`public${image}`);
+      expect(bytes.subarray(0, 2).toString('hex'), image).toBe('ffd8');
+      // Size from the JPEG «start of frame» marker (SOF0/SOF2).
+      const frameStart = bytes.findIndex(
+        (byte, index) => byte === 0xff && (bytes[index + 1] === 0xc0 || bytes[index + 1] === 0xc2),
+      );
+      const height = bytes.readUInt16BE(frameStart + 5);
+      const width = bytes.readUInt16BE(frameStart + 7);
+      expect({ width, height }, image).toEqual({ width: 1200, height: 630 });
+    }
+  });
 });
