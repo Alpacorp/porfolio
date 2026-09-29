@@ -1,0 +1,30 @@
+---
+import Shell from '../layouts/Shell.astro';
+import ArchiveTable from '../components/ArchiveTable.astro';
+import BackLink from '../components/BackLink.astro';
+import { profile } from '../data/profile';
+import { getProjects } from '../lib/projects';
+import { href } from '../i18n';
+import { getI18n } from '../i18n/ui';
+
+const { lang, otherLang, ui } = getI18n(Astro.url);
+const projects = await getProjects(lang);
+---
+
+<Shell
+  title={ui.archivePageTitle}
+  description={ui.archiveDescription(profile.name)}
+  alternate={href(otherLang, { name: 'archive' })}
+>
+  <section class="page">
+    <BackLink href={href(lang, { name: 'home' })} label={ui.home} />
+    <header class="page-header">
+      <p class="eyebrow">{ui.archiveEyebrow}</p>
+      <h1 class="page-title">{ui.archiveTitle}</h1>
+      <p class="muted page-lead">
+        {ui.archiveLead} <span class="badge-case">{ui.caseBadge}</span> {ui.archiveLeadEnd}
+      </p>
+    </header>
+    <ArchiveTable projects={projects} />
+  </section>
+</Shell>

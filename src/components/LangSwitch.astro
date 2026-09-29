@@ -1,0 +1,24 @@
+---
+import { getI18n } from '../i18n/ui';
+
+/** Link to the same page in the other language. */
+interface Props {
+  href: string;
+}
+
+const { href } = Astro.props;
+const { otherLang, ui } = getI18n(Astro.url);
+---
+
+<!-- The accessible name starts with the visible text («EN · Read in English») -->
+<a class="icon-btn lang-switch mono" href={href} hreflang={otherLang} lang={otherLang} title={ui.switchLanguage}>
+  {otherLang.toUpperCase()}<span class="sr-only"> · {ui.switchLanguage}</span>
+</a>
+
+<style>
+  .lang-switch {
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+  }
+</style>

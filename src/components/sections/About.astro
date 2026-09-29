@@ -1,22 +1,36 @@
 ---
 import { languages, stats } from '../../data/profile';
+
+import { getI18n } from '../../i18n/ui';
+
+const { lang, ui } = getI18n(Astro.url);
 ---
 
 <section id="sobre" class="section" aria-labelledby="sobre-titulo">
-  <h2 id="sobre-titulo" class="eyebrow">01 — Sobre mí</h2>
-  <p class="lead">
-    Hablo tres idiomas en un equipo: <span class="hl">negocio</span>, <span class="hl">marketing</span>{' '}
-    y <span class="hl">código</span>. Por eso mis interfaces no solo se ven bien: mueven los indicadores
-    que importan.
-  </p>
+  <h2 id="sobre-titulo" class="eyebrow">{ui.about}</h2>
+  {
+    lang === 'es' ? (
+      <p class="lead">
+        Hablo tres idiomas en un equipo: <span class="hl">negocio</span>, <span class="hl">marketing</span>{' '}
+        y <span class="hl">código</span>. Por eso mis interfaces no solo se ven bien: mueven los indicadores
+        que importan.
+      </p>
+    ) : (
+      <p class="lead">
+        I speak three languages on a team: <span class="hl">business</span>, <span class="hl">marketing</span>{' '}
+        and <span class="hl">code</span>. That’s why my interfaces don’t just look good: they move the
+        metrics that matter.
+      </p>
+    )
+  }
 
   <div class="languages">
     {
-      languages.map((l) => (
+      languages[lang].map((language) => (
         <div class="card language">
-          <span class="mono muted language__period">{l.period}</span>
-          <h3 class="language__title">{l.title}</h3>
-          <p class="muted language__text">{l.text}</p>
+          <span class="mono muted language__period">{language.period}</span>
+          <h3 class="language__title">{language.title}</h3>
+          <p class="muted language__text">{language.text}</p>
         </div>
       ))
     }
@@ -24,10 +38,10 @@ import { languages, stats } from '../../data/profile';
 
   <dl class="stats">
     {
-      stats.map((s) => (
+      stats[lang].map((stat) => (
         <div class="stat">
-          <dt class="mono muted">{s.label}</dt>
-          <dd>{s.value}</dd>
+          <dt class="mono muted">{stat.label}</dt>
+          <dd>{stat.value}</dd>
         </div>
       ))
     }

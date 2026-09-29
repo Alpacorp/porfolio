@@ -1,26 +1,29 @@
 ---
-import { nav } from '../data/profile';
+import { getI18n } from '../i18n/ui';
+import { navLinks } from '../lib/nav';
 
 interface Props {
   /** On the home page links are anchors; elsewhere they point back to the home page. */
   home?: boolean;
 }
 
+const { lang, ui } = getI18n(Astro.url);
 const { home = false } = Astro.props;
-const base = home ? '' : '/';
 ---
 
 <!-- Sticky section bar for small screens, where the sidebar menu is hidden -->
-<nav class="mnav no-print" aria-label="Secciones">
+<nav class="mnav no-print" aria-label={ui.sections}>
   <ul class="mnav__list" data-mnav>
     {
-      nav.map((item) => (
+      navLinks(lang, Astro.url.pathname, home).map((link) => (
         <li>
-          <a class="mnav__link mono" href={item.page ?? `${base}#${item.id}`}
-          data-nav={item.page ? undefined : item.id}
-          aria-current={item.page && Astro.url.pathname.startsWith(item.page) ? 'page' : undefined}
-        >
-            {item.label}
+          <a
+            class="mnav__link mono"
+            href={link.href}
+            data-nav={link.section}
+            aria-current={link.current ? 'page' : undefined}
+          >
+            {link.label}
           </a>
         </li>
       ))
@@ -65,7 +68,7 @@ const base = home ? '' : '/';
   .mnav__link {
     display: inline-flex;
     align-items: center;
-    min-height: 40px;
+    min-height: 44px;
     padding: 0 14px;
     border-radius: 999px;
     font-size: 12px;
@@ -89,15 +92,14 @@ const base = home ? '' : '/';
 </style>
 
 <script>
+  import { centerScrollLeft } from '../lib/geometry';
+
   // Keep the active section visible in the horizontal bar without scrolling the page.
   const list = document.querySelector<HTMLElement>('[data-mnav]');
-  document.addEventListener('nav:active', (e) => {
-    const link = (e as CustomEvent<HTMLAnchorElement>).detail;
+  document.addEventListener('nav:active', (event) => {
+    const link = (event as CustomEvent<HTMLAnchorElement>).detail;
     if (!list || !list.contains(link)) return;
-    // Center the active link: its position inside the list, not inside the sticky bar.
-    const listBox = list.getBoundingClientRect();
-    const linkBox = link.getBoundingClientRect();
-    const target = list.scrollLeft + (linkBox.left - listBox.left) - (listBox.width - linkBox.width) / 2;
-    list.scrollTo({ left: Math.max(0, target) });
+    const left = centerScrollLeft(list.scrollLeft, list.getBoundingClientRect(), link.getBoundingClientRect());
+    list.scrollTo({ left });
   });
 </script>

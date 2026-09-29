@@ -1,0 +1,258 @@
+---
+import Shell from '../layouts/Shell.astro';
+import Icon from '../components/Icon.astro';
+import BackLink from '../components/BackLink.astro';
+import Logo from '../components/Logo.astro';
+import { caseMeta, renderCase, statusLabel, type Project } from '../lib/projects';
+import { href } from '../i18n';
+import { getI18n } from '../i18n/ui';
+
+interface Props {
+  entry: Project;
+  next: Project;
+}
+
+const { lang, otherLang, ui } = getI18n(Astro.url);
+const { entry, next } = Astro.props;
+const { Content } = await renderCase(entry, lang);
+const project = entry.data;
+---
+
+<Shell
+  title={project.title}
+  description={project.summary}
+  alternate={href(otherLang, { name: 'case', id: entry.id })}
+>
+  <article class="case">
+    <BackLink href={href(lang, { name: 'cases' })} label={ui.allCases} />
+
+    <header class="header logo-host">
+      {project.logo && <Logo id={project.logo} scale={1.2} class="header__logo" />}
+      <p class="eyebrow">{caseMeta(entry, lang)}</p>
+      <h1 class="page-title">{project.title}</h1>
+      <p class="summary">{project.summary}</p>
+    </header>
+
+    <dl class="facts">
+      {
+        project.metric && (
+          <div class="fact fact--metric">
+            <dt class="mono muted">{project.metric.label}</dt>
+            <dd>
+              <span class="hl">{project.metric.value}</span>
+            </dd>
+          </div>
+        )
+      }
+      <div class="fact">
+        <dt class="mono muted">{ui.kind}</dt>
+        <dd>{project.kind === 'empleo' ? ui.employment : ui.freelance}{project.via && ` · ${ui.via(project.via)}`}</dd>
+      </div>
+      <div class="fact">
+        <dt class="mono muted">{ui.stack}</dt>
+        <dd>
+          <ul class="stack">{project.stack.map((technology) => <li class="tag">{technology}</li>)}</ul>
+        </dd>
+      </div>
+      <div class="fact">
+        <dt class="mono muted">{ui.status}</dt>
+        <dd>
+          {
+            project.url && project.status === 'live' ? (
+              <a href={project.url} rel="noopener" target="_blank">
+                {ui.viewLive} <Icon name="arrow-up-right" size={14} />
+                <span class="sr-only">{ui.opensNewTab}</span>
+              </a>
+            ) : (
+              statusLabel(project.status, lang)
+            )
+          }
+        </dd>
+      </div>
+    </dl>
+
+    <div class="prose">
+      <Content />
+    </div>
+
+    {
+      project.links && (
+        <section class="links" aria-labelledby="links-titulo">
+          <h2 id="links-titulo" class="eyebrow">{ui.liveVersions}</h2>
+          <ul>
+            {project.links.map((link) => (
+              <li class="logo-host">
+                {link.logo && <Logo id={link.logo} scale={0.8} />}
+                <a href={link.url} rel="noopener" target="_blank">
+                  {link.name} <span aria-hidden="true">↗</span>
+                  <span class="sr-only">{ui.opensNewTab}</span>
+                </a>
+                {link.note && <span class="mono muted">{link.note}</span>}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+
+    <nav class="next card card--interactive" aria-label={ui.nextCase}>
+      <a href={href(lang, { name: 'case', id: next.id })}>
+        <span class="eyebrow">{ui.nextCase}</span>
+        <span class="next__title">{next.data.title} →</span>
+      </a>
+    </nav>
+  </article>
+</Shell>
+
+<style>
+  .case {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    max-width: 760px;
+  }
+
+  .header {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .header :global(.header__logo) {
+    align-self: flex-start;
+  }
+
+
+  .summary {
+    font-size: 19px;
+    line-height: 1.55;
+    color: var(--muted);
+  }
+
+  .facts {
+    margin: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) minmax(0, 1fr);
+    gap: 20px 24px;
+    padding: 24px 0;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .fact {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .fact--metric {
+    grid-column: 1 / -1;
+  }
+
+  @media (max-width: 640px) {
+    .facts {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .fact dt {
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .fact dd {
+    margin: 0;
+    font-size: 15px;
+  }
+
+  .fact--metric dd {
+    font-size: clamp(34px, 5vw, 44px);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+  }
+
+  .stack {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .prose {
+    font-size: 17px;
+    line-height: 1.7;
+  }
+
+  .prose :global(h2) {
+    font-size: 24px;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+    margin: 40px 0 12px;
+  }
+
+  .prose :global(h2:first-child) {
+    margin-top: 0;
+  }
+
+  .prose :global(p),
+  .prose :global(ul) {
+    margin: 0 0 16px;
+  }
+
+  .prose :global(ul) {
+    padding-left: 20px;
+  }
+
+  .prose :global(li) {
+    margin-bottom: 8px;
+  }
+
+  .prose :global(li::marker) {
+    color: var(--muted);
+  }
+
+  .prose :global(strong) {
+    font-weight: 600;
+  }
+
+  .links ul {
+    list-style: none;
+    margin: 16px 0 0;
+    padding: 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .links li {
+    display: grid;
+    grid-template-columns: 110px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .links .muted {
+    font-size: 12px;
+  }
+
+  .next a {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 24px;
+    text-decoration: none;
+    color: var(--ink);
+  }
+
+  .next__title {
+    font-size: 20px;
+    font-weight: 600;
+  }
+
+  .next:hover .next__title {
+    color: var(--mag);
+  }
+</style>

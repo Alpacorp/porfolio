@@ -1,77 +1,87 @@
 ---
+import { Image } from 'astro:assets';
 import Icon from './Icon.astro';
+import LangSwitch from './LangSwitch.astro';
 import ThemeToggle from './ThemeToggle.astro';
 import avatar from '../assets/profile/avatar.webp';
-import { nav, profile } from '../data/profile';
+import { profile } from '../data/profile';
+import { href } from '../i18n';
+import { getI18n } from '../i18n/ui';
+import { navLinks } from '../lib/nav';
 
 interface Props {
-  /** En la home los enlaces son anclas; en otras páginas apuntan a la home. */
+  /** On the home page links are anchors; elsewhere they point back to the home page. */
   home?: boolean;
+  /** Same page in the other language. */
+  alternate?: string;
 }
 
-const { home = false } = Astro.props;
-const base = home ? '' : '/';
+const { lang, otherLang, ui } = getI18n(Astro.url);
+const { home = false, alternate = href(otherLang, { name: 'home' }) } = Astro.props;
 const NameTag = home ? 'h1' : 'p';
+const tagline = profile.tagline[lang];
 ---
 
 <aside class="sidebar">
   <div class="sidebar__top">
-    <a class="logo" href="/" aria-label={`${profile.site}, inicio`}>
+    <a class="logo" href={href(lang, { name: 'home' })} aria-label={ui.homeAria(profile.site)}>
       <span class="logo__mark" aria-hidden="true">A</span>
-      <span class="mono">alpacorp</span>
+      <span class="mono">Alpacorp</span>
     </a>
     <div class="sidebar__tools no-print">
-      <button class="search-btn mono" type="button" data-open-palette aria-label="Buscar o navegar (⌘K)">
+      <button class="search-btn mono" type="button" data-open-palette aria-label={`${ui.searchOrNavigate} (⌘K)`}>
         <Icon name="search" size={16} />
         <kbd>⌘K</kbd>
       </button>
+      <LangSwitch href={alternate} />
       <ThemeToggle />
     </div>
   </div>
 
   <div class="intro">
     <div class="intro__id">
-      <img
+      <Image
         class="intro__photo"
-        src={avatar.src}
-        width="72"
-        height="72"
-        alt={`Foto de ${profile.name}`}
-        decoding="async"
+        src={avatar}
+        width={72}
+        height={72}
+        densities={[1, 2, 3]}
+        alt={ui.photoAlt(profile.name)}
+        loading="eager"
       />
       <NameTag class="intro__name">Alejandro<br /><span class="intro__surname">Palacios Arévalo</span></NameTag>
     </div>
     <p class="intro__role mono">
-      <span class="intro__now">{profile.role} en {profile.current}</span>
-      {profile.focus} · Bogotá
+      <span class="intro__now">{ui.roleAt(profile.role, profile.current)}</span>
+      {profile.focus[lang]} · {profile.city}
     </p>
     <p class="intro__tagline">
-      Construyo producto digital con <span class="hl">ojo de negocio</span>: plataformas en Mercado
-      Pago, banca digital y, como freelance, más de 30 proyectos para clientes en Colombia, México y
-      EE. UU.
+      {tagline.before}<span class="hl">{tagline.highlight}</span>{tagline.after}
     </p>
   </div>
 
-  <p class="status mono"><span class="status__dot" aria-hidden="true"></span>{profile.availability}</p>
+  <p class="status mono"><span class="status__dot" aria-hidden="true"></span>{profile.availability[lang]}</p>
 
-  <nav class="nav no-print" aria-label="Secciones">
+  <nav class="nav no-print" aria-label={ui.sections}>
     {
-      nav.map((item) => (
-        <a class="nav__link mono" href={item.page ?? `${base}#${item.id}`}
-          data-nav={item.page ? undefined : item.id}
-          aria-current={item.page && Astro.url.pathname.startsWith(item.page) ? 'page' : undefined}
+      navLinks(lang, Astro.url.pathname, home).map((link) => (
+        <a
+          class="nav__link mono"
+          href={link.href}
+          data-nav={link.section}
+          aria-current={link.current ? 'page' : undefined}
         >
           <span class="nav__bar" aria-hidden="true" />
-          <span class="nav__label">{item.label}</span>
+          <span class="nav__label">{link.label}</span>
         </a>
       ))
     }
   </nav>
 
   <div class="social no-print">
-    <a class="icon-btn" href={profile.links.linkedin} aria-label="LinkedIn (abre en otra pestaña)" rel="me noopener" target="_blank"><Icon name="linkedin" /></a>
-    <a class="icon-btn" href={profile.links.github} aria-label="GitHub (abre en otra pestaña)" rel="me noopener" target="_blank"><Icon name="github" /></a>
-    <a class="icon-btn" href={`mailto:${profile.email}`} aria-label="Correo"><Icon name="mail" /></a>
+    <a class="icon-btn" href={profile.links.linkedin} aria-label={`LinkedIn ${ui.opensNewTab}`} rel="me noopener" target="_blank"><Icon name="linkedin" /></a>
+    <a class="icon-btn" href={profile.links.github} aria-label={`GitHub ${ui.opensNewTab}`} rel="me noopener" target="_blank"><Icon name="github" /></a>
+    <a class="icon-btn" href={`mailto:${profile.email}`} aria-label={ui.email}><Icon name="mail" /></a>
   </div>
 </aside>
 
@@ -197,7 +207,7 @@ const NameTag = home ? 'h1' : 'p';
     height: 8px;
     border-radius: 50%;
     background: var(--yellow);
-    box-shadow: 0 0 0 3px rgba(255, 221, 0, 0.25);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--yellow) 25%, transparent);
   }
 
   .nav {
@@ -238,7 +248,7 @@ const NameTag = home ? 'h1' : 'p';
     background: linear-gradient(var(--hl), var(--hl)) left 88% / 0 42% no-repeat;
   }
 
-  /* Hover: magenta, el color de interacción del sitio */
+  /* Hover: magenta, the site's interaction color */
   .nav__link:hover {
     color: var(--ink);
   }
@@ -248,7 +258,7 @@ const NameTag = home ? 'h1' : 'p';
     background: var(--mag);
   }
 
-  /* Sección en pantalla: el amarillo del resaltador, en la raya y bajo el texto */
+  /* Section on screen: the highlighter yellow, on the bar and under the text */
   .nav__link[aria-current] {
     color: var(--ink);
     font-weight: 600;
@@ -283,12 +293,13 @@ const NameTag = home ? 'h1' : 'p';
     cursor: pointer;
   }
 
+
   .search-btn:hover {
     border-color: var(--mag);
     color: var(--ink);
   }
 
-  /* En pantallas táctiles el atajo de teclado no aplica: basta la lupa */
+  /* Touch screens have no keyboard shortcut: the magnifier is enough */
   @media (hover: none) {
     .search-btn kbd {
       display: none;
@@ -308,7 +319,7 @@ const NameTag = home ? 'h1' : 'p';
     gap: 8px;
   }
 
-  /* Portátiles con poca altura: todo debe caber sin desplazar la barra lateral */
+  /* Short laptop screens: everything must fit without scrolling the sidebar */
   @media (min-width: 1024px) and (max-height: 900px) {
     .sidebar {
       top: 28px;
@@ -329,32 +340,42 @@ const NameTag = home ? 'h1' : 'p';
       min-height: 28px;
     }
   }
+
+  /* Touch laptops: full-size targets (the compact list is for mouse and trackpad) */
+  @media (pointer: coarse) {
+    .nav__link {
+      min-height: 44px;
+    }
+  }
 </style>
 
 <script>
   // Highlight the section on screen in every menu that links to it (sidebar and mobile bar).
-  const links = new Map<string, HTMLAnchorElement[]>();
-  for (const a of document.querySelectorAll<HTMLAnchorElement>('[data-nav]')) {
-    links.set(a.dataset.nav!, [...(links.get(a.dataset.nav!) ?? []), a]);
+  const linksBySection = new Map<string, HTMLAnchorElement[]>();
+  for (const link of document.querySelectorAll<HTMLAnchorElement>('[data-nav]')) {
+    const sectionId = link.dataset.nav!;
+    linksBySection.set(sectionId, [...(linksBySection.get(sectionId) ?? []), link]);
   }
-  const sections = [...links.keys()]
-    .map((id) => document.getElementById(id))
-    .filter((el): el is HTMLElement => el !== null);
+  const sections = [...linksBySection.keys()]
+    .map((sectionId) => document.getElementById(sectionId))
+    .filter((section): section is HTMLElement => section !== null);
 
   if (sections.length) {
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
           if (!entry.isIntersecting) continue;
-          for (const group of links.values()) group.forEach((a) => a.removeAttribute('aria-current'));
-          for (const a of links.get(entry.target.id) ?? []) {
-            a.setAttribute('aria-current', 'true');
-            document.dispatchEvent(new CustomEvent('nav:active', { detail: a }));
+          for (const links of linksBySection.values()) {
+            links.forEach((link) => link.removeAttribute('aria-current'));
+          }
+          for (const link of linksBySection.get(entry.target.id) ?? []) {
+            link.setAttribute('aria-current', 'true');
+            document.dispatchEvent(new CustomEvent('nav:active', { detail: link }));
           }
         }
       },
       { rootMargin: '-35% 0px -60% 0px' },
     );
-    sections.forEach((s) => observer.observe(s));
+    sections.forEach((section) => observer.observe(section));
   }
 </script>

@@ -8,21 +8,27 @@ interface Props {
   title?: string;
   description?: string;
   home?: boolean;
+  /** Same page in the other language (see Base). */
+  alternate?: string;
+  noindex?: boolean;
 }
 
-const { title, description, home = false } = Astro.props;
+const { title, description, home = false, alternate, noindex } = Astro.props;
 ---
 
-<Base title={title} description={description}>
+<Base title={title} description={description} alternate={alternate} noindex={noindex}>
   <div class="shell">
-    <Sidebar home={home} />
+    <Sidebar home={home} alternate={alternate} />
     <MobileNav home={home} />
-    <main id="contenido" class="main" tabindex="-1">
-      <slot />
+    <div class="column">
+      <main id="contenido" class="main" tabindex="-1">
+        <slot />
+      </main>
+      <!-- Outside <main>, so it keeps its contentinfo landmark -->
       <footer class="footer mono">
         <span>© {new Date().getFullYear()} {profile.name} · {profile.site}</span>
       </footer>
-    </main>
+    </div>
   </div>
 </Base>
 
@@ -43,17 +49,23 @@ const { title, description, home = false } = Astro.props;
     }
   }
 
-  .main {
+  .column {
     flex: 1;
     min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(64px, 8vw, 88px);
+  }
+
+  .main {
     display: flex;
     flex-direction: column;
     gap: clamp(64px, 8vw, 88px);
     outline: none;
   }
 
-  /* Separador entre secciones: línea en color de texto con una pestaña amarilla al inicio.
-     El bloque de contacto (amarillo) ya separa por sí mismo. */
+  /* Section divider: an ink rule with a yellow tab at the start.
+     The (yellow) contact block is a divider on its own. */
   .main > :global(section:not(:first-child):not(.contact))::before {
     content: '';
     display: block;

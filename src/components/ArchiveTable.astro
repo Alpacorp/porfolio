@@ -1,115 +1,104 @@
 ---
 import Logo from './Logo.astro';
-import { formatYears, projectHref, statusLabel, type Project } from '../lib/projects';
+import {
+  formatYears,
+  kindKey,
+  projectHref,
+  searchText,
+  sectorOptions,
+  statusLabel,
+  type Project,
+} from '../lib/projects';
+import { getI18n, sectorName } from '../i18n/ui';
+import { formatCount } from '../lib/filters';
 
 interface Props {
   projects: Project[];
-  /** Total para el contador («X de N»). */
-  total: number;
-  /** Página completa: añade buscador y filtro por sector. */
-  full?: boolean;
-  /** The home page shows a short preview without filters: filtering a partial list is misleading. */
-  filters?: boolean;
 }
 
-const { projects, total, full = false, filters: showFilters = true } = Astro.props;
-const sectors = [...new Set(projects.map((p) => p.data.sector))].sort((a, b) => a.localeCompare(b, 'es'));
-const filters = ['Todo', 'Casos', 'Empleo', 'Freelance'];
+const { projects } = Astro.props;
+const { lang, ui } = getI18n(Astro.url);
+// Keys stay in Spanish: they match the data and the ?tipo= deep links.
+const kindFilters = [
+  { key: 'Todo', label: ui.filterAll },
+  { key: 'Casos', label: ui.filterCases },
+  { key: 'Empleo', label: ui.employment },
+  { key: 'Freelance', label: ui.freelance },
+];
 ---
 
 <div class="archive" data-archive>
   <div class="toolbar">
-    {showFilters && (
-    <div class="filters" role="group" aria-label="Filtrar proyectos">
+    <div class="filters" role="group" aria-label={ui.filterProjects}>
       {
-        filters.map((f, i) => (
-          <button class="chip" type="button" aria-pressed={i === 0 ? "true" : "false"} data-kind={f}>
-            {f}
+        kindFilters.map((filter, index) => (
+          <button class="chip" type="button" aria-pressed={index === 0 ? 'true' : 'false'} data-kind={filter.key}>
+            {filter.label}
           </button>
         ))
       }
     </div>
-    )}
-    {
-      full && (
-        <div class="search">
-          <label class="sr-only" for="archive-search">Buscar proyecto, cliente o tecnología</label>
-          <input
-            id="archive-search"
-            type="search"
-            placeholder="Buscar cliente, sector o tecnología…"
-            autocomplete="off"
-            data-search
-          />
-          <label class="sr-only" for="archive-sector">Sector</label>
-          <select id="archive-sector" data-sector>
-            <option value="">Todos los sectores</option>
-            {sectors.map((s) => <option value={s}>{s}</option>)}
-          </select>
-        </div>
-      )
-    }
-    {
-      showFilters ? (
-        <p class="count mono muted" aria-live="polite" data-count>
-          {projects.length} de {total} proyectos
-        </p>
-      ) : (
-        <p class="count mono muted">Los {projects.length} más recientes de {total}</p>
-      )
-    }
+    <div class="search">
+      <label class="sr-only" for="archive-search">{ui.searchLabel}</label>
+      <input id="archive-search" type="search" placeholder={ui.searchPlaceholder} autocomplete="off" data-search />
+      <label class="sr-only" for="archive-sector">{ui.sector}</label>
+      <select id="archive-sector" data-sector>
+        <option value="">{ui.allSectors}</option>
+        {sectorOptions(projects, lang).map((sector) => <option value={sector.key}>{sector.name}</option>)}
+      </select>
+    </div>
+    <p class="count mono muted" aria-live="polite" data-count data-template={JSON.stringify(ui.countOf(projects.length))}>
+      {formatCount(ui.countOf(projects.length), projects.length)}
+    </p>
   </div>
 
   <table class="table">
     <thead class="mono">
       <tr>
-        <th scope="col">Año</th>
-        <th scope="col" class="col-logo"><span class="sr-only">Cliente</span></th>
-        <th scope="col">Proyecto</th>
-        <th scope="col" class="col-sector">Sector</th>
-        <th scope="col" class="col-stack">Stack</th>
-        <th scope="col"><span class="sr-only">Enlace</span></th>
+        <th scope="col">{ui.colYear}</th>
+        <th scope="col" class="col-logo"><span class="sr-only">{ui.colClient}</span></th>
+        <th scope="col">{ui.colProject}</th>
+        <th scope="col" class="col-sector">{ui.colSector}</th>
+        <th scope="col" class="col-stack">{ui.colStack}</th>
+        <th scope="col"><span class="sr-only">{ui.colLink}</span></th>
       </tr>
     </thead>
     <tbody>
       {
-        projects.map((p) => {
-          const link = projectHref(p);
-          const search = [p.data.title, p.data.client, p.data.via, p.data.sector, ...p.data.stack]
-            .filter(Boolean)
-            .join(' ')
-            .toLowerCase();
+        projects.map((project) => {
+          const { data } = project;
+          const link = projectHref(project, lang);
           return (
             <tr
               class="logo-host"
               data-row
-              data-kind={p.data.kind === 'empleo' ? 'Empleo' : 'Freelance'}
-              data-case={String(p.data.featured)}
-              data-sector={p.data.sector}
-              data-search={search}
+              data-kind={kindKey(project)}
+              data-case={String(data.featured)}
+              data-sector={data.sector}
+              data-search={searchText(project, lang)}
             >
-              <td class="mono muted col-year">{formatYears(p.data)}</td>
-              <td class="col-logo">{p.data.logo && <Logo id={p.data.logo} scale={0.7} />}</td>
+              <td class="mono muted col-year">{formatYears(data, lang)}</td>
+              <td class="col-logo">{data.logo && <Logo id={data.logo} scale={0.7} />}</td>
               <td>
                 {link ? (
                   <a class="row-link" href={link.href} {...(link.external ? { rel: 'noopener', target: '_blank' } : {})}>
-                    {p.data.title}
-                    {link.external && <span class="sr-only">(abre en otra pestaña)</span>}
+                    {data.title}
+                    {link.external && <span class="sr-only">{ui.opensNewTab}</span>}
                   </a>
                 ) : (
-                  <span class="row-title">{p.data.title}</span>
+                  <span class="row-title">{data.title}</span>
                 )}
                 <span class="client mono muted">
-                  {p.data.client}
-                  {p.data.via && ` · vía ${p.data.via}`}
-                  {!link && p.data.status !== 'live' && ` · ${statusLabel[p.data.status].toLowerCase()}`}
+                  {data.client}
+                  {data.via && ` · ${ui.via(data.via)}`}
+                  {!link && data.status !== 'live' && ` · ${statusLabel(data.status, lang).toLowerCase()}`}
                 </span>
               </td>
-              <td class="muted col-sector">{p.data.sector}</td>
-              <td class="mono muted col-stack">{p.data.stack.slice(0, 3).join(', ')}</td>
+              <td class="muted col-sector">{sectorName(data.sector, lang)}</td>
+              <td class="mono muted col-stack">{data.stack.slice(0, 3).join(', ')}</td>
               <td class="col-mark mono">
-                {p.data.featured ? (
-                  <span class="badge-case">CASO</span>
+                {data.featured ? (
+                  <span class="badge-case">{ui.caseBadge}</span>
                 ) : link ? (
                   <span class="muted" aria-hidden="true">↗</span>
                 ) : null}
@@ -120,7 +109,7 @@ const filters = ['Todo', 'Casos', 'Empleo', 'Freelance'];
       }
     </tbody>
   </table>
-  <p class="empty mono muted" data-empty hidden>Ningún proyecto coincide con ese filtro.</p>
+  <p class="empty mono muted" data-empty hidden>{ui.noMatches}</p>
 </div>
 
 <style>
@@ -246,7 +235,7 @@ const filters = ['Todo', 'Casos', 'Empleo', 'Freelance'];
     text-decoration-color: var(--mag);
   }
 
-  /* Toda la fila es clicable a través de su enlace */
+  /* The whole row is clickable through its link */
   tbody tr:has(.row-link) {
     cursor: pointer;
   }
@@ -275,59 +264,52 @@ const filters = ['Todo', 'Casos', 'Empleo', 'Freelance'];
 </style>
 
 <script>
-  const normalize = (s: string) => s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
+  import { formatCount, matchesArchive, readPlural } from '../lib/filters';
 
-  for (const root of document.querySelectorAll<HTMLElement>('[data-archive]')) {
+  const root = document.querySelector<HTMLElement>('[data-archive]');
+  if (root) {
     // Rows also carry data-kind / data-search / data-sector, so target the controls by tag.
     const rows = [...root.querySelectorAll<HTMLTableRowElement>('tr[data-row]')];
     const chips = [...root.querySelectorAll<HTMLButtonElement>('button[data-kind]')];
-    const search = root.querySelector<HTMLInputElement>('input[data-search]');
-    const sector = root.querySelector<HTMLSelectElement>('select[data-sector]');
-    const count = root.querySelector<HTMLElement>('[data-count]');
-    const empty = root.querySelector<HTMLElement>('[data-empty]');
+    const search = root.querySelector<HTMLInputElement>('input[data-search]')!;
+    const sector = root.querySelector<HTMLSelectElement>('select[data-sector]')!;
+    const count = root.querySelector<HTMLElement>('[data-count]')!;
+    const emptyMessage = root.querySelector<HTMLElement>('[data-empty]')!;
+    const countLabel = readPlural(count.dataset.template);
+    let kind = 'Todo';
 
-    // Filters only exist on the full archive page.
-    if (count && empty) {
-      const total = count.textContent!.trim().split(' de ')[1];
-      let kind = 'Todo';
-
-      const apply = () => {
-        const q = normalize(search?.value.trim() ?? '');
-        const s = sector?.value ?? '';
-        let shown = 0;
-        for (const row of rows) {
-          const byKind =
-            kind === 'Todo' || (kind === 'Casos' ? row.dataset.case === 'true' : row.dataset.kind === kind);
-          const bySector = !s || row.dataset.sector === s;
-          const byText = !q || normalize(row.dataset.search!).includes(q);
-          row.hidden = !(byKind && bySector && byText);
-          if (!row.hidden) shown++;
-        }
-        count.textContent = `${shown} de ${total}`;
-        empty.hidden = shown > 0;
-      };
-
-      for (const chip of chips) {
-        chip.addEventListener('click', () => {
-          kind = chip.dataset.kind!;
-          chips.forEach((c) => c.setAttribute('aria-pressed', String(c === chip)));
-          apply();
-        });
+    const apply = () => {
+      const query = { kind, sector: sector.value, text: search.value };
+      let shown = 0;
+      for (const row of rows) {
+        const { kind: rowKind = '', case: isCase, sector: rowSector = '', search: rowText = '' } = row.dataset;
+        row.hidden = !matchesArchive({ kind: rowKind, isCase: isCase === 'true', sector: rowSector, search: rowText }, query);
+        if (!row.hidden) shown++;
       }
-      search?.addEventListener('input', apply);
-      sector?.addEventListener('change', apply);
+      count.textContent = formatCount(countLabel, shown);
+      emptyMessage.hidden = shown > 0;
+    };
 
-      // Deep link from elsewhere (e.g. the timeline): /archivo/?tipo=Freelance preselects that filter.
-      const preset = new URLSearchParams(location.search).get('tipo');
-      chips.find((c) => c.dataset.kind === preset)?.click();
+    for (const chip of chips) {
+      chip.addEventListener('click', () => {
+        kind = chip.dataset.kind!;
+        chips.forEach((other) => other.setAttribute('aria-pressed', String(other === chip)));
+        apply();
+      });
     }
+    search.addEventListener('input', apply);
+    sector.addEventListener('change', apply);
+
+    // Deep link from elsewhere (e.g. the timeline): ?tipo=Freelance preselects that filter.
+    const preset = new URLSearchParams(location.search).get('tipo');
+    chips.find((chip) => chip.dataset.kind === preset)?.click();
 
     // Clicking anywhere on a row follows its link.
     for (const row of rows) {
       const link = row.querySelector<HTMLAnchorElement>('.row-link');
       if (!link) continue;
-      row.addEventListener('click', (e) => {
-        if ((e.target as HTMLElement).closest('a')) return;
+      row.addEventListener('click', (event) => {
+        if ((event.target as HTMLElement).closest('a')) return;
         link.click();
       });
     }

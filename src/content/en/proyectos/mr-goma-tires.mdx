@@ -1,0 +1,34 @@
+---
+title: 'Selling used tires like premium products'
+summary: 'E-commerce for 7 Florida locations with tire-size search, a faceted catalog, 3D tread views, Stripe checkout and a sales dashboard with an AI chat that filters inventory in plain language.'
+metric:
+  value: 'CLS → 0'
+  label: 'down from 0.914, plus mobile LCP from 4.5 s to 3.2 s on the product page'
+---
+
+## The business
+
+Mr. Goma Tires sells used and new tires and offers auto services at **7 locations in Miami and Orlando**. It doesn't compete on catalog size or price, but on experience. The project's mission: **make buying a used tire online feel as clear as buying a new premium product**.
+
+## What I built
+
+I led and built the platform end to end, in English and for US shoppers.
+
+- **Storefront:** tire-size search from the homepage, a catalog with faceted filters and counts, brand and size pages, and a product page with a gallery, zoom and a **3D tread view** showing depth in 1/32" and % of tread life left.
+- **Checkout:** cart and checkout with **Stripe**, WhatsApp orders as an alternative, and a step-by-step quote tool connected to **n8n**.
+- **Sales dashboard:** an inventory table with filters by location, plus an **AI chat (Claude, with tool use)**. Salespeople type what they're looking for in plain language, and the model applies the table filters.
+- **SEO and analytics:** a Google Merchant Center feed, structured data, guides with FAQs, pages for each location and service, and consent-based analytics.
+
+## Decisions that mattered
+
+- **Spec-driven development** with Claude Code: over 35 documented features, each with its own spec, plan, tasks and measured results.
+- **Saying no with data.** An SEO audit recommended consolidating "duplicate" URLs. The analysis showed those units had real price differences (a 22% median), so we kept them separate.
+- **Performance on a budget:** a JavaScript size limit enforced in CI and hundreds of automated tests.
+- **Security in production:** we detected and mitigated a bot attack of 150,000–200,000 fake visits a day.
+
+## The result
+
+- **CLS from 0.914 to 0** on mobile and from 0.525 to 0 on desktop, on the product page.
+- **Mobile LCP from 4.5 s to 3.2 s** on the same page.
+- The gallery zoom went from taking 1.7 s to being ready **before hover**, with images cut from 283 KB to 90 KB.
+- **29% lower daily infrastructure cost** after mitigating the automated traffic.

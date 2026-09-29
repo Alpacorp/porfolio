@@ -1,8 +1,12 @@
 ---
 import Icon from './Icon.astro';
+import { getI18n } from '../i18n/ui';
+
+const { ui } = getI18n(Astro.url);
 ---
 
-<button class="icon-btn theme-toggle" type="button" data-theme-toggle aria-label="Cambiar tema">
+<!-- aria-pressed is set by the script, once the effective theme is known -->
+<button class="icon-btn" type="button" data-theme-toggle aria-label={ui.darkTheme}>
   <span class="theme-toggle__sun"><Icon name="sun" /></span>
   <span class="theme-toggle__moon"><Icon name="moon" /></span>
 </button>
@@ -31,9 +35,13 @@ import Icon from './Icon.astro';
 </style>
 
 <script>
-  import { toggleTheme } from '../lib/theme';
+  import { syncThemeToggles, toggleTheme } from '../lib/theme';
 
-  for (const btn of document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]')) {
-    btn.addEventListener('click', toggleTheme);
+  syncThemeToggles();
+  // Follow the system while the visitor hasn't picked a theme.
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', syncThemeToggles);
+
+  for (const button of document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]')) {
+    button.addEventListener('click', toggleTheme);
   }
 </script>

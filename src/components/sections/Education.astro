@@ -1,21 +1,25 @@
 ---
 import Icon from '../Icon.astro';
 import { education, educationLinks } from '../../data/career';
+
+import { getI18n } from '../../i18n/ui';
+
+const { lang, ui } = getI18n(Astro.url);
 ---
 
 <section id="formacion" class="section" aria-labelledby="formacion-titulo">
-  <h2 id="formacion-titulo" class="eyebrow">05 — Formación</h2>
+  <h2 id="formacion-titulo" class="eyebrow">{ui.education}</h2>
 
   <ol class="list">
     {
-      education.map((e) => (
+      education.map((degree) => (
         <li class="item">
-          <p class="mono muted dates">{e.dates}</p>
+          <p class="mono muted dates">{degree.dates}</p>
           <div class="body">
-            <h3 class="title">{e.title}</h3>
-            <p class="muted org">{e.org}</p>
+            <h3 class="title">{degree.title[lang]}</h3>
+            <p class="muted org">{degree.org}</p>
           </div>
-          <span class="tag kind">{e.kind}</span>
+          <span class="tag kind">{degree.kind[lang]}</span>
         </li>
       ))
     }
@@ -23,12 +27,12 @@ import { education, educationLinks } from '../../data/career';
 
   <div class="links">
     <a class="link mono" href={educationLinks.education} rel="noopener" target="_blank">
-      Formación completa en LinkedIn <Icon name="arrow-up-right" size={14} />
-      <span class="sr-only">(abre en otra pestaña)</span>
+      {ui.educationLinkedIn} <Icon name="arrow-up-right" size={14} />
+      <span class="sr-only">{ui.opensNewTab}</span>
     </a>
     <a class="link mono" href={educationLinks.certifications} rel="noopener" target="_blank">
-      Certificados y cursos <Icon name="arrow-up-right" size={14} />
-      <span class="sr-only">(abre en otra pestaña)</span>
+      {ui.certificates} <Icon name="arrow-up-right" size={14} />
+      <span class="sr-only">{ui.opensNewTab}</span>
     </a>
   </div>
 </section>

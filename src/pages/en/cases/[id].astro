@@ -1,0 +1,15 @@
+---
+import View from '../../../views/Case.astro';
+import { getCases } from '../../../lib/projects';
+import { caseSlug } from '../../../i18n';
+
+export async function getStaticPaths() {
+  const cases = await getCases('en');
+  return cases.map((entry, index) => ({
+    params: { id: caseSlug(entry.id, 'en') },
+    props: { entry, next: cases[(index + 1) % cases.length] },
+  }));
+}
+---
+
+<View {...Astro.props} />

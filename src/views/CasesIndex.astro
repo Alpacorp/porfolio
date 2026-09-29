@@ -1,0 +1,31 @@
+---
+import Shell from '../layouts/Shell.astro';
+import Cases from '../components/sections/Cases.astro';
+import BackLink from '../components/BackLink.astro';
+import { profile } from '../data/profile';
+import { getCases } from '../lib/projects';
+import { href, section } from '../i18n';
+import { getI18n } from '../i18n/ui';
+
+const { lang, otherLang, ui } = getI18n(Astro.url);
+const cases = await getCases(lang);
+---
+
+<Shell
+  title={ui.caseLabel}
+  description={ui.casesDescription(profile.name)}
+  alternate={href(otherLang, { name: 'cases' })}
+>
+  <div class="page">
+    <BackLink href={section(lang, 'casos')} label={ui.home} />
+    <header class="page-header">
+      <p class="eyebrow">{ui.caseLabel}</p>
+      <h1 class="page-title">{ui.casesTitle}</h1>
+      <p class="muted page-lead">
+        {ui.casesLead}{' '}
+        <a href={href(lang, { name: 'archive' })}>{ui.visitArchive}</a>.
+      </p>
+    </header>
+    <Cases cases={cases} heading={ui.allCases} />
+  </div>
+</Shell>

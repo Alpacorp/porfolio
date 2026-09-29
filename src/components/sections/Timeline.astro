@@ -1,46 +1,53 @@
 ---
-import { freelanceGroups, freelanceSince, milestones, timelineRange } from '../../data/career';
+import { freelanceGroups, freelanceSince, milestones, timelineRange, type More } from '../../data/career';
 import { groupItems, type Project } from '../../lib/projects';
+import { yearToPercent } from '../../lib/geometry';
 import TimelinePanel from '../TimelinePanel.astro';
+import { href } from '../../i18n';
+import { getI18n } from '../../i18n/ui';
 
 interface Props {
   projects: Project[];
 }
 
 const { projects } = Astro.props;
-const span = timelineRange.to - timelineRange.from;
-const pos = (year: number) => `${(((year - timelineRange.from) / span) * 100).toFixed(2)}%`;
-const initial = `y-${milestones.at(-1)!.year}`;
-const current = milestones.find((m) => m.current);
+const { lang, ui } = getI18n(Astro.url);
+const readMore = (more: More) => ({
+  href: href(lang, more.route, more.suffix),
+  label: more.label?.[lang] ?? ui.fullExperience,
+});
+const position = (year: number) => yearToPercent(year, timelineRange);
+const initialPanel = `y-${milestones.at(-1)!.year}`;
+const currentMilestone = milestones.find((milestone) => milestone.current);
 ---
 
 <section id="trayectoria" class="section" aria-labelledby="trayectoria-titulo" data-timeline>
-  <h2 id="trayectoria-titulo" class="eyebrow">02 — Trayectoria</h2>
+  <h2 id="trayectoria-titulo" class="eyebrow">{ui.timeline}</h2>
 
-  <!-- Carril 1: empleo. Los años controlan el panel que va justo debajo. -->
+  <!-- Lane 1: employment. The years drive the panel right below. -->
   <div class="lane" data-lane>
-    <p class="lane-label mono muted">Empleo <span class="lane-hint">· toca un año</span></p>
-    <div class="axis" role="group" aria-label="Hitos de empleo">
+    <p class="lane-label mono muted">{ui.employmentLane} <span class="lane-hint">{ui.employmentHint}</span></p>
+    <div class="axis" role="group" aria-label={ui.employmentAria}>
       <div class="axis__ticks" aria-hidden="true"></div>
-      {current && (
-        <div class="now-bar" style={`left: ${pos(current.year)}`} aria-hidden="true">
-          <span class="now-bar__label mono">hoy</span>
+      {currentMilestone && (
+        <div class="now-bar" style={`left: ${position(currentMilestone.year)}`} aria-hidden="true">
+          <span class="now-bar__label mono">{ui.today}</span>
         </div>
       )}
       {
-        milestones.map((m) => {
-          const id = `y-${m.year}`;
+        milestones.map((milestone) => {
+          const id = `y-${milestone.year}`;
           return (
             <button
               class="year"
               type="button"
-              style={`left: ${pos(m.year)}`}
-              aria-pressed={id === initial ? 'true' : 'false'}
+              style={`left: ${position(milestone.year)}`}
+              aria-pressed={id === initialPanel ? 'true' : 'false'}
               aria-controls="panel-empleo"
-              aria-label={`${m.year}: ${m.role}, ${m.org}`}
+              aria-label={`${milestone.year}: ${milestone.role[lang]}, ${milestone.org}`}
               data-target={id}
             >
-              <span class="year__label mono">{m.year}</span>
+              <span class="year__label mono">{milestone.year}</span>
               <span class="year__line" aria-hidden="true" />
             </button>
           );
@@ -49,46 +56,46 @@ const current = milestones.find((m) => m.current);
     </div>
     <div id="panel-empleo" class="card panel" data-panel-box>
       {
-        milestones.map((m) => (
+        milestones.map((milestone) => (
           <TimelinePanel
-            id={`y-${m.year}`}
-            heading={m.current ? `${m.year} → hoy` : String(m.year)}
-            current={m.current}
-            logo={m.logo}
-            more={m.more}
-            role={m.role}
-            org={m.org}
-            text={m.text}
-            hidden={`y-${m.year}` !== initial}
+            id={`y-${milestone.year}`}
+            heading={milestone.current ? `${milestone.year} → ${ui.today}` : String(milestone.year)}
+            current={milestone.current}
+            logo={milestone.logo}
+            more={readMore(milestone.more)}
+            role={milestone.role[lang]}
+            org={milestone.org}
+            text={milestone.text[lang]}
+            hidden={`y-${milestone.year}` !== initialPanel}
           />
         ))
       }
     </div>
   </div>
 
-  <!-- Carril 2: freelance. Empieza cerrado; cada bloque abre o cierra su lista de proyectos. -->
+  <!-- Lane 2: freelance. Starts closed; each block opens or closes its project list. -->
   <div class="lane" data-lane data-collapsible>
     <p class="lane-label mono muted">
-      Freelance · alpacorp, en paralelo <span class="lane-hint">· toca un bloque para ver sus proyectos</span>
+      {ui.freelanceLane} <span class="lane-hint">{ui.freelanceHint}</span>
     </p>
     <div class="axis axis--free" aria-hidden="true">
-      <div class="free-bar mono" style={`left: ${pos(freelanceSince)}`}>{freelanceSince} → hoy</div>
+      <div class="free-bar mono" style={`left: ${position(freelanceSince)}`}>{freelanceSince} → {ui.today}</div>
     </div>
-    <div class="groups" role="group" aria-label="Bloques freelance">
+    <div class="groups" role="group" aria-label={ui.freelanceAria}>
       {
-        freelanceGroups.map((g) => (
+        freelanceGroups.map((group) => (
           <button
             class="group"
             type="button"
             aria-expanded="false"
             aria-controls="panel-freelance"
-            data-target={`g-${g.id}`}
+            data-target={`g-${group.id}`}
           >
-            <span class="group__label">{g.label}</span>
-            <span class="group__sub mono">{g.sub}</span>
+            <span class="group__label">{group.label[lang]}</span>
+            <span class="group__sub mono">{group.sub[lang]}</span>
             <span class="group__cta mono" aria-hidden="true">
-              <span class="group__open">Ver proyectos ↓</span>
-              <span class="group__close">Cerrar ↑</span>
+              <span class="group__open">{ui.seeProjects}</span>
+              <span class="group__close">{ui.close}</span>
             </span>
           </button>
         ))
@@ -96,15 +103,15 @@ const current = milestones.find((m) => m.current);
     </div>
     <div id="panel-freelance" class="card panel" data-panel-box hidden>
       {
-        freelanceGroups.map((g) => (
+        freelanceGroups.map((group) => (
           <TimelinePanel
-            id={`g-${g.id}`}
-            heading={g.label}
-            role={g.role}
-            org={g.org}
-            text={g.text}
-            items={groupItems(projects, g.id)}
-            more={g.more}
+            id={`g-${group.id}`}
+            heading={group.label[lang]}
+            role={group.role[lang]}
+            org={group.org[lang]}
+            text={group.text[lang]}
+            items={groupItems(projects, group.id, lang)}
+            more={readMore(group.more)}
             hidden
           />
         ))
@@ -153,7 +160,7 @@ const current = milestones.find((m) => m.current);
     background: repeating-linear-gradient(90deg, var(--line) 0 1px, transparent 1px 12px);
   }
 
-  /* Franja desde el empleo actual hasta el final del eje: «sigo aquí». */
+  /* Band from the current job to the end of the axis: «still here». */
   .now-bar {
     position: absolute;
     right: -24px;
@@ -343,7 +350,7 @@ const current = milestones.find((m) => m.current);
     display: none;
   }
 
-  /* En pantallas estrechas los años se encimarían: el eje pasa a ser una fila de botones. */
+  /* On narrow screens the years would overlap: the axis becomes a row of buttons. */
   @media (max-width: 640px) {
     .axis:not(.axis--free) {
       height: auto;
@@ -388,58 +395,64 @@ const current = milestones.find((m) => m.current);
 </style>
 
 <script>
+  import { pointerOffset } from '../../lib/geometry';
+
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
 
-  /** Si el panel quedó fuera de la pantalla (típico en móvil), lo trae a la vista. */
-  function reveal(box: HTMLElement) {
-    const r = box.getBoundingClientRect();
-    if (r.top < 0 || r.top > innerHeight * 0.6) {
-      box.scrollIntoView({ block: 'start', behavior: reduceMotion.matches ? 'auto' : 'smooth' });
+  /** If the panel ended up off screen (typical on mobile), bring it into view. */
+  function reveal(panelBox: HTMLElement) {
+    const { top } = panelBox.getBoundingClientRect();
+    if (top < 0 || top > innerHeight * 0.6) {
+      panelBox.scrollIntoView({ block: 'start', behavior: reduceMotion.matches ? 'auto' : 'smooth' });
     }
   }
 
   /** Aim the panel's pointer at the centre of the trigger that opened it. */
-  function point(box: HTMLElement, trigger: HTMLElement) {
-    const b = box.getBoundingClientRect();
-    const t = trigger.getBoundingClientRect();
-    const x = Math.min(Math.max(t.left + t.width / 2 - b.left, 24), b.width - 24);
-    box.style.setProperty('--pointer-x', `${x}px`);
-    box.dataset.pointer = '';
+  function aimPointer(panelBox: HTMLElement, trigger: HTMLElement) {
+    const offset = pointerOffset(trigger.getBoundingClientRect(), panelBox.getBoundingClientRect());
+    panelBox.style.setProperty('--pointer-x', `${offset}px`);
+    panelBox.dataset.pointer = '';
   }
 
-  const pointers: (() => void)[] = [];
+  const pointerUpdates: (() => void)[] = [];
+  let pendingFrame = 0;
+  const updatePointers = () => {
+    cancelAnimationFrame(pendingFrame);
+    pendingFrame = requestAnimationFrame(() => pointerUpdates.forEach((update) => update()));
+  };
   // Fonts can shift the years slightly once loaded, so re-aim after load and on resize.
-  for (const ev of ['load', 'resize']) addEventListener(ev, () => pointers.forEach((update) => update()));
+  addEventListener('load', updatePointers);
+  addEventListener('resize', updatePointers);
 
   for (const lane of document.querySelectorAll<HTMLElement>('[data-timeline] [data-lane]')) {
     const triggers = [...lane.querySelectorAll<HTMLButtonElement>('[data-target]')];
-    const box = lane.querySelector<HTMLElement>('[data-panel-box]')!;
-    const panels = [...box.querySelectorAll<HTMLElement>('[data-panel]')];
+    const panelBox = lane.querySelector<HTMLElement>('[data-panel-box]')!;
+    const panels = [...panelBox.querySelectorAll<HTMLElement>('[data-panel]')];
     const collapsible = lane.hasAttribute('data-collapsible');
-    // Los años son un selector (aria-pressed); los bloques freelance, un acordeón (aria-expanded).
-    const state = collapsible ? 'aria-expanded' : 'aria-pressed';
+    // Years are a selector (aria-pressed); freelance blocks, an accordion (aria-expanded).
+    const stateAttribute = collapsible ? 'aria-expanded' : 'aria-pressed';
 
     const update = () => {
-      const active = triggers.find((t) => t.getAttribute(state) === 'true');
-      if (active && !box.hidden) point(box, active);
+      const active = triggers.find((trigger) => trigger.getAttribute(stateAttribute) === 'true');
+      if (active && !panelBox.hidden) aimPointer(panelBox, active);
     };
-    pointers.push(update);
+    pointerUpdates.push(update);
     update();
 
     for (const trigger of triggers) {
       trigger.addEventListener('click', () => {
-        const closing = collapsible && trigger.getAttribute(state) === 'true';
+        const closing = collapsible && trigger.getAttribute(stateAttribute) === 'true';
         const target = closing ? null : trigger.dataset.target;
 
-        for (const t of triggers) {
-          t.setAttribute(state, String(t === trigger && !closing));
+        for (const other of triggers) {
+          other.setAttribute(stateAttribute, String(other === trigger && !closing));
         }
-        panels.forEach((p) => (p.hidden = p.dataset.panel !== target));
-        box.hidden = target === null;
+        panels.forEach((panel) => (panel.hidden = panel.dataset.panel !== target));
+        panelBox.hidden = target === null;
 
         if (target) {
-          point(box, trigger);
-          reveal(box);
+          aimPointer(panelBox, trigger);
+          reveal(panelBox);
         }
       });
     }

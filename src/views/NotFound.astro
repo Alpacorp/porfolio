@@ -1,0 +1,48 @@
+---
+import Shell from '../layouts/Shell.astro';
+import { href } from '../i18n';
+
+/*
+ * Vercel serves this single page for every unknown URL, in both languages, so
+ * it carries both texts and shows the English one under /en/ (script below).
+ */
+---
+
+<Shell title="404" noindex>
+  <section class="page not-found">
+    <p class="eyebrow">Error 404</p>
+    <div lang="es" data-lang="es">
+      <h1 class="page-title">Esta página <span class="hl">no existe</span>.</h1>
+      <p class="muted">Puede que el enlace esté viejo. Prueba con ⌘K o vuelve al inicio.</p>
+      <p><a href={href('es', { name: 'home' })}>Volver al inicio →</a></p>
+    </div>
+    <div lang="en" data-lang="en" hidden>
+      <h1 class="page-title">This page <span class="hl">doesn’t exist</span>.</h1>
+      <p class="muted">The link may be out of date. Try ⌘K or head back home.</p>
+      <p><a href={href('en', { name: 'home' })}>Back to home →</a></p>
+    </div>
+  </section>
+</Shell>
+
+<script>
+  import { langFromPath } from '../i18n';
+
+  if (langFromPath(location.pathname) === 'en') {
+    document.documentElement.lang = 'en';
+    for (const block of document.querySelectorAll<HTMLElement>('[data-lang]')) {
+      block.hidden = block.dataset.lang !== 'en';
+    }
+  }
+</script>
+
+<style>
+  .not-found {
+    gap: 18px;
+  }
+
+  .not-found > div {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+</style>
