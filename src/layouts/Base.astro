@@ -25,8 +25,8 @@ const {
 const site = Astro.site!;
 const fullTitle = pageTitle(title, profile.name, profile.role);
 const canonical = new URL(Astro.url.pathname, site);
-// Share card (1200×630) with photo, name and role; social networks need an absolute URL.
-const ogImage = new URL('/og.jpg', Astro.site);
+// Share card with photo, name and role in the page language; social networks need an absolute URL.
+const ogImage = new URL(locale[lang].shareImage, site);
 ---
 
 <!doctype html>
