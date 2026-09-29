@@ -9,6 +9,7 @@ import { href, langFromPath, otherLang } from '../i18n';
 import { useT } from '../i18n/ui';
 
 const lang = langFromPath(Astro.url.pathname);
+const other = otherLang(lang);
 const t = useT(lang);
 const [allCases, experience] = await Promise.all([getCases(lang), getExperienceItems(lang)]);
 // Employment case studies are already summarised under «Experience»; the printed
@@ -16,11 +17,16 @@ const [allCases, experience] = await Promise.all([getCases(lang), getExperienceI
 const cases = allCases.filter((c) => c.data.kind === 'freelance');
 ---
 
-<Base title={t.cvTitle} description={t.cvDescription(profile.fullName, profile.role)} alternate={href(otherLang(lang), { name: 'cv' })}>
+<Base title={t.cvTitle} description={t.cvDescription(profile.fullName, profile.role)} alternate={href(other, { name: 'cv' })}>
   <main id="contenido" class="cv" tabindex="-1">
     <div class="toolbar no-print">
       <a class="mono back" href={href(lang, { name: 'home' })}><Icon name="arrow-left" size={16} /> alpacorp.net</a>
-      <button class="btn btn--dark" type="button" data-print><Icon name="print" size={16} /> {t.print}</button>
+      <div class="toolbar__actions">
+        <a class="icon-btn lang-btn mono" href={href(other, { name: 'cv' })} hreflang={other} lang={other} aria-label={t.switchLanguage} title={t.switchLanguage}>
+          {other.toUpperCase()}
+        </a>
+        <button class="btn btn--dark" type="button" data-print><Icon name="print" size={16} /> {t.print}</button>
+      </div>
     </div>
 
     <header class="header">
@@ -166,6 +172,18 @@ const cases = allCases.filter((c) => c.data.kind === 'freelance');
     align-items: center;
     gap: 16px;
     flex-wrap: wrap;
+  }
+
+  .toolbar__actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .lang-btn {
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
   }
 
   .back {
