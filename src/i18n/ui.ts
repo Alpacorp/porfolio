@@ -35,7 +35,7 @@ const es = {
   employmentLane: 'Empleo',
   employmentHint: '· toca un año',
   employmentAria: 'Hitos de empleo',
-  freelanceLane: 'Freelance · alpacorp, en paralelo',
+  freelanceLane: 'Freelance · Alpacorp, en paralelo',
   freelanceHint: '· toca un bloque para ver sus proyectos',
   freelanceAria: 'Bloques freelance',
   seeProjects: 'Ver proyectos ↓',
@@ -76,7 +76,7 @@ const es = {
 
   // Contact
   contactTitle: '¿Construimos algo que mueva los números?',
-  contactText: 'Posiciones en fintech y producto, o proyectos freelance a través de alpacorp.',
+  contactText: 'Posiciones en fintech y producto, o proyectos freelance a través de Alpacorp.',
   writeMe: 'Escríbeme',
   cvButton: 'Ver CV / descargar PDF',
 
@@ -176,7 +176,7 @@ const en: Dictionary = {
   employmentLane: 'Employment',
   employmentHint: '· pick a year',
   employmentAria: 'Employment milestones',
-  freelanceLane: 'Freelance · alpacorp, alongside',
+  freelanceLane: 'Freelance · Alpacorp, alongside',
   freelanceHint: '· pick a block to see its projects',
   freelanceAria: 'Freelance blocks',
   seeProjects: 'See projects ↓',
@@ -213,7 +213,7 @@ const en: Dictionary = {
   certificates: 'Certificates and courses',
 
   contactTitle: 'Shall we build something that moves the numbers?',
-  contactText: 'Open to fintech and product roles, and to freelance projects through alpacorp.',
+  contactText: 'Open to fintech and product roles, and to freelance projects through Alpacorp.',
   writeMe: 'Email me',
   cvButton: 'View CV / download PDF',
 

@@ -10,7 +10,7 @@
  * from Wikimedia Commons (public domain); the novenas, from the apps Alejandro built.
  */
 export const logos = {
-  alpacorp: { label: 'alpacorp', height: 26 },
+  alpacorp: { label: 'Alpacorp', height: 26 },
   mercadolibre: { label: 'Mercado Libre', height: 30 },
   bcs: { label: 'Banco Caja Social', height: 24 },
   servientrega: { label: 'Servientrega', height: 22 },

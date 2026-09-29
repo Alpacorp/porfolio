@@ -172,7 +172,7 @@ export const freelanceExperience = {
   current: true,
   logo: 'alpacorp' as LogoId,
   role: { es: 'Desarrollador full stack freelance', en: 'Freelance Full Stack Developer' } satisfies L,
-  company: 'alpacorp',
+  company: 'Alpacorp',
   summary: {
     es: 'En paralelo a mi empleo, construyo producto para clientes en Colombia, México y EE. UU.: e-commerce, sitios corporativos, campañas y productos propios.',
     en: 'Alongside my job, I build products for clients in Colombia, Mexico and the US: e-commerce, corporate websites, campaigns and my own products.',
