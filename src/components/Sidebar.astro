@@ -24,9 +24,10 @@ const tagline = profile.tagline[lang];
 
 <aside class="sidebar">
   <div class="sidebar__top">
-    <a class="logo" href={href(lang, { name: 'home' })} aria-label={ui.homeAria(profile.site)}>
+    <!-- Its accessible name is the visible brand plus «, inicio» for screen readers -->
+    <a class="logo" href={href(lang, { name: 'home' })}>
       <span class="logo__mark" aria-hidden="true">A</span>
-      <span class="logo__word mono">Alpacorp</span>
+      <span class="logo__word mono">{profile.brand}</span><span class="sr-only">, {ui.home.toLowerCase()}</span>
     </a>
     <div class="sidebar__tools no-print">
       <button class="search-btn mono" type="button" data-open-palette aria-label={`${ui.searchOrNavigate} (⌘K)`}>
@@ -356,8 +357,14 @@ const tagline = profile.tagline[lang];
   }
 
   @media (max-width: 359px) {
+    /* Hidden from sight only: it still names the home link */
     .logo__word {
-      display: none;
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
     }
     .intro__surname {
       white-space: normal;

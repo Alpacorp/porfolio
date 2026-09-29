@@ -12,6 +12,8 @@ export const profile = {
   city: 'Bogotá',
   email: 'alejandro.palacios88@gmail.com',
   site: 'alpacorp.net',
+  /** The brand as written in text (the domain stays lowercase). */
+  brand: 'Alpacorp',
   availability: {
     es: 'Abierto a fintech, producto y freelance',
     en: 'Open to fintech, product and freelance',

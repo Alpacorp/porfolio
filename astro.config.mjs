@@ -12,6 +12,8 @@ export default defineConfig({
     // the sitemap's i18n option can't pair them because the slugs differ per language.
     sitemap(),
   ],
+  // The site's CSS is small (~8 KB): inlining it saves render-blocking requests.
+  build: { inlineStylesheets: 'always' },
   // Keep old URLs working after a case study is renamed.
   redirects: {
     '/casos/opsit-devoluciones-cashbacks': '/casos/plataforma-refunds',
