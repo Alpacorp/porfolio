@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { centerScrollLeft, pointerOffset, yearToPercent } from '../src/lib/geometry';
 import { displayUrl } from '../src/lib/format';
+import { climb } from '../src/lib/ladder';
 import { navLinks } from '../src/lib/nav';
 import { alternateLinks, pageTitle } from '../src/lib/seo';
 import { buildPaletteItems, searchText } from '../src/lib/palette';
@@ -112,5 +113,19 @@ describe('buildPaletteItems', () => {
     const copy = items.find((item) => item.action === 'copy-email')!;
     expect(copy.hint).toBe(profile.email);
     expect(items.find((item) => item.href === `mailto:${profile.email}`)).toBeDefined();
+  });
+});
+
+describe('climb', () => {
+  const steps = [{ year: 2021 }, { year: 2011 }, { year: 2024 }];
+  test('lists the steps newest first', () => {
+    expect(climb(steps).map((step) => step.year)).toEqual([2024, 2021, 2011]);
+  });
+  test('counts levels up from the oldest step', () => {
+    expect(climb(steps).map((step) => step.level)).toEqual([2, 1, 0]);
+  });
+  test('leaves the input untouched', () => {
+    climb(steps);
+    expect(steps.map((step) => step.year)).toEqual([2021, 2011, 2024]);
   });
 });

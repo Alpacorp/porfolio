@@ -1,0 +1,152 @@
+---
+import type { Track } from '../data/career';
+import { climb } from '../lib/ladder';
+import { getI18n } from '../i18n/ui';
+
+/**
+ * The roles as a staircase: newest at the top and furthest along, so the climb
+ * reads at a glance. Each step links to where its full story lives.
+ */
+interface Props {
+  steps: { year: number; track: Track; role: string; org: string; href: string; current?: boolean }[];
+}
+
+const { ui } = getI18n(Astro.url);
+const steps = climb(Astro.props.steps);
+---
+
+<ol class="ladder" aria-label={ui.ladderAria} style={`--steps: ${steps.length}`}>
+  {
+    steps.map((step) => (
+      <li class="step" style={`--level: ${step.level}`} data-current={step.current ? '' : undefined}>
+        <span class="step__dot" aria-hidden="true" />
+        <a class="step__link" href={step.href}>
+          <span class="step__meta mono">
+            <span class="step__year">{step.current ? `${step.year} → ${ui.today}` : step.year}</span>
+            <span class="step__track">{ui.tracks[step.track]}</span>
+          </span>
+          <span class="step__role">{step.role}</span>
+          <span class="step__org muted">{step.org}</span>
+        </a>
+      </li>
+    ))
+  }
+</ol>
+
+<style>
+  .ladder {
+    /* Horizontal run of each step. The whole climb never runs past 40% of the
+       width, so a new role adds a step without pushing the text off the edge. */
+    --tread: min(56px, 40% / max(var(--steps) - 1, 1));
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .step {
+    position: relative;
+    padding: 0 0 18px calc(var(--tread) * var(--level) + 24px);
+  }
+
+  /* Riser: the vertical stretch of the staircase beside each step */
+  .step::before {
+    content: '';
+    position: absolute;
+    left: calc(var(--tread) * var(--level) + 4px);
+    top: 8px;
+    bottom: 0;
+    border-left: 2px solid var(--rule);
+  }
+
+  /* Tread: the horizontal stretch down to the step below */
+  .step::after {
+    content: '';
+    position: absolute;
+    left: calc(var(--tread) * (var(--level) - 1) + 4px);
+    bottom: 0;
+    width: calc(var(--tread) + 2px);
+    border-top: 2px solid var(--rule);
+  }
+
+  /* The first role is where the climb starts: nothing below it */
+  .step:last-child::before,
+  .step:last-child::after {
+    display: none;
+  }
+
+  .step__dot {
+    position: absolute;
+    left: calc(var(--tread) * var(--level));
+    top: 4px;
+    width: 10px;
+    height: 10px;
+    border: 2px solid var(--rule);
+    border-radius: 50%;
+    background: var(--paper);
+  }
+
+  /* The current role: the highlighter yellow, as for «present» on the axis below */
+  .step[data-current]::before {
+    border-color: var(--yellow);
+  }
+
+  .step[data-current] .step__dot {
+    border-color: var(--yellow);
+    background: var(--yellow);
+  }
+
+  .step__link {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 2px;
+    min-height: 44px;
+    text-decoration: none;
+  }
+
+  .step__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 10px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .step__track {
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .step[data-current] .step__year {
+    color: var(--ink);
+    font-weight: 700;
+  }
+
+  .step__role {
+    font-size: 17px;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  .step__org {
+    font-size: 14px;
+  }
+
+  .step:hover::before,
+  .step:has(:focus-visible)::before,
+  .step:hover .step__dot,
+  .step:has(:focus-visible) .step__dot {
+    border-color: var(--mag);
+  }
+
+  .step__link:hover .step__role {
+    color: var(--mag);
+  }
+
+  @media (max-width: 640px) {
+    .ladder {
+      --tread: min(14px, 25% / max(var(--steps) - 1, 1));
+    }
+  }
+</style>
