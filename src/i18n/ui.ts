@@ -1,4 +1,5 @@
 import { langFromPath, otherLang, type Lang } from './index';
+import type { Track } from '../data/career';
 
 /** A count in singular and plural; `{count}` is replaced by the number. */
 export type Plural = { one: string; other: string };
@@ -42,6 +43,10 @@ const es = {
   seeProjects: 'Ver proyectos ↓',
   close: 'Cerrar ↑',
   today: 'hoy',
+  ladderLane: 'Evolución',
+  ladderHint: '· de la facturación a la ingeniería',
+  ladderAria: 'Evolución de mis cargos, del más reciente al primero',
+  tracks: { business: 'Negocio', marketing: 'Marketing', engineering: 'Ingeniería' } as Record<Track, string>,
 
   // Cases
   seeAllCases: (count: number) => `Ver los ${count} casos de estudio`,
@@ -184,6 +189,10 @@ const en: Dictionary = {
   seeProjects: 'See projects ↓',
   close: 'Close ↑',
   today: 'present',
+  ladderLane: 'Growth',
+  ladderHint: '· from billing to engineering',
+  ladderAria: 'How my roles evolved, from the latest to the first',
+  tracks: { business: 'Business', marketing: 'Marketing', engineering: 'Engineering' },
 
   seeAllCases: (count) => `See all ${count} case studies`,
   exploreArchive: (count) => `Browse all ${count} projects in the archive`,

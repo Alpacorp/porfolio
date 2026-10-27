@@ -1,8 +1,16 @@
 ---
-import { freelanceGroups, freelanceSince, milestones, timelineRange, type More } from '../../data/career';
+import {
+  freelanceExperience,
+  freelanceGroups,
+  freelanceSince,
+  milestones,
+  timelineRange,
+  type More,
+} from '../../data/career';
 import { groupItems, type Project } from '../../lib/projects';
 import { yearToPercent } from '../../lib/geometry';
 import TimelinePanel from '../TimelinePanel.astro';
+import CareerLadder from '../CareerLadder.astro';
 import { href } from '../../i18n';
 import { getI18n } from '../../i18n/ui';
 
@@ -19,10 +27,33 @@ const readMore = (more: More) => ({
 const position = (year: number) => yearToPercent(year, timelineRange);
 const initialPanel = `y-${milestones.at(-1)!.year}`;
 const currentMilestone = milestones.find((milestone) => milestone.current);
+const ladderSteps = [
+  ...milestones.map((milestone) => ({
+    year: milestone.year,
+    track: milestone.track,
+    role: milestone.role[lang],
+    org: milestone.org,
+    href: readMore(milestone.more).href,
+    current: milestone.current,
+  })),
+  {
+    year: freelanceExperience.startYear,
+    track: freelanceExperience.track,
+    role: freelanceExperience.role[lang],
+    org: freelanceExperience.company,
+    href: readMore(freelanceExperience.more).href,
+  },
+];
 ---
 
 <section id="trayectoria" class="section" aria-labelledby="trayectoria-titulo" data-timeline>
   <h2 id="trayectoria-titulo" class="eyebrow">{ui.timeline}</h2>
+
+  <!-- The climb at a glance; the lanes below hold the detail. -->
+  <div class="lane">
+    <p class="lane-label mono muted">{ui.ladderLane} <span class="lane-hint">{ui.ladderHint}</span></p>
+    <CareerLadder steps={ladderSteps} />
+  </div>
 
   <!-- Lane 1: employment. The years drive the panel right below. -->
   <div class="lane" data-lane>

@@ -7,6 +7,9 @@ import type { L, Route } from '../i18n';
  */
 export type More = { route: Route; suffix?: string; label?: L };
 
+/** Which of the «three languages» a role was spoken in (see `languages` in profile.ts). */
+export type Track = 'business' | 'marketing' | 'engineering';
+
 /**
  * Timeline milestones («Empleo» lane). Kept short on purpose: each one links to
  * the company page, where the full story lives.
@@ -15,6 +18,7 @@ export const milestones: {
   year: number;
   current?: boolean;
   logo: LogoId;
+  track: Track;
   role: L;
   org: string;
   text: L;
@@ -23,6 +27,7 @@ export const milestones: {
   {
     year: 2011,
     logo: 'servientrega',
+    track: 'business',
     role: { es: 'Analista de Facturación e In Company', en: 'Billing and In Company Analyst' },
     org: 'Servientrega',
     text: {
@@ -34,6 +39,7 @@ export const milestones: {
   {
     year: 2015,
     logo: 'servientrega',
+    track: 'marketing',
     role: { es: 'Webmaster y Trafficker Digital', en: 'Webmaster and Paid Media Specialist' },
     org: 'Servientrega',
     text: {
@@ -45,6 +51,7 @@ export const milestones: {
   {
     year: 2021,
     logo: 'jikkosoft',
+    track: 'engineering',
     role: { es: 'Frontend Developer', en: 'Frontend Developer' },
     org: 'Jikkosoft · Cali',
     text: {
@@ -56,6 +63,7 @@ export const milestones: {
   {
     year: 2022,
     logo: 'bcs',
+    track: 'engineering',
     role: { es: 'Frontend Developer', en: 'Frontend Developer' },
     org: 'Banco Caja Social',
     text: {
@@ -68,6 +76,7 @@ export const milestones: {
     year: 2024,
     current: true,
     logo: 'mercadolibre',
+    track: 'engineering',
     role: { es: 'Software Engineer', en: 'Software Engineer' },
     org: 'Mercado Libre / Mercado Pago · OpsIT',
     text: {
@@ -171,6 +180,7 @@ export const freelanceExperience = {
   startYear: 2019,
   current: true,
   logo: 'alpacorp' as LogoId,
+  track: 'engineering' as Track,
   role: { es: 'Desarrollador full stack freelance', en: 'Freelance Full Stack Developer' } satisfies L,
   company: 'Alpacorp',
   summary: {
