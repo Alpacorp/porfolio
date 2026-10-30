@@ -14,7 +14,7 @@ const { lang, ui } = getI18n(Astro.url);
     {
       education.map((degree) => (
         <li class="item">
-          <p class="mono muted dates">{degree.dates}</p>
+          <p class="mono muted dates">{degree.current ? `${degree.dates} — ${ui.today}` : degree.dates}</p>
           <div class="body">
             <h3 class="title">{degree.title[lang]}</h3>
             <p class="muted org">{degree.org}</p>

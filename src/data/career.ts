@@ -225,8 +225,18 @@ export const experienceTags = experienceFilters.map((filter) => filter.key).filt
   ...Exclude<ExperienceFilter, 'Todo'>[],
 ];
 
-/** UNAD and SENA dates follow the latest CV; Acámica and INCAP follow LinkedIn. */
-export const education: { title: L; org: string; dates: string; kind: L }[] = [
+/**
+ * UNAD and SENA dates follow the latest CV; Acámica and INCAP follow LinkedIn.
+ * A `current` degree reads «<dates> — today».
+ */
+export const education: { title: L; org: string; dates: string; current?: boolean; kind: L }[] = [
+  {
+    title: { es: 'Maestría en Ciberseguridad', en: 'Master’s in Cybersecurity' },
+    org: 'Universidad Nacional Abierta y a Distancia (UNAD)',
+    dates: 'oct 2026',
+    current: true,
+    kind: { es: 'Maestría · en curso', en: 'Master’s · in progress' },
+  },
   {
     title: { es: 'Ingeniería de Sistemas', en: 'B.S. in Systems Engineering' },
     org: 'Universidad Nacional Abierta y a Distancia (UNAD)',
